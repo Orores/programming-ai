@@ -163,3 +163,4 @@ cython_debug/
 # Ignore temporary files and log files
 *.log
 *.tmp
+*.swp
