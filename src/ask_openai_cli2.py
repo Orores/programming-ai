@@ -1,7 +1,7 @@
 import argparse
 import os
 from dotenv import load_dotenv
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
 
 # Load the API key from the .env file
 load_dotenv()
@@ -11,10 +11,13 @@ if not api_key:
     raise ValueError("No OpenAI API key found. Please check your .env file.")
 
 # Initialize LangChain's OpenAI interface
-llm = OpenAI(api_key=api_key)
+llm = ChatOpenAI(
+    model_name='gpt-4-1106-preview',
+    openai_api_key=api_key
+)
 
 def ask_question(question):
-    response = llm.invoke(question,model="gpt-3.5-turbo")
+    response = llm.invoke(question)
     return response
 
 def main():
@@ -38,7 +41,7 @@ def main():
 
     if args.r:
         with open(args.r, "w") as file:
-            file.write(answer)
+            file.write(answer.content)
     else:
         print(f"Answer: {answer}")
 
