@@ -1,7 +1,8 @@
 # programming-ai
 AI assistant for programming
 
-#Setting up a virtualenvironment
+## Setting up a Virtual Environment
+
 ### Setting Up a Virtual Environment (venv) for Python
 
 #### Step 1: Prerequisites
@@ -65,3 +66,23 @@ deactivate
 ```
 
 This will return you to the global Python environment.
+
+## Running Tests
+
+To run tests for this project, follow these steps:
+
+1. Make sure you have set up and activated your virtual environment as described above.
+
+2. Navigate to the project's root directory.
+
+3. Run the tests using the following command, which captures both standard output and standard error and saves them to a log file named `output.log`:
+
+```bash
+python -u -m unittest discover -s tests > output.log 2>&1
+```
+
+This command will discover and run all test cases in the `tests` directory while capturing any output or errors.
+
+4. View the test results in the `output.log` file to ensure that everything is working correctly.
+
+Now you know how to set up a virtual environment for your project, run tests, and capture the output for future reference.
