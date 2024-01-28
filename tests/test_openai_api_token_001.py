@@ -2,7 +2,6 @@ import unittest
 import requests
 from dotenv import load_dotenv
 import os
-import time  # Import the time module
 
 class TestOpenAIToken(unittest.TestCase):
     def setUp(self):
@@ -15,9 +14,6 @@ class TestOpenAIToken(unittest.TestCase):
 
         # Ensure the API key is set
         self.assertIsNotNone(api_key, "Please set your OpenAI API key in the .env file.")
-
-        # Add a 5-second delay to avoid rate limiting
-        time.sleep(5)  # Delay for 5 seconds
 
         # Define the endpoint URL for chat completions
         endpoint_url = 'https://api.openai.com/v1/chat/completions'

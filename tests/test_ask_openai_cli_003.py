@@ -13,13 +13,13 @@ class TestAskOpenAICLI(unittest.TestCase):
 
     @patch('builtins.print')
     @patch('src.ask_openai_cli_003.requests.post')
-    def test_main_function(self, mock_post, mock_print):
-        from src.ask_openai_cli_003 import main
+    def test_ask_question_function(self, mock_post, mock_print):
+        from src.ask_openai_cli_003 import ask_question  # Update the import
 
         # Load environment variables from .env file
         load_dotenv()
 
-        # Define a mock API response with variable text
+        # Define a mock API response with variable text (similar to your previous test)
         mock_response = requests.Response()
         mock_response.status_code = 200
         mock_response_text = 'The 2020 World Series took place at Globe Life Field in Arlington, Texas.'
@@ -62,8 +62,8 @@ class TestAskOpenAICLI(unittest.TestCase):
         api_key = load_api_key()
         os.environ["OPENAI_API_KEY"] = api_key
 
-        # Execute the main function
-        main()
+        # Execute the ask_question function
+        ask_question("Your question goes here.")  # Provide the question you want to test
 
         # Perform a fuzzy comparison and assert that it's above the threshold
         similarity_score = fuzz.partial_ratio(expected_response, mock_response_text)
@@ -75,3 +75,4 @@ class TestAskOpenAICLI(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
