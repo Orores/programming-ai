@@ -5,17 +5,12 @@ import requests
 import json
 from dotenv import load_dotenv
 from fuzzywuzzy import fuzz
-
-def load_api_key():
-    return os.getenv("OPENAI_API_KEY")
+from src.ask_openai_cli_003 import ask_question
 
 class TestAskOpenAICLI(unittest.TestCase):
 
-    @patch('builtins.print')
     @patch('src.ask_openai_cli_003.requests.post')
-    def test_ask_question_function(self, mock_post, mock_print):
-        from src.ask_openai_cli_003 import ask_question  # Update the import
-
+    def test_ask_question_function(self, mock_post):
         # Load environment variables from .env file
         load_dotenv()
 
@@ -58,21 +53,27 @@ class TestAskOpenAICLI(unittest.TestCase):
         # Patch the requests.post function to use the mock API request
         mock_post.side_effect = mock_api_request
 
-        # Set the environment variable for the API key (assuming it's loaded from .env)
-        api_key = load_api_key()
-        os.environ["OPENAI_API_KEY"] = api_key
-
-        # Execute the ask_question function
-        ask_question("Your question goes here.")  # Provide the question you want to test
+        # Execute the ask_question function and capture the response
+        response = ask_question("Your question goes here.")  # Provide the question you want to test
 
         # Perform a fuzzy comparison and assert that it's above the threshold
-        similarity_score = fuzz.partial_ratio(expected_response, mock_response_text)
+        similarity_score = fuzz.partial_ratio(expected_response, response)
         self.assertGreaterEqual(similarity_score, matching_threshold,
                                 f"API response similarity score ({similarity_score}) is below the threshold.")
 
-        # Check if the expected output is printed with comma separation
-        mock_print.assert_called_with("Assistant's reply:", mock_response_text)
+        # Check if the expected output is returned as the response
+        self.assertEqual(response, expected_response)
+
+    def test_real_api_call(self):
+        load_dotenv()  # Load environment variables from .env file
+        api_key = os.getenv("OPENAI_API_KEY")
+
+        # Execute the ask_question function and capture the response
+        response = ask_question("What is the capital of France?")  # Question about the capital of France
+
+        # Ensure that a real API response is received (status code 200)
+        self.assertIsInstance(response, str, "Response should be a string")
+        self.assertIn("Paris", response, "Response should contain 'Paris' or 'paris'")
 
 if __name__ == "__main__":
     unittest.main()
-

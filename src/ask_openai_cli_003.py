@@ -37,7 +37,7 @@ def ask_question(question):
     response = make_api_request(api_key, conversation)
     assistant_reply = extract_assistant_reply(response)
 
-    print("Assistant's reply:", assistant_reply)
+    return assistant_reply  # Return the response instead of printing it
 
 def main():
     parser = argparse.ArgumentParser(description="Ask a question to OpenAI's GPT-3 model.")
@@ -46,7 +46,8 @@ def main():
 
     if args.question:
         # Called from command line with --question argument
-        ask_question(args.question)
+        assistant_reply = ask_question(args.question)
+        print("Assistant's reply:", assistant_reply)
     else:
         # No arguments provided, display help message
         parser.print_help()
