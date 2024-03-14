@@ -1,0 +1,5 @@
+{list of potential attributes}
+
+Rewrite following code so it has the mentioned attributes. Show me the full updated code.
+
+{code}

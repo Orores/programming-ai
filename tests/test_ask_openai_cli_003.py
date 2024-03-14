@@ -5,16 +5,13 @@ import requests
 import json
 from dotenv import load_dotenv
 from fuzzywuzzy import fuzz
-from src.ask_openai_cli_003 import ask_question
+from src.ask_openai_cli_003 import OpenAIAssistant  # Update the import to use the class
 
-class TestAskOpenAICLI(unittest.TestCase):
+class TestOpenAIAssistant(unittest.TestCase):
 
     @patch('src.ask_openai_cli_003.requests.post')
-    def test_ask_question_function(self, mock_post):
-        # Load environment variables from .env file
-        load_dotenv()
-
-        # Define a mock API response with variable text (similar to your previous test)
+    def test_ask_question_method(self, mock_post):
+        # Define a mock API response
         mock_response = requests.Response()
         mock_response.status_code = 200
         mock_response_text = 'The 2020 World Series took place at Globe Life Field in Arlington, Texas.'
@@ -28,33 +25,17 @@ class TestAskOpenAICLI(unittest.TestCase):
                     },
                     'logprobs': None
                 }
-            ],
-            'created': 1677664795,
-            'id': 'chatcmpl-7QyqpwdfhqwajicIEznoc6Q47XAyW',
-            'model': 'gpt-3.5-turbo-0613',
-            'object': 'chat.completion',
-            'usage': {
-                'completion_tokens': 17,
-                'prompt_tokens': 57,
-                'total_tokens': 74
-            }
+            ]
         }).encode('utf-8')
+        mock_post.return_value = mock_response
 
-        # Define the expected response (with variations)
-        expected_response = "The 2020 World Series took place at Globe Life Field in Arlington, Texas."
+        # Create an instance of OpenAIAssistant
+        assistant = OpenAIAssistant()
+        response = assistant.ask_question("Your question goes here.")  # Provide the question you want to test
 
-        # Define a matching threshold for fuzzy comparison
-        matching_threshold = 80  # You can adjust the threshold as needed
-
-        # Define a mock API request function
-        def mock_api_request(*args, **kwargs):
-            return mock_response
-
-        # Patch the requests.post function to use the mock API request
-        mock_post.side_effect = mock_api_request
-
-        # Execute the ask_question function and capture the response
-        response = ask_question("Your question goes here.")  # Provide the question you want to test
+        # Define the expected response and a matching threshold for fuzzy comparison
+        expected_response = mock_response_text
+        matching_threshold = 80
 
         # Perform a fuzzy comparison and assert that it's above the threshold
         similarity_score = fuzz.partial_ratio(expected_response, response)
@@ -64,16 +45,20 @@ class TestAskOpenAICLI(unittest.TestCase):
         # Check if the expected output is returned as the response
         self.assertEqual(response, expected_response)
 
-    def test_real_api_call(self):
-        load_dotenv()  # Load environment variables from .env file
-        api_key = os.getenv("OPENAI_API_KEY")
+    @patch('src.ask_openai_cli_003.load_dotenv')  # Mock load_dotenv to avoid actually loading .env file in tests
+    def test_real_api_call(self, mock_load_dotenv):
+        # Prevent the actual loading of environment variables
+        mock_load_dotenv.return_value = None
 
-        # Execute the ask_question function and capture the response
-        response = ask_question("What is the capital of France?")  # Question about the capital of France
+        # Assuming the API key is set manually for the test, or use another way to inject the API key
+        assistant = OpenAIAssistant()
+        assistant.api_key = 'your_test_api_key_here'  # Replace with a valid API key or mock method
+
+        response = assistant.ask_question("What is the capital of France?")  # Question about the capital of France
 
         # Ensure that a real API response is received (status code 200)
         self.assertIsInstance(response, str, "Response should be a string")
-        self.assertIn("Paris", response, "Response should contain 'Paris' or 'paris'")
+        self.assertIn("Paris", response, "Response should contain 'Paris'")
 
 if __name__ == "__main__":
     unittest.main()
