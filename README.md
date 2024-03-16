@@ -1,3 +1,13 @@
+#Current Problem
+
+You're trying to develop a Python script that combines the functionality of two existing classes: GPT3ChatCompletion and FileReader. The script should be able to:
+
+    Automatically read files and determine whether they contain conversations or single questions.
+    Utilize the GPT3ChatCompletion class to generate responses based on either the content of the file (if provided) or a direct question (if provided).
+
+However, you're encountering difficulties in handling the case where no file path is provided but a question is provided directly. The current solutions proposed didn't meet your requirements.
+
+
 # programming-ai
 AI assistant for programming
 
@@ -79,6 +89,12 @@ To run tests for this project, follow these steps:
 
 ```bash
 python -u -m unittest discover -s tests > output.log 2>&1
+```
+
+or do
+
+```bash
+python -m unittest tests.your_test > output.log 2>&1
 ```
 
 This command will discover and run all test cases in the `tests` directory while capturing any output or errors.
