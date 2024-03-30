@@ -1,5 +1,5 @@
-import argparse
 import json
+import argparse
 
 class FileReader:
     """
@@ -26,9 +26,18 @@ class FileReader:
     def __init__(self, file_path=None):
         self.file_path = file_path
 
+    def update_attributes(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{key}'")
+
     def read_file(self, file_path=None):
         try:
-            with open(file_path, 'r') as file:
+            if file_path:
+                self.file_path = file_path
+            with open(self.file_path, 'r') as file:
                 try:
                     # Attempt to parse as JSON
                     content = json.load(file)
@@ -45,20 +54,23 @@ class FileReader:
         except FileNotFoundError:
             # Raise an error with a custom message
             raise FileNotFoundError(f"File not found. Please check the path '{self.file_path}' and try again.")
+        except TypeError:
+            # Raise an error with a custom message
+            raise TypeError(f"None was passed as a file path, which is not valid")
 
 
-    @staticmethod
-    def setup_args(parser):
-        parser.add_argument("--file_path", type=str, default="question.tmp", help="Path to the file to be read. The format (text or JSON) will be automatically detected.")
+    def setup_args(self, parser):
+        parser.add_argument("--file_path", type=str, help="Path to the file to be read. The format (text or JSON) will be automatically detected.")
 
-def main():
+if __name__ == '__main__':
+    reader = FileReader()
     parser = argparse.ArgumentParser(description="Command Line Interface for Automatically Reading Text or JSON Files")
-    FileReader.setup_args(parser)  # Setup argument for file path
+    reader.setup_args(parser)  # Setup argument for file path
     
     args = parser.parse_args()
-    reader = FileReader(file_path=args.file_path)
+    reader.update_attributes(file_path=args.file_path)
     
-    result = reader.read_file(args.file_path)
+    result = reader.read_file()
     content_type = result["type"]
     content = result["content"]
     
@@ -66,7 +78,4 @@ def main():
         print("Conversations from JSON File:", content)
     else:
         print("Text File Content:", content)
-
-if __name__ == '__main__':
-    main()
 

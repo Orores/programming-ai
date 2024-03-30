@@ -1,7 +1,7 @@
-import argparse
 import os
 from dotenv import load_dotenv
 import requests
+import argparse
 
 class GPT3ChatCompletion:
     """
@@ -54,7 +54,42 @@ class GPT3ChatCompletion:
         self.top_p = top_p
         self.endpoint_url = 'https://api.openai.com/v1/chat/completions'
 
-    def make_api_request(self, conversation):
+    def update_attributes(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{key}'")
+
+    def make_api_request(
+            self,
+            conversation,
+            model=None,
+            temperature=None,
+            max_tokens=None,
+            stop_sequences=None,
+            frequency_penalty=None,
+            presence_penalty=None,
+            top_p=None
+            ):
+
+        # Use Class defaults if None are provided
+        model = model if model is not None else self.model
+        temperature = temperature if temperature is not None else self.temperature
+        max_tokens = max_tokens if max_tokens is not None else self.max_tokens
+        stop_sequences = stop_sequences if stop_sequences is not None else self.stop_sequences
+        frequency_penalty = frequency_penalty if frequency_penalty is not None else self.frequency_penalty
+        presence_penalty = presence_penalty if presence_penalty is not None else self.presence_penalty
+        top_p = top_p if top_p is not None else self.top_p
+
+        # The following check does not work if the input is not a dict
+        if conversation is None:
+            raise ValueError("No question was asked")
+        if isinstance(conversation, str): 
+            conversation = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": conversation}
+            ]
         data = {
             "model": self.model,
             "temperature": self.temperature,
@@ -72,26 +107,18 @@ class GPT3ChatCompletion:
         response = requests.post(self.endpoint_url, headers=headers, json=data)
         return response.json()
 
-    @classmethod
-    def setup_args(cls, parser):
-        parser.add_argument("--model", type=str, default="gpt-3.5-turbo", help="Model name for the OpenAI completion request.")
-        parser.add_argument("--max_tokens", type=int, default=100, help="Maximum number of tokens to generate in the completion.")
-        parser.add_argument("--temperature", type=float, default=1, help="Controls randomness: lower values make completions more deterministic.")
-        parser.add_argument("--frequency_penalty", type=float, default=0, help="Penalty for frequent tokens, increasing this value produces more varied results.")
-        parser.add_argument("--presence_penalty", type=float, default=0, help="Penalty for new tokens, increasing this value encourages new tokens in the completion.")
-        parser.add_argument("--top_p", type=float, default=1, help="Nucleus sampling: top p of the probability mass is considered for sampling.")
-        parser.add_argument("--stop_sequences", nargs='*', help="Sequences where the API should stop generating further tokens.")
-        parser.add_argument("--question", type=str, default="Tell the user that no question was asked", help="The question or prompt to ask the model.")
-
-def main():
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Command Line Interface for GPT-3 Chat Completion")
-    GPT3ChatCompletion.setup_args(parser)  # Setup GPT3 chat completion arguments
-    
+    parser.add_argument("--model", type=str, default="gpt-3.5-turbo", help="Model name for the OpenAI completion request.")
+    parser.add_argument("--max_tokens", type=int, default=100, help="Maximum number of tokens to generate in the completion.")
+    parser.add_argument("--temperature", type=float, default=1, help="Controls randomness: lower values make completions more deterministic.")
+    parser.add_argument("--frequency_penalty", type=float, default=0, help="Penalty for frequent tokens, increasing this value produces more varied results.")
+    parser.add_argument("--presence_penalty", type=float, default=0, help="Penalty for new tokens, increasing this value encourages new tokens in the completion.")
+    parser.add_argument("--top_p", type=float, default=1, help="Nucleus sampling: top p of the probability mass is considered for sampling.")
+    parser.add_argument("--stop_sequences", nargs='*', help="Sequences where the API should stop generating further tokens.")
+    parser.add_argument("--question", type=str, help="The question or prompt to ask the model.")
+
     args = parser.parse_args()
-    conversation = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": args.question}
-    ]
     chat_completion = GPT3ChatCompletion(
         model=args.model,
         max_tokens=args.max_tokens,
@@ -101,8 +128,12 @@ def main():
         top_p=args.top_p,
         stop_sequences=args.stop_sequences
     )
+
+    conversation = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": args.question}
+    ]
+    
     response = chat_completion.make_api_request(conversation)
     print("Chat Completion Response:", response)
 
-if __name__ == '__main__':
-    main()
