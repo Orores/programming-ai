@@ -16,6 +16,7 @@ class ParserCreator:
         self.parser.add_argument("--stop_sequences", nargs='*', help="Sequences where the API should stop generating further tokens.")
         self.parser.add_argument("--question", type=str, help="The question or prompt to ask the model.")
         self.parser.add_argument("--file_path", type=str, help="Path to the file.")
+        self.parser.add_argument("--save_path", type=str, default="response.tmp", help="Path to save the response.")
 
 if __name__ == "__main__":
     creator = ParserCreator()  # Create an instance of ParserCreator
@@ -30,4 +31,5 @@ if __name__ == "__main__":
     print(f"Stop sequences: {args.stop_sequences}")
     print(f"Question: {args.question}")
     print(f"File Path: {args.file_path}")
+    print(f"Save Path: {args.save_path}")
 

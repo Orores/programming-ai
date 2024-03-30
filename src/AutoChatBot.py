@@ -7,6 +7,8 @@ from StringFileReader import StringFileReader
 from ConversationJsonReader import ConversationJsonReader
 from ParserCreator import ParserCreator
 from GPTChatCompletion import GPT3ChatCompletion
+from GPTChatCompletionSaver import ChatCompletionSaver
+
 
 
 class ChatBot:
@@ -21,6 +23,7 @@ class ChatBot:
         self.parser_creator = ParserCreator()
         self.conversation_json_reader = ConversationJsonReader()
         self.string_file_reader = StringFileReader()
+        self.openai_completion_saver = ChatCompletionSaver()
 
     def decide_conversation(self, args):
         if args.file_path:
@@ -41,6 +44,8 @@ class ChatBot:
         response = self.chat_completion.make_api_request(conversation)
 
         print("Chat Completion Response:", response)
+        self.openai_completion_saver.save_to_file(response, args.save_path)
+
 
 if __name__ == '__main__':
     bot = ChatBot()

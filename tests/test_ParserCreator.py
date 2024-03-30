@@ -25,6 +25,9 @@ class TestParserCreator(unittest.TestCase):
             self.assertEqual(args.stop_sequences, ["bye"])
             self.assertEqual(args.question, "How are you?")
             self.assertEqual(args.file_path, "/path/to/file")
+            
+            # Check default value for save_path
+            self.assertEqual(args.save_path, "response.tmp")
 
 if __name__ == "__main__":
     unittest.main()
