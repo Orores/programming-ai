@@ -41,9 +41,18 @@ class ChatBot:
     def run(self):
         args = self.parser_creator.parser.parse_args()
         conversation = self.decide_conversation(args)
-        response = self.chat_completion.make_api_request(conversation)
+        response = self.chat_completion.make_api_request(
+                conversation = conversation,
+                model = args.model,
+                temperature = args.temperature,
+                max_tokens = args.max_tokens,
+                stop_sequences = args.stop_sequences,
+                frequency_penalty = args.frequency_penalty,
+                presence_penalty = args.presence_penalty,
+                top_p = args.top_p,
+                )
 
-        print("Chat Completion Response:", response)
+        #print("Chat Completion Response:", response)
         self.openai_completion_saver.save_to_file(response, args.save_path)
 
 

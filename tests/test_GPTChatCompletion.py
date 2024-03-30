@@ -19,7 +19,7 @@ class TestGPT3ChatCompletion(unittest.TestCase):
         assert api_key is not None, "OPENAI_API_KEY environment variable not set."
 
         # Initialize the GPT3ChatCompletion with desired parameters
-        cls.chat_completion = GPT3ChatCompletion(api_key=api_key, model="gpt-3.5-turbo", max_tokens=100)
+        cls.chat_completion = GPT3ChatCompletion(api_key=api_key, model="gpt-3.5-turbo", max_tokens=2000)
 
         # Define a conversation example to pass
         conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]

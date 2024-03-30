@@ -91,13 +91,13 @@ class GPT3ChatCompletion:
                 {"role": "user", "content": conversation}
             ]
         data = {
-            "model": self.model,
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-            "stop": self.stop_sequences,
-            "frequency_penalty": self.frequency_penalty,
-            "presence_penalty": self.presence_penalty,
-            "top_p": self.top_p,
+            "model": model,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stop": stop_sequences,
+            "frequency_penalty": frequency_penalty,
+            "presence_penalty": presence_penalty,
+            "top_p": top_p,
             "messages": conversation
         }
         headers = {

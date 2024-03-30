@@ -88,6 +88,79 @@ class ConversationJsonReader:
                 # Step 5: Raise ValueError if the format is incorrect
                 raise ValueError("Conversation JSON must contain dictionaries with 'role' and 'content' keys.")
 
+class ContextManager:
+    """
+    A class for managing context stored in multiple JSON files.
+
+    This class provides methods to retrieve context based on the file name.
+
+    Steps:
+    1. Initialize the ContextManager with the folder path containing JSON files.
+    2. Use retrieve_context() method to get context for a specific context file.
+    3. Use get_all_context_names() method to get a list of all existing context names.
+
+    Usage:
+    context_folder = 'context_prompts'
+    manager = ContextManager(context_folder)
+    context_name = 'example_context.json'
+    retrieved_context = manager.retrieve_context(context_name)
+    print(retrieved_context)
+    [{'role': 'example_context', 'content': 'You are a helpful assistant.'}]
+    """
+
+    def __init__(self, context_folder):
+        """
+        Initialize the ContextManager with the folder path containing JSON files.
+
+        Args:
+        - context_folder (str): Folder path containing JSON files representing context.
+        """
+        self.context_folder = context_folder
+        self.context_data = self.load_context_data()
+
+    def load_context_data(self):
+        """
+        Load context data from JSON files into memory.
+
+        Returns:
+        - dict: Dictionary containing context data loaded from JSON files.
+        """
+        context_data = {}
+        for file_name in os.listdir(self.context_folder):
+            if file_name.endswith(".json"):
+                file_path = os.path.join(self.context_folder, file_name)
+                context_data[file_name] = ConversationJsonReader().read_file(file_path)
+        return context_data
+
+    def retrieve_context(self, context_name):
+        """
+        Retrieve context from a specific context file.
+
+        Args:
+        - context_name (str): Name of the context file.
+
+        Returns:
+        - list of dict or str: Context data from the specified file, or a message indicating no context found.
+
+        Notes:
+        - If the specified context file does not exist, a message will be returned.
+        """
+        if context_name in self.context_data:
+            return self.context_data[context_name]
+        else:
+            return f"Context file '{context_name}' does not exist."
+
+    def get_all_context_names(self):
+        """
+        Get a list of all existing context names.
+
+        Returns:
+        - list: List of strings containing all existing context names.
+        """
+        return list(self.context_data.keys())
+
+
+
 if __name__ == '__main__':
     # Step 1: Create an instance of ConversationJsonReader with a specified file_path
     reader = ConversationJsonReader(file_path="conversations.json")
