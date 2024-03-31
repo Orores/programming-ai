@@ -39,18 +39,28 @@ class ChatBot:
        
         return conversation
 
-    def run(self):
-        args = self.parser_creator.parser.parse_args()
-        conversation = self.decide_conversation(args)
+    def str_to_dict_list(self, conversation):
         if isinstance(conversation, str):
-            conversation = {"role": "user", "content": conversation}
+            conversation = [{"role": "user", "content": conversation}]
+        return conversation
+
+    def extend_context(self, args, conversation):
         if args.context is not None:
             try:
                 context = self.context_manager.retrieve_context(args.context)
-                context.append(conversation)
+                context.extend(conversation)
                 conversation=context
             except FileNotFoundError:
                 exit()
+        return conversation
+
+
+
+    def run(self):
+        args = self.parser_creator.parser.parse_args()
+        conversation = self.decide_conversation(args)
+        conversation = self.str_to_dict_list(conversation)
+        conversation = self.extend_context(args, conversation)
         response = self.chat_completion.make_api_request(
                 conversation = conversation,
                 model = args.model,
