@@ -29,12 +29,11 @@ class DirectoryToJsonConverter:
             
             roles_contents = []
             for i in range(1, 1000): # Assuming up to 1000 subdirectories
-                role_file = os.path.join(subdir_path, f'role_{i}')
-                content_file = os.path.join(subdir_path, f'content_{i}')
-                
+                role_file = os.path.join(subdir_path, f'role_{i}.txt')
+                content_file = os.path.join(subdir_path, f'content_{i}.txt')
+                 
                 if not os.path.exists(role_file) or not os.path.exists(content_file):
                     break
-                
                 with open(role_file, 'r') as role_fp, open(content_file, 'r') as content_fp:
                     role_content = {"role": role_fp.read().strip(), "content": content_fp.read().strip()}
                     roles_contents.append(role_content)

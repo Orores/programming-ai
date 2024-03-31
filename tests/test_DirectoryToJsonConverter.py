@@ -37,19 +37,19 @@ class TestDirectoryToJsonConverter(unittest.TestCase):
     Sample Folder/Files Hierarchy:
     - Input Directory:
         - subdir1
-            - role_1
-            - role_2
-            - role_3
-            - content_1
-            - content_2
-            - content_3
+            - role_1.txt
+            - role_2.txt
+            - role_3.txt
+            - content_1.txt
+            - content_2.txt
+            - content_3.txt
         - subdir2
-            - role_1
-            - role_2
-            - role_3
-            - content_1
-            - content_2
-            - content_3
+            - role_1.txt
+            - role_2.txt
+            - role_3.txt
+            - content_1.txt
+            - content_2.txt
+            - content_3.txt
 
     Sample JSON Format:
     Each JSON file represents a subdirectory and contains an array of dictionaries where each dictionary
@@ -84,9 +84,9 @@ class TestDirectoryToJsonConverter(unittest.TestCase):
 
             # Create role and content files
             for i in range(1, 4):
-                with open(os.path.join(subdir_path, f'role_{i}'), 'w') as role_fp:
+                with open(os.path.join(subdir_path, f'role_{i}.txt'), 'w') as role_fp:
                     role_fp.write(f'Role {i} for {subdir_name}')
-                with open(os.path.join(subdir_path, f'content_{i}'), 'w') as content_fp:
+                with open(os.path.join(subdir_path, f'content_{i}.txt'), 'w') as content_fp:
                     content_fp.write(f'Content {i} for {subdir_name}')
 
     def test_convert_directories_to_json(self):

@@ -8,7 +8,7 @@ from ConversationJsonReader import ConversationJsonReader
 from ParserCreator import ParserCreator
 from GPTChatCompletion import GPT3ChatCompletion
 from GPTChatCompletionSaver import ChatCompletionSaver
-
+from ContextManager import ContextManager
 
 
 class ChatBot:
@@ -24,6 +24,7 @@ class ChatBot:
         self.conversation_json_reader = ConversationJsonReader()
         self.string_file_reader = StringFileReader()
         self.openai_completion_saver = ChatCompletionSaver()
+        self.context_manager = ContextManager(context_folder = 'context_prompts')
 
     def decide_conversation(self, args):
         if args.file_path:
@@ -41,6 +42,15 @@ class ChatBot:
     def run(self):
         args = self.parser_creator.parser.parse_args()
         conversation = self.decide_conversation(args)
+        if isinstance(conversation, str):
+            conversation = {"role": "user", "content": conversation}
+        if args.context is not None:
+            try:
+                context = self.context_manager.retrieve_context(args.context)
+                context.append(conversation)
+                conversation=context
+            except FileNotFoundError:
+                exit()
         response = self.chat_completion.make_api_request(
                 conversation = conversation,
                 model = args.model,

@@ -21,7 +21,7 @@ class ContextManager:
     [{'role': 'example_context', 'content': 'You are a helpful assistant.'}]
     """
 
-    def __init__(self, context_folder):
+    def __init__(self, context_folder='context_prompts'):
         """
         Initialize the ContextManager with the folder path containing JSON files.
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     manager = ContextManager(context_folder)
 
     # Retrieve context from a specific context file
-    context_name = 'test1.json'
+    context_name = 'banana.json'
     retrieved_context = manager.retrieve_context(context_name)
     print(retrieved_context)  # Output: [{'role': 'system', 'content': 'You are a helpful assistant.'}]
 

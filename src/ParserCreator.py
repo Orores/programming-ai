@@ -17,6 +17,7 @@ class ParserCreator:
         self.parser.add_argument("--question", type=str, help="The question or prompt to ask the model.")
         self.parser.add_argument("--file_path", type=str, help="Path to the file.")
         self.parser.add_argument("--save_path", type=str, default="response.tmp", help="Path to save the response.")
+        self.parser.add_argument("--context", type=str, help="File path for the context.")
 
 if __name__ == "__main__":
     creator = ParserCreator()  # Create an instance of ParserCreator
@@ -32,4 +33,4 @@ if __name__ == "__main__":
     print(f"Question: {args.question}")
     print(f"File Path: {args.file_path}")
     print(f"Save Path: {args.save_path}")
-
+    print(f"Context: {args.context}")
