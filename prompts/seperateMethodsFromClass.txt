@@ -1,0 +1,1 @@
+Based on the following code generate two lists of methods. The first list contains methods that can be securely be isolated into a seperate class. The second list has all the the other methods.

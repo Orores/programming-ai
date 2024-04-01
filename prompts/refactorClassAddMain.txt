@@ -1,0 +1,1 @@
+Rewrite following code so that the class has a main method with a descriptive name that handles all the functionality from the class, so that I only ever need to import the main method.

@@ -1,0 +1,3 @@
+Rewrite following code so it includes docstrings. The docstring for the classes is special. Because the class docstring must contain a list of all methods and what they do and what parameters they take. Furthermore the docstrings for the classes must include a list of attributes and what they represent.
+
+

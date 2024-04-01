@@ -1,5 +1,8 @@
-langchain
-langchain-openai
-openai
-python-dotenv
+# python-dotenv: For loading environment variables from a .env file
+# fuzzywuzzy: For fuzzy text matching and comparison
+# python-Levenshtein: Improves the speed of fuzzywuzzy by providing a faster implementation of Levenshtein distance algorithm
 
+
+python-dotenv
+fuzzywuzzy
+python-Levenshtein

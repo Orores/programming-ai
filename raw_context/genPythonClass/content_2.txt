@@ -1,0 +1,8 @@
+Write python code that can read a json of the form:
+
+    [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, how are you?"}
+    ]
+
+Call the Class ConversationJsonReader and let it have two methods, one to read a json and return a dictionary and another one to validate that the json has the expected structure.
