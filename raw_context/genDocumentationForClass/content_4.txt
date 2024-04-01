@@ -1,0 +1,42 @@
+Write documentation for following code
+
+import os
+from ConversationJsonReader import ConversationJsonReader
+
+class ContextManager:
+    def __init__(self, context_folder='context_prompts'):
+
+        self.context_folder = context_folder
+        self.context_data = self.load_context_data()
+
+    def load_context_data(self):
+
+        context_data = {}
+        for file_name in os.listdir(self.context_folder):
+            if file_name.endswith(".json"):
+                file_path = os.path.join(self.context_folder, file_name)
+                context_data[file_name] = ConversationJsonReader().read_file(file_path)
+        return context_data
+
+    def retrieve_context(self, context_name):
+
+        if context_name in self.context_data:
+            return self.context_data[context_name]
+        else:
+            return f"Context file '{context_name}' does not exist."
+
+    def get_all_context_names(self):
+
+        return list(self.context_data.keys())
+
+
+if __name__ == "__main__":
+    context_folder = 'context_prompts'
+    manager = ContextManager(context_folder)
+
+    context_name = 'banana.json'
+    retrieved_context = manager.retrieve_context(context_name)
+    print(retrieved_context)  # Output: [{'role': 'system', 'content': 'You are a helpful assistant.'}]
+
+    all_context_names = manager.get_all_context_names()
+    print(all_context_names)

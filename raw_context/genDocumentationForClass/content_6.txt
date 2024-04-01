@@ -1,0 +1,22 @@
+Write documentation for the following code, the response object looks like
+
+class StringFileReader:
+    def __init__(self, file_path=None):
+        self.file_path = file_path
+
+    def read_file(self, file_path=None):
+
+        try:
+            if file_path:
+                self.file_path = file_path
+            
+            with open(self.file_path, 'r') as file:
+                content = file.read()
+                
+                if not isinstance(content, str):
+                    raise TypeError("The content read from the file is not a string.")
+                
+                return content
+        except FileNotFoundError:
+            raise FileNotFoundError(f"File not found. Please check the path '{self.file_path}' and try again.")
+

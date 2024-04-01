@@ -72,7 +72,7 @@ class ChatBot:
                 top_p = args.top_p,
                 )
 
-        print("Chat Completion Response:", response)
+        #print("Chat Completion Response:", response)
         self.openai_completion_saver.save_to_file(response, args.save_path)
 
 
