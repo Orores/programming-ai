@@ -20,9 +20,15 @@ class ChatBot:
     and utilizes GPT-3 for chat completion accordingly.
     """
 
+    FAIL = '\33[91m'
+    OKGREEN = '\33[92m'
+    OKCYAN ='\33[96m'
+    ORANGE = '\33[93m'
+    BOLD = '\33[1m'
+
     def __init__(self):
         self.chat_completion = GPT3ChatCompletion()
-        self.parser_creator = ParserCreator()
+        self.parser = ParserCreator().parser
         self.conversation_json_reader = ConversationJsonReader()
         self.string_file_reader = StringFileReader()
         self.openai_completion_saver = ChatCompletionSaver()
@@ -37,7 +43,8 @@ class ChatBot:
         elif args.question:
             conversation = args.question
         else:
-            raise ValueError("No conversation or question provided.")
+            self.parser.error(self.FAIL + self.BOLD + 'Please enter the word you want the machine to say. Enter -h for help')
+
        
         return conversation
 
@@ -59,7 +66,7 @@ class ChatBot:
 
 
     def run(self):
-        args = self.parser_creator.parser.parse_args()
+        args = self.parser.parse_args()
         conversation = self.decide_conversation(args)
         conversation = self.str_to_dict_list(conversation)
         conversation = self.extend_context(args, conversation)
