@@ -85,19 +85,20 @@ class ChatBot:
         self.openai_completion_saver.save_to_file(response, args.save_path)
         response = response['choices'][0]['message']['content']
         file_path = 'sandbox_scripts/myscript.py'
-        py_file_executor = PyFileExecutor(
-                file_path = file_path,
-                code = response,
-                )
-        error_output = py_file_executor.execute()
-        if error_output:
-            print("Error Output:", error_output)
-            conversation = CodeErrorFormatter.format_code_error(
-                    code = code,
-                    error_output = error_output,
-                    ) 
-        else:
-            print("Execution completed successfully.")
+        if args.run_code:
+            py_file_executor = PyFileExecutor(
+                    file_path = file_path,
+                    code = response,
+                    )
+            error_output = py_file_executor.execute()
+            if error_output:
+                print("Error Output:", error_output)
+                conversation = CodeErrorFormatter.format_code_error(
+                        code = code,
+                        error_output = error_output,
+                        ) 
+            else:
+                print("Execution completed successfully.")
 
 
 
