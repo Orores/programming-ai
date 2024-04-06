@@ -1,0 +1,13 @@
+Show me a Medium Level Design for a python class that accomplished following High Level Software design:
+
+1. Input: The code changes are extracted from the current git working directory using a git diff command. The changes are tokenized into individual words using a natural language processing (NLP) library.
+
+2. NLP Analysis: The NLP library processes the tokenized words to identify keywords, context, and sentiment within the code changes. This analysis helps in understanding the purpose and impact of the code changes.
+
+3. Proposal: Based on the NLP analysis, a proposed commit message is generated summarizing the code changes. The commit message includes relevant keywords and provides a concise description of the changes made.
+
+4. User Interaction: The proposed commit message is displayed to the user along with the option to accept or reject it. If the user accepts the proposed message, the code changes are staged and committed using the git commit command. If the user rejects the message, they have the option to manually enter a custom commit message.
+
+5. Error Handling: In case of errors during the NLP analysis or if the proposed commit message is not suitable, appropriate error messages are displayed to the user. The user can then choose to retry the NLP analysis or provide a custom commit message.
+
+

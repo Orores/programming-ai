@@ -1,0 +1,1 @@
+Show me a high level design for a simple piece of code that uses nlp to create git commits. It shall analyze the changes of the code itself, then proprose a comit to me and ask for whther i want to use that message.

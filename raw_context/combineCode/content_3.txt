@@ -10,8 +10,6 @@ from GPTChatCompletion import GPT3ChatCompletion
 from GPTChatCompletionSaver import ChatCompletionSaver
 from ContextManager import ContextManager
 from PyFileExecutor import PyFileExecutor
-from CodeErrorFormatter import CodeErrorFormatter
-
 
 class ChatBot:
     """
@@ -63,35 +61,32 @@ class ChatBot:
         conversation = self.decide_conversation(args)
         conversation = self.str_to_dict_list(conversation)
         conversation = self.extend_context(args, conversation)
-        response = self.chat_completion.make_api_request(
-                conversation = conversation,
-                model = args.model,
-                temperature = args.temperature,
-                max_tokens = args.max_tokens,
-                stop_sequences = args.stop_sequences,
-                frequency_penalty = args.frequency_penalty,
-                presence_penalty = args.presence_penalty,
-                top_p = args.top_p,
-                )
+        for _ in range(10):
+            response = self.chat_completion.make_api_request(
+                    conversation = conversation,
+                    model = args.model,
+                    temperature = args.temperature,
+                    max_tokens = args.max_tokens,
+                    stop_sequences = args.stop_sequences,
+                    frequency_penalty = args.frequency_penalty,
+                    presence_penalty = args.presence_penalty,
+                    top_p = args.top_p,
+                    )
 
-        #print("Chat Completion Response:", response)
-        self.openai_completion_saver.save_to_file(response, args.save_path)
-        response = response['choices'][0]['message']['content']
-        file_path = 'sandbox_scripts/myscript.py'
-        py_file_executor = PyFileExecutor(
-                file_path = file_path,
-                code = response,
-                )
-        error_output = py_file_executor.execute()
-        if error_output:
-            print("Error Output:", error_output)
-            conversation = CodeErrorFormatter.format_code_error(
-                    code = code,
-                    error_output = error_output,
-                    ) 
-        else:
-            print("Execution completed successfully.")
-
+            #print("Chat Completion Response:", response)
+            self.openai_completion_saver.save_to_file(response, args.save_path)
+            response = response['choices'][0]['message']['content']
+            file_path = 'sandbox_scripts/myscript.py'
+            py_file_executor = PyFileExecutor(
+                    file_path = file_path,
+                    code = response,
+                    )
+            error_output = py_file_executor.execute()
+            if error_output:
+                print("Error Output:", error_output)
+            else:
+                break
+                print("Execution completed successfully.")
 
 
 if __name__ == '__main__':
