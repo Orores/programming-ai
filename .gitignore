@@ -164,3 +164,6 @@ cython_debug/
 *.log
 *.tmp
 *.swp
+
+# Ignore test output locations
+sandbox_scripts/

@@ -18,6 +18,7 @@ class ParserCreator:
         self.parser.add_argument("--file_path", type=str, help="Path to the file.")
         self.parser.add_argument("--save_path", type=str, default="response.tmp", help="Path to save the response.")
         self.parser.add_argument("--context", type=str, help="File path for the context.")
+        self.parser.add_argument("--run_code", action='store_true', help="Run the response string as code in a console.")
 
 if __name__ == "__main__":
     creator = ParserCreator()  # Create an instance of ParserCreator
@@ -34,3 +35,7 @@ if __name__ == "__main__":
     print(f"File Path: {args.file_path}")
     print(f"Save Path: {args.save_path}")
     print(f"Context: {args.context}")
+    if args.run_code:
+        print("Run code option is enabled.")
+    else:
+        print("Run code option is not enabled.")
