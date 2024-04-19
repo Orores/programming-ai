@@ -6,7 +6,7 @@ from unittest.mock import patch, Mock, call
 import subprocess
 
 # Add the src directory to the Python path for imports
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 from PyFileExecutor import PyFileExecutor
 

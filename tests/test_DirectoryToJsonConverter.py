@@ -5,7 +5,7 @@ import sys
 import json
 
 # Add the src directory to the Python path for imports
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 from DirectoryToJsonConverter import DirectoryToJsonConverter
 

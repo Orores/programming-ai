@@ -3,7 +3,7 @@ import os
 import tempfile
 import sys
 # Add the src directory to the Python path for imports
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 # Import the class to be tested
 from StringFileReader import StringFileReader

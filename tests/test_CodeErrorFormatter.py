@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock, Mock, call
 
 import sys
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 from CodeErrorFormatter import CodeErrorFormatter
 

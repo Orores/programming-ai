@@ -7,7 +7,7 @@ import json
 import tempfile
 
 # Add the src directory to the Python path for imports
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 from ContextManager import ContextManager
 

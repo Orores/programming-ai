@@ -67,42 +67,47 @@ class ChatBot:
 
     def run(self):
         args = self.parser.parse_args()
-        conversation = self.decide_conversation(args)
-        conversation = self.str_to_dict_list(conversation)
-        conversation = self.extend_context(args, conversation)
-        response = self.chat_completion.make_api_request(
-                conversation = conversation,
-                model = args.model,
-                temperature = args.temperature,
-                max_tokens = args.max_tokens,
-                stop_sequences = args.stop_sequences,
-                frequency_penalty = args.frequency_penalty,
-                presence_penalty = args.presence_penalty,
-                top_p = args.top_p,
-                )
-
-        #print("Chat Completion Response:", response)
-        self.openai_completion_saver.save_to_file(response, args.save_path)
-        response = response['choices'][0]['message']['content']
-        file_path = 'sandbox_scripts/myscript.py'
-        if args.run_code:
-            py_file_executor = PyFileExecutor(
-                    file_path = file_path,
-                    code = response,
+        if args.show_available_context:
+            context_names = self.context_manager.get_all_context_names()
+            print("Available Context Names:", context_names)
+        else:
+            conversation = self.decide_conversation(args)
+            conversation = self.str_to_dict_list(conversation)
+            conversation = self.extend_context(args, conversation)
+            response = self.chat_completion.make_api_request(
+                    conversation = conversation,
+                    model = args.model,
+                    temperature = args.temperature,
+                    max_tokens = args.max_tokens,
+                    stop_sequences = args.stop_sequences,
+                    frequency_penalty = args.frequency_penalty,
+                    presence_penalty = args.presence_penalty,
+                    top_p = args.top_p,
                     )
-            error_output = py_file_executor.execute()
-            if error_output:
-                print("Error Output:", error_output)
-                conversation = CodeErrorFormatter.format_code_error(
-                        code = code,
-                        error_output = error_output,
-                        ) 
-            else:
-                print("Execution completed successfully.")
 
+            #print("Chat Completion Response:", response)
+            self.openai_completion_saver.save_to_file(response, args.save_path)
+            response = response['choices'][0]['message']['content']
+            file_path = 'sandbox_scripts/myscript.py'
+            if args.run_code:
+                py_file_executor = PyFileExecutor(
+                        file_path = file_path,
+                        code = response,
+                        )
+                error_output = py_file_executor.execute()
+                if error_output:
+                    print("Error Output:", error_output)
+                    conversation = CodeErrorFormatter.format_code_error(
+                            code = code,
+                            error_output = error_output,
+                            ) 
+                else:
+                    print("Execution completed successfully.")
 
-
-if __name__ == '__main__':
+def main():
     bot = ChatBot()
     bot.run()
 
+
+if __name__ == '__main__':
+    main()
