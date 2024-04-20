@@ -1,0 +1,146 @@
+Format the following text in markdown:
+
+Creating a debian package from a python project
+
+Step by step guide:
+
+1. Create a new directory for your project.
+2. Inside the project directory, create a "src" directory to store your Python source code.
+3. Create a "README.md" file to provide information about your project.
+4. Create a "requirements.txt" file to list any dependencies your project has.
+5. Create a "setup.py" file to define how your project should be installed.
+6. Create a "debian" directory to store Debian packaging files.
+7. Inside the "debian" directory, create a "control" file to define metadata about your package.
+8. Inside the "debian" directory, create a "rules" file to define the rules for building your package.
+9. Inside the "debian" directory, create a "compat" file to specify the debhelper compatibility level.
+10. Inside the "debian" directory, create a "changelog" file to track changes to your package.
+11. Inside the "debian" directory, create a "install" file to specify where files should be installed.
+12. Inside the "debian" directory, create a "copyright" file to define copyright information for your package.
+13. Inside the "debian" directory, create a "watch" file to specify how to check for new versions of your package.
+14. Run `dpkg-buildpackage -us -uc` to build your Debian package.
+15. Your Debian package will be created in the parent directory of your project.
+
+Folder structure as a tree:
+
+```
+project/
+├── src/
+│   ├── main.py
+│   └── utils.py
+├── README.md
+├── requirements.txt
+├── setup.py
+└── debian/
+    ├── control
+    ├── rules
+    ├── compat
+    ├── changelog
+    ├── install
+    ├── copyright
+    └── watch
+```
+
+Source code for files listed in the tree:
+
+main.py:
+```python
+from utils import hello
+
+if __name__ == "__main__":
+    hello()
+```
+
+utils.py:
+```python
+def hello():
+    print("Hello, world!")
+```
+
+README.md:
+```
+# Project Name
+
+This is a Python project that demonstrates how to create a Debian package.
+```
+
+requirements.txt:
+```
+numpy
+```
+
+setup.py:
+```python
+from setuptools import setup, find_packages
+
+setup(
+    name="project",
+    version="1.0",
+    packages=find_packages(),
+    install_requires=[
+        "numpy"
+    ]
+)
+```
+
+control:
+```
+Source: project
+Section: python
+Priority: optional
+Maintainer: Your Name <your.email@example.com>
+Build-Depends: debhelper (>= 12)
+Standards-Version: 4.5.0
+Homepage: https://example.com
+Package: project
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: Description of your project
+```
+
+rules:
+```
+#!/usr/bin/make -f
+
+%:
+    dh $@
+```
+
+compat:
+```
+12
+```
+
+changelog:
+```
+project (1.0-1) stable; urgency=low
+
+  * Initial release
+
+ -- Your Name <your.email@example.com>  Tue, 01 Jan 2021 00:00:00 +0000
+```
+
+install:
+```
+src/* /usr/lib/python3/dist-packages/
+debian/control /usr/share/doc/project/
+README.md /usr/share/doc/project/
+```
+
+copyright:
+```
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: project
+Upstream-Contact: Your Name <your.email@example.com>
+Source: https://example.com
+
+Files: *
+Copyright: Your Name <your.email@example.com>
+License: GPL-3+
+```
+
+watch:
+```
+version=3
+opts=dversionmangle=s/\+(debian|dfsg|ds|deb|a|b|c|ubuntu|0\.[\d.]+)// \
+https://example.com
+```

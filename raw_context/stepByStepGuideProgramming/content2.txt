@@ -1,0 +1,1 @@
+Write a concise step by step guide on how to structure a repository for a python project  and create a debian installation file for it.
