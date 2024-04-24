@@ -6,7 +6,7 @@ import json
 from unittest.mock import patch
 
 # Add the src directory to the Python path for imports
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 from ConversationJsonReader import ConversationJsonReader
 

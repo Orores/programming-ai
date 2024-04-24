@@ -1,7 +1,7 @@
 import os
 # Add the src directory to the Python path for imports
 import sys
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 import unittest
 import tempfile

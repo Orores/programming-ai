@@ -1,3 +1,9 @@
+# Debian build folder
+deb_dist/
+
+# Wheel Dist Folder
+wheel_dist/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

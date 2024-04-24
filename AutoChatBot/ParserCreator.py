@@ -19,6 +19,7 @@ class ParserCreator:
         self.parser.add_argument("--save_path", type=str, default="response.tmp", help="Path to save the response.")
         self.parser.add_argument("--context", type=str, help="File path for the context.")
         self.parser.add_argument("--run_code", action='store_true', help="Run the response string as code in a console.")
+        self.parser.add_argument("--show_available_context", action='store_true', help="Show available context.")
 
 if __name__ == "__main__":
     creator = ParserCreator()  # Create an instance of ParserCreator
@@ -39,3 +40,8 @@ if __name__ == "__main__":
         print("Run code option is enabled.")
     else:
         print("Run code option is not enabled.")
+        
+    if args.show_available_context:
+        print("Show available context option is enabled.")
+    else:
+        print("Show available context option is not enabled.")

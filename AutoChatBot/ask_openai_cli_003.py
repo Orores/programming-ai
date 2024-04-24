@@ -1,5 +1,5 @@
 import argparse
-from src.gpt3_assistant import GPT3Assistant
+from .AutoChatbot.gpt3_assistant import GPT3Assistant
 
 class AIAssistant:
     def __init__(self):

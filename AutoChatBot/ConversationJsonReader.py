@@ -79,14 +79,14 @@ class ConversationJsonReader:
         # Step 1: Check if the conversation is a list
         if not isinstance(conversation, list):
             # Step 2: Raise ValueError if the conversation is not a list
-            raise ValueError("Conversation JSON must contain a list of dictionaries.")
+            raise ValueError(f"Conversation JSON must contain a list of dictionaries.\n Converstation:\n {conversation}")
         
         # Step 3: Iterate through each item in the conversation
         for item in conversation:
             # Step 4: Check if each item is a dictionary and contains "role" and "content" keys
-            if not isinstance(item, dict) or "role" not in item or "content" not in item:
+            if not isinstance(item, dict) or ("role" not in item and "content" not in item):
                 # Step 5: Raise ValueError if the format is incorrect
-                raise ValueError("Conversation JSON must contain dictionaries with 'role' and 'content' keys.")
+                raise ValueError(f"Conversation JSON must contain dictionaries with 'role' and 'content' keys.\n Converstation:\n {item}")
 
 if __name__ == '__main__':
     # Step 1: Create an instance of ConversationJsonReader with a specified file_path

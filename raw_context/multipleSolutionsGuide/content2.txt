@@ -1,0 +1,13 @@
+project/
+├── src/
+│   ├── project/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   └── data.json
+├── unittests/
+│   ├── __init__.py
+│   └── test_main.py
+├── setup.py
+└── README.md
+
+I have a project like this. I want to create a github repo for it and then push it to github. Explain to me the problem and then offer 3 step by step solution approaches.

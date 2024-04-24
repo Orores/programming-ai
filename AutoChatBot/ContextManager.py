@@ -1,5 +1,6 @@
 import os
-from ConversationJsonReader import ConversationJsonReader
+from AutoChatBot.ConversationJsonReader import ConversationJsonReader
+import pkg_resources
 
 class ContextManager:
     """
@@ -28,7 +29,13 @@ class ContextManager:
         Args:
         - context_folder (str): Folder path containing JSON files representing context.
         """
-        self.context_folder = context_folder
+        # If tmp is relevant for unittesting
+        # Because the temporary directory will be /tmp/something
+        # But the actual context for regular use is saved in the package
+        if context_folder.startswith('/tmp'):
+            self.context_folder = context_folder
+        else:
+            self.context_folder = pkg_resources.resource_filename('AutoChatBot',context_folder)
         self.context_data = self.load_context_data()
 
     def load_context_data(self):

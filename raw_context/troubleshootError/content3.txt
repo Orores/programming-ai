@@ -1,0 +1,36 @@
+**Error:**
+The error is occurring in the build.sh script when trying to build the wheel package. It is giving the following error:
+```
+error: invalid command 'bdist_wheel'
+mv: cannot stat './dist/*.whl': No such file or directory
+```
+
+**Solution:**
+To fix this error, you can follow these troubleshooting steps:
+
+1. **Check setuptools Version:**
+   Ensure that the `setuptools` package is up-to-date in your Python environment. Some older versions of `setuptools` do not support the `bdist_wheel` command.
+
+2. **Install Wheel Package:**
+   Make sure you have the `wheel` package installed in your virtual environment. You can install it using pip:
+   ```
+   pip install wheel
+   ```
+
+3. **Update setup.py:**
+   Modify your `setup.py` file to explicitly enable the `bdist_wheel` command by adding the following line:
+   ```python
+   setup(
+       ...
+       setup_requires=['wheel'],
+       ...
+   )
+   ```
+
+4. **Run the Build Script:**
+   After making the changes, try running the build script `build.sh` again. This should now recognize and execute the `bdist_wheel` command correctly.
+
+5. **Verify Wheel Package:**
+   Once the build script completes without errors, check the `wheel_dist` directory to ensure that the `.whl` file has been successfully created and moved there.
+
+By following these steps, you should be able to resolve the `invalid command 'bdist_wheel'` error and successfully build the wheel package for your project.

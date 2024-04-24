@@ -3,7 +3,12 @@ import json
 
 class DirectoryToJsonConverter:
     """
-    The code takes a directory specified by the `input_directory` variable as input. Within this directory, there are subdirectories containing files named `role_i` and `content_i`, where `i` ranges from 1 to `n`. The goal is to transform each subdirectory into a JSON object with the subdirectory's name. Each JSON object will contain an array of objects structured as follows:
+    The code takes a directory specified by the `input_directory` variable as input. Within this directory, there are subdirectories containing files named `role_i` and `content_i`, where `i` ranges from 1 to `n`.
+
+    The Class can handle names that are either role_{i}.txt or role{i}.txt
+
+    The goal is to transform each subdirectory into a JSON object with the subdirectory's name. Each JSON object will contain an array of objects structured as follows:
+
 
     ```
     [
@@ -29,11 +34,17 @@ class DirectoryToJsonConverter:
             
             roles_contents = []
             for i in range(1, 1000): # Assuming up to 1000 subdirectories
-                role_file = os.path.join(subdir_path, f'role_{i}.txt')
-                content_file = os.path.join(subdir_path, f'content_{i}.txt')
-                 
-                if not os.path.exists(role_file) or not os.path.exists(content_file):
+                role_file_1 = os.path.join(subdir_path, f'role_{i}.txt')
+                content_file_1 = os.path.join(subdir_path, f'content_{i}.txt')
+                role_file_2 = os.path.join(subdir_path, f'role{i}.txt')
+                content_file_2 = os.path.join(subdir_path, f'content{i}.txt')
+                
+                if not (os.path.exists(role_file_1) and os.path.exists(content_file_1)) and not (os.path.exists(role_file_2) and os.path.exists(content_file_2)):
                     break
+                
+                role_file = role_file_1 if os.path.exists(role_file_1) else role_file_2
+                content_file = content_file_1 if os.path.exists(content_file_1) else content_file_2
+                
                 with open(role_file, 'r') as role_fp, open(content_file, 'r') as content_fp:
                     role_content = {"role": role_fp.read().strip(), "content": content_fp.read().strip()}
                     roles_contents.append(role_content)
@@ -43,9 +54,9 @@ class DirectoryToJsonConverter:
                 json.dump(roles_contents, json_fp, indent=4)
 
 # Example usage
-input_directory = 'raw_context'
-output_directory = 'context_prompts'
+if __name__ == '__main__':
+    input_directory = 'raw_context'
+    output_directory = 'context_prompts'
 
-converter = DirectoryToJsonConverter(input_directory, output_directory)
-converter.convert_directories_to_json()
-
+    converter = DirectoryToJsonConverter(input_directory, output_directory)
+    converter.convert_directories_to_json()

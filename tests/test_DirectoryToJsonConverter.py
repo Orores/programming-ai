@@ -5,7 +5,7 @@ import sys
 import json
 
 # Add the src directory to the Python path for imports
-sys.path.append('src')
+sys.path.append('AutoChatBot')
 
 from DirectoryToJsonConverter import DirectoryToJsonConverter
 
@@ -34,7 +34,7 @@ class TestDirectoryToJsonConverter(unittest.TestCase):
     - tmp_input_dir: Temporary directory for input data.
     - tmp_output_dir: Temporary directory for output data.
 
-    Sample Folder/Files Hierarchy:
+    Sample Folder/File Hierarchies:
     - Input Directory:
         - subdir1
             - role_1.txt
@@ -89,12 +89,33 @@ class TestDirectoryToJsonConverter(unittest.TestCase):
                 with open(os.path.join(subdir_path, f'content_{i}.txt'), 'w') as content_fp:
                     content_fp.write(f'Content {i} for {subdir_name}')
 
+        # Create additional subdirectories with role and content files for alternate testing
+        for subdir_name in ['subdir3', 'subdir4']:
+            subdir_path = os.path.join(self.tmp_input_dir.name, subdir_name)
+            os.makedirs(subdir_path)
+
+            # Create role and content files with alternate naming convention
+            for i in range(1, 4):
+                with open(os.path.join(subdir_path, f'role{i}.txt'), 'w') as role_fp:
+                    role_fp.write(f'Role {i} for {subdir_name}')
+                with open(os.path.join(subdir_path, f'content{i}.txt'), 'w') as content_fp:
+                    content_fp.write(f'Content {i} for {subdir_name}')
+
     def test_convert_directories_to_json(self):
         converter = DirectoryToJsonConverter(self.tmp_input_dir.name, self.tmp_output_dir.name)
         converter.convert_directories_to_json()
 
-        # Check if JSON files were created correctly
+        # Check if JSON files were created correctly for role_i content_i
         for subdir_name in ['subdir1', 'subdir2']:
+            json_file_path = os.path.join(self.tmp_output_dir.name, f'{subdir_name}.json')
+            self.assertTrue(os.path.exists(json_file_path), f"JSON file {json_file_path} does not exist.")
+
+            with open(json_file_path, 'r') as json_fp:
+                json_data = json.load(json_fp)
+                self.assertEqual(len(json_data), 3)
+
+        # Check if JSON files were created correctly for rolei contenti
+        for subdir_name in ['subdir3', 'subdir4']:
             json_file_path = os.path.join(self.tmp_output_dir.name, f'{subdir_name}.json')
             self.assertTrue(os.path.exists(json_file_path), f"JSON file {json_file_path} does not exist.")
 
