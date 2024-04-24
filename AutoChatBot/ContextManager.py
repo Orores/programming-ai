@@ -1,5 +1,5 @@
 import os
-from ConversationJsonReader import ConversationJsonReader
+from AutoChatBot.ConversationJsonReader import ConversationJsonReader
 
 class ContextManager:
     """

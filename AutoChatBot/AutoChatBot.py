@@ -3,14 +3,14 @@ from dotenv import load_dotenv
 import requests
 import argparse
 
-from StringFileReader import StringFileReader
-from ConversationJsonReader import ConversationJsonReader
-from ParserCreator import ParserCreator
-from GPTChatCompletion import GPT3ChatCompletion
-from GPTChatCompletionSaver import ChatCompletionSaver
-from ContextManager import ContextManager
-from PyFileExecutor import PyFileExecutor
-from CodeErrorFormatter import CodeErrorFormatter
+from .StringFileReader import StringFileReader
+from .ConversationJsonReader import ConversationJsonReader
+from .ParserCreator import ParserCreator
+from .GPTChatCompletion import GPT3ChatCompletion
+from .GPTChatCompletionSaver import ChatCompletionSaver
+from .ContextManager import ContextManager
+from .PyFileExecutor import PyFileExecutor
+from .CodeErrorFormatter import CodeErrorFormatter
 
 
 class ChatBot:
@@ -85,7 +85,7 @@ class ChatBot:
                     top_p = args.top_p,
                     )
 
-            #print("Chat Completion Response:", response)
+            print("Chat Completion Response:", response)
             self.openai_completion_saver.save_to_file(response, args.save_path)
             response = response['choices'][0]['message']['content']
             file_path = 'sandbox_scripts/myscript.py'

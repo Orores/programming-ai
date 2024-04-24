@@ -1,9 +1,10 @@
+update the following code so it additionaly creates a wheel package for a python project.
+
 #!/bin/bash
 
 # Define directories for the generated files
 DEB_DIST_DIR=./deb_dist
 DIST_DIR=./dist
-WHEEL_DIST_DIR=./wheel_dist
 
 # Activate virtual environment
 echo "Activating virtual environment..."
@@ -31,16 +32,7 @@ rm -rf "${DEB_DIST_DIR}" ./*.egg-info
 echo "Building Debian package..."
 python3 setup.py --command-packages=stdeb.command bdist_deb
 
-# Build the wheel package
-echo "Building wheel package..."
-python3 setup.py bdist_wheel
-
-# Create wheel_dist directory if it doesn't exist
-mkdir -p "${WHEEL_DIST_DIR}"
-
-# Move the wheel package to wheel_dist directory
-mv ./dist/*.whl "${WHEEL_DIST_DIR}"
-
 # Remove .tar.gz files from the root directory
 rm -f ./*.tar.gz
 echo ".tar.gz files in the root directory have been removed"
+

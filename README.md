@@ -8,6 +8,12 @@ You're trying to develop a Python script that combines the functionality of two 
 However, you're encountering difficulties in handling the case where no file path is provided but a question is provided directly. The current solutions proposed didn't meet your requirements.
 
 
+
+# Tips
+
+If yopu don't use the chatbot as a package, liek if you have cloned the repo, pelase use python -m, because the imports start with a dot which means the import are handled in a way that is a package
+
+
 # programming-ai
 AI assistant for programming
 

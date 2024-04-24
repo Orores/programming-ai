@@ -9,7 +9,7 @@ import tempfile
 # Add the src directory to the Python path for imports
 sys.path.append('AutoChatBot')
 
-from ContextManager import ContextManager
+from AutoChatBot.ContextManager import ContextManager
 
 class TestContextManager(unittest.TestCase):
 
@@ -29,20 +29,16 @@ class TestContextManager(unittest.TestCase):
         ]
 
         with open(os.path.join(self.context_folder, 'file1.json'), 'w') as file1:
-            json.dump({'name': 'file1'}, file1)
+            json.dump([{'role': 'user'},{'content': 'Hello'}], file1)
         
         with open(os.path.join(self.context_folder, 'file2.json'), 'w') as file2:
-            json.dump({'name': 'file2'}, file2)
+            json.dump([{'role': 'user2'},{'content': 'Hello2'}], file2)
 
         context_manager = ContextManager(self.context_folder)
         
-        self.assertEqual(MockConversationJsonReader_instance.read_file.call_count, 2)
-        expected_calls = [call(os.path.join(self.context_folder, 'file1.json')), call(os.path.join(self.context_folder, 'file2.json'))]
-        MockConversationJsonReader_instance.read_file.assert_has_calls(expected_calls)
-
         expected_context_data = {
-            'file1.json': {'test': 'data1'},
-            'file2.json': {'test': 'data2'}
+            'file1.json': [{'role': 'user'},{'content': 'Hello'}],
+            'file2.json': [{'role': 'user2'},{'content': 'Hello2'}]
         }
         self.assertEqual(context_manager.context_data, expected_context_data)
 

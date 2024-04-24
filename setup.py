@@ -22,7 +22,7 @@ with open('README.md', 'r', encoding="utf-8") as file:
 
 setup(
     name='AutoChatBot',
-    version='1.0.6',
+    version='1.0.8',
     description='CLI chatbot that uses openai api',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -32,6 +32,9 @@ setup(
     license='MIT',
     packages=['AutoChatBot'],
     package_dir={'AutoChatBot': 'AutoChatBot/'},
+    package_data={
+        "": ["context_prompts/*"]
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI approved :: MIT License',
@@ -42,6 +45,7 @@ setup(
     },
     keywords='chatbot',
     python_requires=">=3.6",
+    setup_requires=['wheel'],
     #install_requires=read_requirements(),  # Use the read_requirements function
-    install_requires=['requests','python-dotenv'],
+    install_requires=['requests','python-dotenv','stdeb'],
 )
