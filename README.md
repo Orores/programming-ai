@@ -1,12 +1,6 @@
 #Current Problem
 
-You're trying to develop a Python script that combines the functionality of two existing classes: GPT3ChatCompletion and FileReader. The script should be able to:
-
-    Automatically read files and determine whether they contain conversations or single questions.
-    Utilize the GPT3ChatCompletion class to generate responses based on either the content of the file (if provided) or a direct question (if provided).
-
-However, you're encountering difficulties in handling the case where no file path is provided but a question is provided directly. The current solutions proposed didn't meet your requirements.
-
+context prompts might be generated into the wrong directory since context prompts are nto in AutoChatBot folder, please deal with the ensuring problems mostly reated to the the contexyt prompt creater which use the raw_context
 
 
 # Tips

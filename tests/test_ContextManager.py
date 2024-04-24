@@ -29,6 +29,7 @@ class TestContextManager(unittest.TestCase):
         ]
 
         with open(os.path.join(self.context_folder, 'file1.json'), 'w') as file1:
+            print(self.context_folder)
             json.dump([{'role': 'user'},{'content': 'Hello'}], file1)
         
         with open(os.path.join(self.context_folder, 'file2.json'), 'w') as file2:

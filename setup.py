@@ -33,8 +33,9 @@ setup(
     packages=['AutoChatBot'],
     package_dir={'AutoChatBot': 'AutoChatBot/'},
     package_data={
-        "": ["context_prompts/*"]
+        "AutoChatBot": ["context_prompts/*"]
     },
+    include_package_data = True,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI approved :: MIT License',
