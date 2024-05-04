@@ -127,5 +127,65 @@ class TestDirectoryToJsonConverter(unittest.TestCase):
         self.tmp_input_dir.cleanup()
         self.tmp_output_dir.cleanup()
 
+class TestDirectoryToJsonConverterSingle(unittest.TestCase):
+    def setUp(self):
+        # Create a temporary input directory
+        self.input_directory = tempfile.TemporaryDirectory()
+
+        # Create subdirectories with role and content files
+        subdir1 = os.path.join(self.input_directory.name, 'subdir1')
+        os.makedirs(subdir1)
+        with open(os.path.join(subdir1, 'role_1.txt'), 'w') as f:
+            f.write('role_1_string')
+        with open(os.path.join(subdir1, 'content_1.txt'), 'w') as f:
+            f.write('content_1_string')
+        with open(os.path.join(subdir1, 'role_2.txt'), 'w') as f:
+            f.write('role_2_string')
+        with open(os.path.join(subdir1, 'content_2.txt'), 'w') as f:
+            f.write('content_2_string')
+
+        subdir2 = os.path.join(self.input_directory.name, 'subdir2')
+        os.makedirs(subdir2)
+        with open(os.path.join(subdir2, 'role_1.txt'), 'w') as f:
+            f.write('role_1_string')
+        with open(os.path.join(subdir2, 'content_1.txt'), 'w') as f:
+            f.write('content_1_string')
+
+    def tearDown(self):
+        # Clean up the temporary input directory
+        self.input_directory.cleanup()
+
+    def test_convert_directories_to_single_json(self):
+        # Create a temporary output directory
+        with tempfile.TemporaryDirectory() as output_directory:
+            # Create an instance of DirectoryToJsonConverter
+            converter = DirectoryToJsonConverter(self.input_directory.name, output_directory)
+
+            # Call the convert_directories_to_single_json method
+            converter.convert_directories_to_single_json()
+
+            # Check if the output JSON file was created
+            output_json_file = os.path.join(output_directory, 'all_directories.json')
+            self.assertTrue(os.path.exists(output_json_file), "The output JSON file was not created.")
+
+            # Read the output JSON file
+            with open(output_json_file, 'r') as f:
+                output_data = json.load(f)
+
+            # Check the content of the JSON file
+            expected_output_data = {
+                'subdir1': [
+                    {'role': 'role_1_string', 'content': 'content_1_string'},
+                    {'role': 'role_2_string', 'content': 'content_2_string'}
+                ],
+                'subdir2': [
+                    {'role': 'role_1_string', 'content': 'content_1_string'}
+                ]
+            }
+            self.assertEqual(output_data, expected_output_data, "The output JSON file does not have the expected content.")
+
+if __name__ == '__main__':
+    unittest.main()
+
 if __name__ == '__main__':
     unittest.main()

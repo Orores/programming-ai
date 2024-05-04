@@ -1,0 +1,54 @@
+Create a similiar class method to the following code, but instead of creating a seperate json for each subdirectory, the new method shall create a single json, the directory names shall be the new keys and for each directory key the value shall be a list of dictionaries just like before.
+
+    def convert_directories_to_json(self):
+        """
+        Converts subdirectories containing 'role_i.txt' and 'content_i.txt' files into JSON objects.
+
+        The method reads 'role_i.txt' and 'content_i.txt' files within each subdirectory of the input directory.
+        It constructs JSON objects representing the subdirectory's content, where each object contains 'role' and 'content' keys.
+        The JSON objects are then saved as separate files in the output directory.
+
+        Input:
+        - None (Operates on the instance's input_directory and output_directory attributes)
+
+        Output:
+        - Creates JSON files in the output directory, each representing a subdirectory's content.
+          Each JSON file contains an array of objects with 'role' and 'content' keys:
+          [
+              {"role": "role_1_string", "content": "content_1_string"},
+              {"role": "role_2_string", "content": "content_2_string"},
+              ...
+          ]
+
+        Raises:
+        - No explicit exceptions are raised within this method.
+        """
+
+        if not os.path.exists(self.output_directory):
+            os.makedirs(self.output_directory)
+
+        for subdir in os.listdir(self.input_directory):
+            subdir_path = os.path.join(self.input_directory, subdir)
+            
+            roles_contents = []
+            for i in range(1, 1000): # Assuming up to 1000 subdirectories
+                role_file_1 = os.path.join(subdir_path, f'role_{i}.txt')
+                content_file_1 = os.path.join(subdir_path, f'content_{i}.txt')
+                role_file_2 = os.path.join(subdir_path, f'role{i}.txt')
+                content_file_2 = os.path.join(subdir_path, f'content{i}.txt')
+                
+                if not (os.path.exists(role_file_1) and os.path.exists(content_file_1)) and not (os.path.exists(role_file_2) and os.path.exists(content_file_2)):
+                    break
+                
+                role_file = role_file_1 if os.path.exists(role_file_1) else role_file_2
+                content_file = content_file_1 if os.path.exists(content_file_1) else content_file_2
+                
+                with open(role_file, 'r') as role_fp, open(content_file, 'r') as content_fp:
+                    role_content = {"role": role_fp.read().strip(), "content": content_fp.read().strip()}
+                    roles_contents.append(role_content)
+            
+            output_json_file = os.path.join(self.output_directory, f'{subdir}.json')
+            with open(output_json_file, 'w') as json_fp:
+                json.dump(roles_contents, json_fp, indent=4)
+
+
