@@ -128,6 +128,40 @@ class TestDirectoryToJsonConverter(unittest.TestCase):
         self.tmp_output_dir.cleanup()
 
 class TestDirectoryToJsonConverterSingle(unittest.TestCase):
+    """
+    TestDirectoryToJsonConverterSingle: This class is a unit test case for the DirectoryToJsonConverter class.
+    
+    Steps:
+    1. Set up a temporary input directory with subdirectories and role/content files.
+    2. Clean up the temporary input directory after the test completes.
+    3. Test the convert_directories_to_single_json() method of DirectoryToJsonConverter.
+    4. Check if the output JSON file was created and has the expected content.
+    
+    Example usage:
+        unittest.main()
+        
+    Directory structure example:
+        - input_directory
+            - subdir1
+                - role_1.txt
+                - content_1.txt
+                - role_2.txt
+                - content_2.txt
+            - subdir2
+                - role_1.txt
+                - content_1.txt
+                
+    Expected JSON structure:
+        {
+            "subdir1": [
+                {"role": "role_1_string", "content": "content_1_string"},
+                {"role": "role_2_string", "content": "content_2_string"}
+            ],
+            "subdir2": [
+                {"role": "role_1_string", "content": "content_1_string"}
+            ]
+        }
+    """
     def setUp(self):
         # Create a temporary input directory
         self.input_directory = tempfile.TemporaryDirectory()
@@ -183,9 +217,6 @@ class TestDirectoryToJsonConverterSingle(unittest.TestCase):
                 ]
             }
             self.assertEqual(output_data, expected_output_data, "The output JSON file does not have the expected content.")
-
-if __name__ == '__main__':
-    unittest.main()
 
 if __name__ == '__main__':
     unittest.main()

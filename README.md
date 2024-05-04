@@ -2,6 +2,9 @@
 
 context prompts might be generated into the wrong directory since context prompts are nto in AutoChatBot folder, please deal with the ensuring problems mostly reated to the the contexyt prompt creater which use the raw_context
 
+Weird issue that doesnt tell you if you wrote the conteyt jason name corretcly
+
+when you miss writeing filepath or questionthe error doesnt tell you what you missed writing
 
 # Tips
 
