@@ -1,0 +1,2 @@
+Write a python function that converts subdirectories containing 'role_i.txt' and 'content_i.txt' files into a single JSON object.
+
