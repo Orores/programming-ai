@@ -218,5 +218,86 @@ class TestDirectoryToJsonConverterSingle(unittest.TestCase):
             }
             self.assertEqual(output_data, expected_output_data, "The output JSON file does not have the expected content.")
 
+
+class TestDirectoryToJsonConverterBasedOnMode(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Create a temporary directory
+        cls.temp_dir = tempfile.TemporaryDirectory()
+
+        # Create subdirectories with role and content files
+        cls.subdir1 = os.path.join(cls.temp_dir.name, 'subdir1')
+        os.makedirs(cls.subdir1)
+        with open(os.path.join(cls.subdir1, 'role_1.txt'), 'w') as f:
+            f.write("role_1_string")
+        with open(os.path.join(cls.subdir1, 'content_1.txt'), 'w') as f:
+            f.write("content_1_string")
+        with open(os.path.join(cls.subdir1, 'role_2.txt'), 'w') as f:
+            f.write("role_2_string")
+        with open(os.path.join(cls.subdir1, 'content_2.txt'), 'w') as f:
+            f.write("content_2_string")
+
+        cls.subdir2 = os.path.join(cls.temp_dir.name, 'subdir2')
+        os.makedirs(cls.subdir2)
+        with open(os.path.join(cls.subdir2, 'role_1.txt'), 'w') as f:
+            f.write("role_1_string")
+        with open(os.path.join(cls.subdir2, 'content_1.txt'), 'w') as f:
+            f.write("content_1_string")
+
+    @classmethod
+    def tearDownClass(cls):
+        # Clean up the temporary directory and its files
+        cls.temp_dir.cleanup()
+
+    def test_convert_directories_to_json(self):
+        output_directory = os.path.join(self.temp_dir.name, 'output')
+        converter = DirectoryToJsonConverter(self.temp_dir.name, output_directory, 'multiple')
+
+        converter.convert_directories_to_json_based_on_mode()
+
+        # Check if the JSON files were created correctly
+        self.assertTrue(os.path.exists(os.path.join(output_directory, 'subdir1.json')))
+        self.assertTrue(os.path.exists(os.path.join(output_directory, 'subdir2.json')))
+
+        # Check the content of the JSON files
+        with open(os.path.join(output_directory, 'subdir1.json'), 'r') as f:
+            json_data = json.load(f)
+            expected_data = [
+                {"role": "role_1_string", "content": "content_1_string"},
+                {"role": "role_2_string", "content": "content_2_string"}
+            ]
+            self.assertEqual(json_data, expected_data)
+
+        with open(os.path.join(output_directory, 'subdir2.json'), 'r') as f:
+            json_data = json.load(f)
+            expected_data = [
+                {"role": "role_1_string", "content": "content_1_string"}
+            ]
+            self.assertEqual(json_data, expected_data)
+
+    def test_convert_directories_to_single_json(self):
+        output_directory = os.path.join(self.temp_dir.name, 'output')
+        converter = DirectoryToJsonConverter(self.temp_dir.name, output_directory, 'single')
+        converter.convert_directories_to_json_based_on_mode()
+
+        # Check if the JSON file was created correctly
+        self.assertTrue(os.path.exists(os.path.join(output_directory, 'all_directories.json')))
+
+        # Check the content of the JSON file
+        with open(os.path.join(output_directory, 'all_directories.json'), 'r') as f:
+            json_data = json.load(f)
+            expected_data = {
+                "subdir1": [
+                    {"role": "role_1_string", "content": "content_1_string"},
+                    {"role": "role_2_string", "content": "content_2_string"}
+                ],
+                "subdir2": [
+                    {"role": "role_1_string", "content": "content_1_string"}
+                ],
+                "output" : [] #Because the output directory is in the same folder as the subdirs, hence the test is bad.
+            }
+            self.assertEqual(json_data, expected_data)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,74 @@
+added method:
+    def convert_directories_to_json_based_on_mode(self):
+        """
+        Converts subdirectories containing 'role_i.txt' and 'content_i.txt' files into JSON objects based on the json_mode parameter.
+
+        The method reads 'role_i.txt' and 'content_i.txt' files within each subdirectory of the input directory.
+        It constructs JSON objects representing the subdirectory's content, where each object contains 'role' and 'content' keys.
+        The JSON objects are then saved as separate files in the output directory if json_mode is 'multiple'.
+        If json_mode is 'single', a single JSON file representing all subdirectories will be created.
+
+        Input:
+        - json_mode: A string indicating the mode to determine the JSON conversion method ('single' or 'multiple')
+
+        Output:
+        - Creates JSON files in the output directory if json_mode is 'multiple', each representing a subdirectory's content.
+          Each JSON file contains an array of objects with 'role' and 'content' keys:
+          [
+              {"role": "role_1_string", "content": "content_1_string"},
+              {"role": "role_2_string", "content": "content_2_string"},
+              ...
+          ]
+        - Creates a single JSON file in the output directory if json_mode is 'single', representing all subdirectories.
+          The JSON file contains directory names as keys, and each value is an array of objects with 'role' and 'content' keys:
+          {
+              "subdirectory1": [
+                  {"role": "role_1_string", "content": "content_1_string"},
+                  {"role": "role_2_string", "content": "content_2_string"},
+                  ...
+              ],
+              "subdirectory2": [
+                  ...
+              ],
+              ...
+          }
+
+        Raises:
+        - No explicit exceptions are raised within this method.
+        """
+
+        if json_mode == 'multiple':
+            self.convert_directories_to_json()
+        elif json_mode == 'single':
+            self.convert_directories_to_single_json()
+        else:
+            print("Invalid json_mode. Please use 'single' or 'multiple'.")
+
+old init method:
+    def __init__(self, input_directory, output_directory):
+        self.input_directory = input_directory
+        self.output_directory = output_directory
+
+new init method:
+    def __init__(self, input_directory, output_directory, json_mode):
+        self.input_directory = input_directory
+        self.output_directory = output_directory
+        self.json_mode = json_mode
+
+old example usage:
+# Example usage
+if __name__ == '__main__':
+    input_directory = 'raw_context'
+    output_directory = 'context_prompts'
+
+    converter = DirectoryToJsonConverter(input_directory, output_directory)
+ 
+new example usage:
+# Example usage
+if __name__ == '__main__':
+    input_directory = 'raw_context'
+    output_directory = 'context_prompts'
+    json_mode = 'single'
+
+    converter = DirectoryToJsonConverter(input_directory, output_directory, json_mode)
+ 
