@@ -199,7 +199,7 @@ class TestDirectoryToJsonConverterSingle(unittest.TestCase):
             converter.convert_directories_to_single_json()
 
             # Check if the output JSON file was created
-            output_json_file = os.path.join(output_directory, 'all_directories.json')
+            output_json_file = os.path.join(output_directory, 'context.json')
             self.assertTrue(os.path.exists(output_json_file), "The output JSON file was not created.")
 
             # Read the output JSON file
@@ -208,13 +208,17 @@ class TestDirectoryToJsonConverterSingle(unittest.TestCase):
 
             # Check the content of the JSON file
             expected_output_data = {
-                'subdir1': [
-                    {'role': 'role_1_string', 'content': 'content_1_string'},
-                    {'role': 'role_2_string', 'content': 'content_2_string'}
-                ],
-                'subdir2': [
-                    {'role': 'role_1_string', 'content': 'content_1_string'}
-                ]
+                'subdir1': {
+                    'context': [
+                        {'role': 'role_1_string', 'content': 'content_1_string'},
+                        {'role': 'role_2_string', 'content': 'content_2_string'}
+                    ]
+                },
+                'subdir2': {
+                    'context': [
+                        {'role': 'role_1_string', 'content': 'content_1_string'}
+                    ]
+                }
             }
             self.assertEqual(output_data, expected_output_data, "The output JSON file does not have the expected content.")
 
@@ -281,20 +285,26 @@ class TestDirectoryToJsonConverterBasedOnMode(unittest.TestCase):
         converter.convert_directories_to_json_based_on_mode()
 
         # Check if the JSON file was created correctly
-        self.assertTrue(os.path.exists(os.path.join(output_directory, 'all_directories.json')))
+        self.assertTrue(os.path.exists(os.path.join(output_directory, 'context.json')))
 
         # Check the content of the JSON file
-        with open(os.path.join(output_directory, 'all_directories.json'), 'r') as f:
+        with open(os.path.join(output_directory, 'context.json'), 'r') as f:
             json_data = json.load(f)
             expected_data = {
-                "subdir1": [
-                    {"role": "role_1_string", "content": "content_1_string"},
-                    {"role": "role_2_string", "content": "content_2_string"}
-                ],
-                "subdir2": [
-                    {"role": "role_1_string", "content": "content_1_string"}
-                ],
-                "output" : [] #Because the output directory is in the same folder as the subdirs, hence the test is bad.
+                "subdir1": {
+                    "context": [
+                        {"role": "role_1_string", "content": "content_1_string"},
+                        {"role": "role_2_string", "content": "content_2_string"}
+                    ]
+                },
+                "subdir2": {
+                    "context": [
+                        {"role": "role_1_string", "content": "content_1_string"}
+                    ]
+                },
+                "output" : {
+                    "context" : [] #Because the output directory is in the same folder as the subdirs, hence the test is bad.
+                }
             }
             self.assertEqual(json_data, expected_data)
 

@@ -1,0 +1,14 @@
+[
+    {
+        "role": "system",
+        "content": "you are a computer programm that updates code and nothing else."
+    },
+    {
+        "role": "user",
+        "content": "update the following code so it additionaly creates a wheel package for a python project.\n\n#!/bin/bash\n\n# Define directories for the generated files\nDEB_DIST_DIR=./deb_dist\nDIST_DIR=./dist\n\n# Activate virtual environment\necho \"Activating virtual environment...\"\nsource venv/bin/activate\n\n# Run unit tests\necho \"Running unit tests...\"\nif ! python -m unittest discover tests; then\n    echo \"Unit tests failed. Build process stopped.\"\n    # Deactivate virtual environment before exiting due to failure\n    deactivate\n    exit 1\nfi\necho \"All unit tests passed.\"\n\n# Deactivate virtual environment after running tests\necho \"Deactivating virtual environment...\"\ndeactivate\n\n# Clean up the previous build directories, including the .egg-info directory\necho \"Cleaning up previous build directories...\"\nrm -rf \"${DEB_DIST_DIR}\" ./*.egg-info\n\n# Build the Debian package\necho \"Building Debian package...\"\npython3 setup.py --command-packages=stdeb.command bdist_deb\n\n# Remove .tar.gz files from the root directory\nrm -f ./*.tar.gz\necho \".tar.gz files in the root directory have been removed\""
+    },
+    {
+        "role": "assistant",
+        "content": ""
+    }
+]

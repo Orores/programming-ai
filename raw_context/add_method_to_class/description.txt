@@ -1,0 +1,6 @@
+Takes:
+Python class with code
+Description of what type of method to add
+
+Returns:
+Code for the new class method
