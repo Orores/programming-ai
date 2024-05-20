@@ -32,7 +32,6 @@ class ChatBot:
         self.conversation_json_reader = ConversationJsonReader()
         self.string_file_reader = StringFileReader()
         self.openai_completion_saver = ChatCompletionSaver()
-        self.context_manager = ContextManager(context_folder = 'context_prompts')
 
     def decide_conversation(self, args):
         if args.file_path:
@@ -55,6 +54,7 @@ class ChatBot:
 
     def extend_context(self, args, conversation):
         if args.context is not None:
+            self.context_manager = ContextManager(context_folder = 'context_prompts')
             try:
                 context = self.context_manager.retrieve_context(args.context)
                 context.extend(conversation)
@@ -68,6 +68,7 @@ class ChatBot:
     def run(self):
         args = self.parser.parse_args()
         if args.show_available_context:
+            self.context_manager = ContextManager(context_folder = 'context_prompts')
             context_names = self.context_manager.get_all_context_names()
             print("Available Context Names:", context_names)
         else:
