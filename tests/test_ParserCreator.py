@@ -8,7 +8,7 @@ from ParserCreator import ParserCreator  # Assuming your script file is named Pa
 
 class TestParserCreator(unittest.TestCase):
     def test_parse_args(self):
-        test_args = ["--model", "gpt-3.5-turbo", "--max_tokens", "200", "--temperature", "0.7", "--frequency_penalty", "0.5",
+        test_args = ["--api", "openai", "--model", "gpt-3.5-turbo", "--max_tokens", "200", "--temperature", "0.7", "--frequency_penalty", "0.5",
                      "--presence_penalty", "0.3", "--top_p", "0.8", "--stop_sequences", "bye", "--question", "How are you?",
                      "--file_path", "/path/to/file", "--save_path", "result.txt", "--context", "/path/to/context", "--run_code", "--show_available_context"]
         with patch("sys.argv", ["ParserCreator.py"] + test_args):
@@ -16,6 +16,7 @@ class TestParserCreator(unittest.TestCase):
             args = creator.parser.parse_args()
 
             # Check if arguments are parsed correctly
+            self.assertEqual(args.api, "openai")
             self.assertEqual(args.model, "gpt-3.5-turbo")
             self.assertEqual(args.max_tokens, 200)
             self.assertEqual(args.temperature, 0.7)
