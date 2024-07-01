@@ -22,8 +22,8 @@ with open('README.md', 'r', encoding="utf-8") as file:
 
 setup(
     name='AutoChatBot',
-    version='1.0.9',
-    description='CLI chatbot that uses openai api',
+    version='1.0.10',
+    description='CLI chatbot that uses togetherai or openai api',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='orores',
