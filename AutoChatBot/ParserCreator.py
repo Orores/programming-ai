@@ -1,12 +1,9 @@
 import argparse
 
 class ParserCreator:
-    """
-    Command Line Interface for GPT-3 Chat Completion
-    """
-
     def __init__(self):
-        self.parser = argparse.ArgumentParser(description="Command Line Interface for GPT-3 Chat Completion")
+        self.parser = argparse.ArgumentParser(description="Command Line Interface for Chat Bot")
+        self.parser.add_argument("--api", type=str, choices=["openai", "togetherai"], required=True, help="Select the API to use: 'openai' or 'togetherai'")
         self.parser.add_argument("--model", type=str, default="gpt-3.5-turbo", help="Model name for the OpenAI completion request.")
         self.parser.add_argument("--max_tokens", type=int, default=100, help="Maximum number of tokens to generate in the completion.")
         self.parser.add_argument("--temperature", type=float, default=1, help="Controls randomness: lower values make completions more deterministic.")
@@ -15,11 +12,12 @@ class ParserCreator:
         self.parser.add_argument("--top_p", type=float, default=1, help="Nucleus sampling: top p of the probability mass is considered for sampling.")
         self.parser.add_argument("--stop_sequences", nargs='*', help="Sequences where the API should stop generating further tokens.")
         self.parser.add_argument("--question", type=str, help="The question or prompt to ask the model.")
-        self.parser.add_argument("--file_path", type=str, help="Path to the file.")
-        self.parser.add_argument("--save_path", type=str, default="response.tmp", help="Path to save the response.")
-        self.parser.add_argument("--context", type=str, help="File path for the context.")
-        self.parser.add_argument("--run_code", action='store_true', help="Run the response string as code in a console.")
-        self.parser.add_argument("--show_available_context", action='store_true', help="Show available context.")
+        self.parser.add_argument("--file_path", type=str, help="Path to the file containing conversation or question.")
+        self.parser.add_argument("--context", type=str, help="Context to use for the conversation.")
+        self.parser.add_argument("--show_available_context", action='store_true', help="Show available contexts.")
+        self.parser.add_argument("--show_models", action='store_true', help="Show available models for TogetherAI.")
+        self.parser.add_argument("--save_path", type=str, default='response.tmp', help="Path to save the chat completion response.")
+        self.parser.add_argument("--run_code", action='store_true', help="Run the generated code if any.")
 
 if __name__ == "__main__":
     creator = ParserCreator()  # Create an instance of ParserCreator
