@@ -4,7 +4,7 @@ from io import StringIO
 import sys
 from dotenv import load_dotenv
 import os
-from AutocChatBot.TogetherAIModelRetriever import TogetherAIModelRetriever
+from AutoChatBot.TogetherAIModelRetriever import TogetherAIModelRetriever
 
 class TestTogetherAIModelRetriever(unittest.TestCase):
     @classmethod

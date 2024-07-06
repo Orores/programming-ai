@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 import tempfile
-from AutoChatCot.GPTChatCompletionSaver import ChatCompletionSaver
+from AutoChatBot.GPTChatCompletionSaver import ChatCompletionSaver
 
 class TestChatCompletionSaver(unittest.TestCase):
     def setUp(self):
