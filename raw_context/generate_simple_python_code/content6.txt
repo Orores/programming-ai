@@ -1,0 +1,1 @@
+Write a python script that has a cli and lists all items passed via --directory in a directory

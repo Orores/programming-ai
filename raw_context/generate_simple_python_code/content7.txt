@@ -1,0 +1,23 @@
+import os
+import argparse
+
+def list_directory_contents(directory):
+    try:
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                print(entry.name)
+    except FileNotFoundError:
+        print(f"Error: Directory '{directory}' does not exist.")
+    except PermissionError:
+        print(f"Error: Permission denied to access '{directory}'.")
+
+def main():
+    parser = argparse.ArgumentParser(description="List all items in a directory.")
+    parser.add_argument('--directory', type=str, required=True, help='Path to the directory')
+    
+    args = parser.parse_args()
+
+    list_directory_contents(args.directory)
+
+if __name__ == "__main__":
+    main()

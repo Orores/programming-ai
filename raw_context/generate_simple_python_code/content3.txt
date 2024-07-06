@@ -1,0 +1,30 @@
+# Simple Arithmetic Operations
+def arithmetic_operations(a, b):
+    print(f"Addition of {a} and {b}: {a + b}")
+    print(f"Subtraction of {a} and {b}: {a - b}")
+    print(f"Multiplication of {a} and {b}: {a * b}")
+    print(f"Division of {a} and {b}: {a / b}")
+    print(f"Modulus of {a} and {b}: {a % b}")
+    print(f"Exponentiation of {a} to the power of {b}: {a ** b}")
+    print(f"Floor Division of {a} and {b}: {a // b}")
+
+# Simple String Operations
+def string_operations(s1, s2):
+    print(f"Concatenation of '{s1}' and '{s2}': {s1 + s2}")
+    print(f"Repetition of '{s1}' 3 times: {s1 * 3}")
+    print(f"Length of '{s1}': {len(s1)}")
+    print(f"Uppercase of '{s1}': {s1.upper()}")
+    print(f"Lowercase of '{s1}': {s1.lower()}")
+    print(f"Title case of '{s1}': {s1.title()}")
+    print(f"Does '{s1}' start with 'a': {s1.startswith('a')}")
+    print(f"Does '{s1}' end with 'z': {s1.endswith('z')}")
+    print(f"Replacing 'a' with 'o' in '{s1}': {s1.replace('a', 'o')}")
+    print(f"Splitting '{s1}' by ' ': {s1.split(' ')}")
+
+# Example usage
+if __name__ == "__main__":
+    # Arithmetic operations with example values
+    arithmetic_operations(10, 3)
+
+    # String operations with example values
+    string_operations("apple", "banana")

@@ -1,0 +1,57 @@
+import os
+import sys
+import tty
+import termios
+
+class FancyCLI:
+    @staticmethod
+    def option_one():
+        print("You selected Option 1")
+
+    @staticmethod
+    def option_two():
+        print("You selected Option 2")
+
+    @staticmethod
+    def option_three():
+        print("You selected Option 3")
+
+    @staticmethod
+    def read_key():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+            if ch == '\x1b':
+                ch += sys.stdin.read(2)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+    @staticmethod
+    def cli_menu():
+        options = ["Option 1", "Option 2", "Option 3"]
+        functions = [FancyCLI.option_one, FancyCLI.option_two, FancyCLI.option_three]
+        selected = 0
+
+        while True:
+            os.system('clear')
+            for i, option in enumerate(options):
+                if i == selected:
+                    print(f"> {option}")
+                else:
+                    print(f"  {option}")
+
+            key = FancyCLI.read_key()
+            if key == '\x1b[A':  # Up arrow
+                selected = (selected - 1) % len(options)
+            elif key == '\x1b[B':  # Down arrow
+                selected = (selected + 1) % len(options)
+            elif key == '\n':  # Enter key
+                os.system('clear')
+                functions[selected]()
+                break
+
+if __name__ == "__main__":
+    FancyCLI.cli_menu()

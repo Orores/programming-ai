@@ -88,6 +88,8 @@ class DirectoryToJsonConverter:
             output_json_file = os.path.join(self.output_directory, f'{subdir}.json')
             with open(output_json_file, 'w') as json_fp:
                 json.dump(roles_contents, json_fp, indent=4)
+            
+            print(f"Converted '{subdir}' to JSON and saved to '{output_json_file}'")
 
     def convert_directories_to_single_json(self):
         """
@@ -152,9 +154,13 @@ class DirectoryToJsonConverter:
             
             directory_data[subdir] = subdir_obj
 
+            print(f"Converted '{subdir}' to JSON and included in the single JSON file")
+
         output_json_file = os.path.join(self.output_directory, 'context.json')
         with open(output_json_file, 'w') as json_fp:
             json.dump(directory_data, json_fp, indent=4)
+        
+        print(f"All subdirectories have been converted to a single JSON file saved to '{output_json_file}'")
 
     def convert_directories_to_json_based_on_mode(self):
         """

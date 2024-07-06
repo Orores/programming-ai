@@ -11,8 +11,8 @@ from .GPTChatCompletionSaver import ChatCompletionSaver
 from .ContextManager import ContextManager
 from .PyFileExecutor import PyFileExecutor
 from .CodeErrorFormatter import CodeErrorFormatter
-from .TogetherAIChatCompletion import TogetherAIChatCompletion  # Import the new class
-from .TogetherAIModelRetriever import TogetherAIModelRetriever  # Import the new class
+from .TogetherAIChatCompletion import TogetherAIChatCompletion
+from .TogetherAIModelRetriever import TogetherAIModelRetriever
 
 class ChatBot:
     """
@@ -55,7 +55,7 @@ class ChatBot:
 
     def extend_context(self, args, conversation):
         if args.context is not None:
-            self.context_manager = ContextManager(context_folder = 'context_prompts')
+            self.context_manager = ContextManager(context_folder = 'context_prompts/context.json', is_single_file = True)
             try:
                 context = self.context_manager.retrieve_context(args.context)
                 context.extend(conversation)
@@ -67,7 +67,8 @@ class ChatBot:
     def run(self):
         args = self.parser.parse_args()
         if args.show_available_context:
-            self.context_manager = ContextManager(context_folder = 'context_prompts')
+            # Alternatively you can jsut pass the directory and set "is_single_file" to false
+            self.context_manager = ContextManager(context_folder = 'context_prompts/context.json', is_single_file = True)
             context_names = self.context_manager.get_all_context_names()
             print("Available Context Names:", context_names)
         elif args.show_models:

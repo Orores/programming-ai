@@ -1,0 +1,60 @@
+def check_number(num):
+    if num > 0:
+        print(f"{num} is positive.")
+    elif num < 0:
+        print(f"{num} is negative.")
+    else:
+        print(f"{num} is zero.")
+
+def sum_of_numbers(numbers):
+    total = 0
+    for number in numbers:
+        total += number
+    return total
+
+def find_first_even(numbers):
+    for number in numbers:
+        if number % 2 == 0:
+            return number
+    return None
+
+def use_while_loop(limit):
+    counter = 0
+    while counter < limit:
+        print(f"Counter: {counter}")
+        counter += 1
+
+def divide_numbers(a, b):
+    try:
+        result = a / b
+    except ZeroDivisionError:
+        print("Error: Division by zero is not allowed.")
+        return None
+    except TypeError:
+        print("Error: Both inputs must be numbers.")
+        return None
+    else:
+        return result
+    finally:
+        print("Execution of divide_numbers is complete.")
+
+if __name__ == "__main__":
+    # Test the check_number function
+    check_number(10)
+    check_number(-5)
+    check_number(0)
+
+    # Test the sum_of_numbers function
+    numbers = [1, 2, 3, 4, 5]
+    print(f"Sum of numbers: {sum_of_numbers(numbers)}")
+
+    # Test the find_first_even function
+    print(f"First even number: {find_first_even(numbers)}")
+
+    # Test the use_while_loop function
+    use_while_loop(5)
+
+    # Test the divide_numbers function
+    print(f"Division result: {divide_numbers(10, 2)}")
+    print(f"Division result: {divide_numbers(10, 0)}")
+    print(f"Division result: {divide_numbers(10, 'a')}")

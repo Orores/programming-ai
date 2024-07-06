@@ -1,0 +1,83 @@
+Remove all but the python code. Return only the python code:
+
+Creating a CLI that allows navigation using arrow keys without third-party libraries is quite challenging because it requires handling terminal input directly, which can be complex and platform-dependent. However, I can create a basic implementation using standard Python libraries.
+
+Here's an example of a class with static methods and a simple CLI that allows navigation using arrow keys:
+
+```python
+import os
+import sys
+import tty
+import termios
+
+class FancyCLI:
+    @staticmethod
+    def option_one():
+        print("You selected Option 1")
+
+    @staticmethod
+    def option_two():
+        print("You selected Option 2")
+
+    @staticmethod
+    def option_three():
+        print("You selected Option 3")
+
+    @staticmethod
+    def read_key():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+            if ch == '\x1b':
+                ch += sys.stdin.read(2)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+    @staticmethod
+    def cli_menu():
+        options = ["Option 1", "Option 2", "Option 3"]
+        functions = [FancyCLI.option_one, FancyCLI.option_two, FancyCLI.option_three]
+        selected = 0
+
+        while True:
+            os.system('clear')
+            for i, option in enumerate(options):
+                if i == selected:
+                    print(f"> {option}")
+                else:
+                    print(f"  {option}")
+
+            key = FancyCLI.read_key()
+            if key == '\x1b[A':  # Up arrow
+                selected = (selected - 1) % len(options)
+            elif key == '\x1b[B':  # Down arrow
+                selected = (selected + 1) % len(options)
+            elif key == '\n':  # Enter key
+                os.system('clear')
+                functions[selected]()
+                break
+
+if __name__ == "__main__":
+    FancyCLI.cli_menu()
+```
+
+### Explanation:
+1. **FancyCLI Class**:
+    - Contains three static methods: `option_one`, `option_two`, and `option_three`.
+    - `read_key` method reads a single key from the keyboard, including arrow keys.
+    - `cli_menu` method displays a menu, handles navigation using arrow keys, and calls the selected option's method when Enter is pressed.
+
+2. **Key Reading**:
+    - `read_key` uses `termios` and `tty` to set the terminal to raw mode for reading single key presses.
+
+3. **Menu Display**:
+    - `cli_menu` displays the options and highlights the selected option.
+    - Arrow keys change the selected option, and the Enter key triggers the selected option.
+
+### Usage:
+Run the script and use the arrow keys to navigate through the options. Press Enter to select an option.
+
+Please note that this script is for UNIX-like systems (Linux, macOS). Handling terminal input/output might differ on Windows, and additional work would be required to make it cross-platform.
