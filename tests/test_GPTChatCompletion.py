@@ -2,11 +2,7 @@ import unittest
 from dotenv import load_dotenv
 import os
 import sys
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-
-from GPTChatCompletion import GPT3ChatCompletion
+from AutoChatBot.GPTChatCompletion import GPT3ChatCompletion
 
 class TestGPT3ChatCompletion(unittest.TestCase):
     @classmethod

@@ -2,9 +2,8 @@ import unittest
 from unittest.mock import patch, MagicMock, Mock, call
 
 import sys
-sys.path.append('AutoChatBot')
 
-from CodeErrorFormatter import CodeErrorFormatter
+from AutoChatBot.CodeErrorFormatter import CodeErrorFormatter
 
 class TestCodeErrorFormatter(unittest.TestCase):
 

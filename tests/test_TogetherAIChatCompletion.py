@@ -2,11 +2,7 @@ import unittest
 from dotenv import load_dotenv
 import os
 import sys
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-
-from TogetherAIChatCompletion import TogetherAIChatCompletion
+from AutoChatBot.TogetherAIChatCompletion import TogetherAIChatCompletion
 
 class TestTogetherAIChatCompletion(unittest.TestCase):
     @classmethod

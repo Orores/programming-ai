@@ -4,11 +4,7 @@ from io import StringIO
 import sys
 from dotenv import load_dotenv
 import os
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-
-from TogetherAIModelRetriever import TogetherAIModelRetriever
+from AutocChatBot.TogetherAIModelRetriever import TogetherAIModelRetriever
 
 class TestTogetherAIModelRetriever(unittest.TestCase):
     @classmethod

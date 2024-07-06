@@ -1,9 +1,6 @@
 import unittest
-
 import sys
-sys.path.append('AutoChatBot')
-
-from RemoveLanguageDelimiters import CodeExtractor
+from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
 
 class TestCodeExtractor(unittest.TestCase):
 

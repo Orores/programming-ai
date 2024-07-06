@@ -1,10 +1,7 @@
 import unittest
 import sys
 from unittest.mock import patch
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-from ParserCreator import ParserCreator  # Assuming your script file is named ParserCreator.py
+from AutoChatBot.ParserCreator import ParserCreator  # Assuming your script file is named ParserCreator.py
 
 class TestParserCreator(unittest.TestCase):
     def test_parse_args(self):

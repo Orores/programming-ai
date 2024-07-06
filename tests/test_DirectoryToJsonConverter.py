@@ -3,11 +3,7 @@ import tempfile
 import os
 import sys
 import json
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-
-from DirectoryToJsonConverter import DirectoryToJsonConverter
+from AutoChatBot.DirectoryToJsonConverter import DirectoryToJsonConverter
 
 class TestDirectoryToJsonConverter(unittest.TestCase):
     """Test class for the DirectoryToJsonConverter.

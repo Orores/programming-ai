@@ -1,11 +1,9 @@
 import os
 # Add the src directory to the Python path for imports
 import sys
-sys.path.append('AutoChatBot')
-
 import unittest
 import tempfile
-from GPTChatCompletionSaver import ChatCompletionSaver
+from AutoChatCot.GPTChatCompletionSaver import ChatCompletionSaver
 
 class TestChatCompletionSaver(unittest.TestCase):
     def setUp(self):

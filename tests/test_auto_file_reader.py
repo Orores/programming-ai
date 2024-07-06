@@ -4,11 +4,7 @@ import sys
 import tempfile
 import json
 from unittest.mock import patch
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-
-from auto_file_reader import FileReader
+from AutoChatBot.auto_file_reader import FileReader
 
 class TestFileReader(unittest.TestCase):
     @classmethod

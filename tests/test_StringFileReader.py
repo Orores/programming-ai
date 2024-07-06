@@ -3,11 +3,7 @@ import os
 import sys
 import tempfile
 from unittest.mock import patch
-
-# Add the src directory to the Python path for imports
-sys.path.append('AutoChatBot')
-
-from StringFileReader import StringFileReader
+from AutoChatBot.StringFileReader import StringFileReader
 
 class TestStringFileReader(unittest.TestCase):
     @classmethod
