@@ -16,8 +16,8 @@ class CodeErrorFormatter:
     error:
     NameError: name 'print' is not defined
     """
-
-    def format_code_error(self, code, error_output):
+    @staticmethod
+    def format_code_error(code, error_output):
         """
         Formats code and error output into a string.
 
@@ -28,7 +28,7 @@ class CodeErrorFormatter:
         Returns:
         - str: The formatted string.
         """
-        formatted_string = f"code:\n{code}\n\nerror:\n{error_output}"
+        aformatted_string = f"code:\n{code}\n\nerror:\n{error_output}"
         return formatted_string
 
 

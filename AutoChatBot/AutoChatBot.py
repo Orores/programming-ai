@@ -64,10 +64,42 @@ class ChatBot:
                 exit()
         return conversation
 
+    def make_api_request(self, args, conversation):
+        if args.api == "openai":
+            response = self.gpt3_chat_completion.make_api_request(
+                conversation=conversation,
+                model=args.model,
+                temperature=args.temperature,
+                max_tokens=args.max_tokens,
+                stop_sequences=args.stop_sequences,
+                frequency_penalty=args.frequency_penalty,
+                presence_penalty=args.presence_penalty,
+                top_p=args.top_p,
+            )
+        elif args.api == "togetherai":
+            response = self.togetherai_chat_completion.make_api_request(
+                conversation=conversation
+            )
+        else:
+            raise ValueError("Invalid API selection. Choose 'openai' or 'togetherai'.")
+        return response
+
+    def execute_code(self, args, response):
+        file_path = 'sandbox_scripts/myscript.py'
+        if args.run_code:
+            py_file_executor = PyFileExecutor(
+                file_path=file_path,
+                code=response,
+            )
+            executed_code, error_output = py_file_executor.execute()
+            return executed_code, error_output
+        else:
+            return None, None
+
     def run(self):
         args = self.parser.parse_args()
         if args.show_available_context:
-            # Alternatively you can jsut pass the directory and set "is_single_file" to false
+            # Alternatively you can just pass the directory and set "is_single_file" to false
             self.context_manager = ContextManager(context_folder = 'context_prompts/context.json', is_single_file = True)
             context_names = self.context_manager.get_all_context_names()
             print("Available Context Names:", context_names)
@@ -81,43 +113,26 @@ class ChatBot:
             conversation = self.str_to_dict_list(conversation)
             conversation = self.extend_context(args, conversation)
             
-            # Decide which API to use
-            if args.api == "openai":
-                response = self.gpt3_chat_completion.make_api_request(
-                    conversation=conversation,
-                    model=args.model,
-                    temperature=args.temperature,
-                    max_tokens=args.max_tokens,
-                    stop_sequences=args.stop_sequences,
-                    frequency_penalty=args.frequency_penalty,
-                    presence_penalty=args.presence_penalty,
-                    top_p=args.top_p,
-                )
-            elif args.api == "togetherai":
-                response = self.togetherai_chat_completion.make_api_request(
-                    conversation=conversation
-                )
-            else:
-                raise ValueError("Invalid API selection. Choose 'openai' or 'togetherai'.")
-
-            print("Chat Completion Response:", response)
-            self.openai_completion_saver.save_to_file(response, args.save_path)
-            response = response['choices'][0]['message']['content']
-            file_path = 'sandbox_scripts/myscript.py'
-            if args.run_code:
-                py_file_executor = PyFileExecutor(
-                    file_path=file_path,
-                    code=response,
-                )
-                error_output = py_file_executor.execute()
-                if error_output:
-                    print("Error Output:", error_output)
-                    conversation = CodeErrorFormatter.format_code_error(
-                        code=code,
-                        error_output=error_output,
-                    )
+            for attempt in range(3):
+                response = self.make_api_request(args, conversation)
+                print("Chat Completion Response:", response)
+                self.openai_completion_saver.save_to_file(response, args.save_path)
+                response_content = response['choices'][0]['message']['content']
+                if args.run_code:
+                    executed_code, error_output = self.execute_code(args, response_content)
+                    if error_output:
+                        print("Error Output:", error_output)
+                        conversation = CodeErrorFormatter.format_code_error(
+                            code=executed_code,
+                            error_output=error_output,
+                        )
+                        conversation = self.str_to_dict_list(conversation)
+                        conversation = self.extend_context(args, conversation)
+                    else:
+                        print("Execution completed successfully.")
+                        break
                 else:
-                    print("Execution completed successfully.")
+                    break
 
 def main():
     bot = ChatBot()
