@@ -73,12 +73,8 @@ class ChatBot:
         elif args.show_models:
             models = self.togetherai_model_retriever.get_available_models()
             print("Available Models for TogetherAI:\n")
-            for model in models:
-                    display_name = model.get('display_name', 'N/A')
-                    model_type = model.get('type', 'N/A')
-                    pricing = model.get('pricing', 'N/A')
-                    print(f"Name: {display_name}, Type: {model_type}, Pricing: {pricing}")
-         
+            self.togetherai_model_retriever.print_models_table(models)
+
         else:
             conversation = self.decide_conversation(args)
             conversation = self.str_to_dict_list(conversation)

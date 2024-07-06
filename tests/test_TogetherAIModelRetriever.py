@@ -1,7 +1,9 @@
 import unittest
+from unittest.mock import patch
+from io import StringIO
+import sys
 from dotenv import load_dotenv
 import os
-import sys
 
 # Add the src directory to the Python path for imports
 sys.path.append('AutoChatBot')
@@ -39,6 +41,49 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
             self.assertIn('display_name', model, "Model dictionary does not contain 'display_name'")
             self.assertIn('type', model, "Model dictionary does not contain 'type'")
             self.assertIn('pricing', model, "Model dictionary does not contain 'pricing'")
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_print_models_table(self, mock_stdout):
+        # Mock model data
+        mock_models = [
+            {
+                "display_name": "Mock Model 1",
+                "type": "language",
+                "pricing": {
+                    "hourly": 0,
+                    "input": 0.1,
+                    "output": 0.1,
+                    "base": 0
+                }
+            },
+            {
+                "display_name": "Mock Model 2",
+                "type": "chat",
+                "pricing": {
+                    "hourly": 0,
+                    "input": 0.2,
+                    "output": 0.2,
+                    "base": 0
+                }
+            }
+        ]
+
+        # Call the method to print models
+        self.model_retriever.print_models_table(mock_models)
+
+        # Capture the output
+        output = mock_stdout.getvalue()
+
+        # Define the expected output
+        expected_output = (
+            "Name                                     Type       Pricing (Hourly) Pricing (Input) Pricing (Output) Pricing (Base)\n"
+            "------------------------------------------------------------------------------------------------------------------------\n"
+            "Mock Model 1                             language   0        0.1      0.1      0       \n"
+            "Mock Model 2                             chat       0        0.2      0.2      0       \n"
+        )
+
+        # Check if the output matches the expected output
+        self.assertEqual(output, expected_output, "The table output is not as expected")
 
 if __name__ == '__main__':
     unittest.main()
