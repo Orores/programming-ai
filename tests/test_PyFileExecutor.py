@@ -23,6 +23,7 @@ The tests verify:
 import unittest
 import os
 import tempfile
+import sys
 from unittest.mock import patch, Mock
 from AutoChatBot.PyFileExecutor import PyFileExecutor
 
@@ -31,8 +32,10 @@ class TestPyFileExecutor(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.file_path = os.path.join(self.temp_dir.name, 'script.py')
+        sys.path.append(self.temp_dir.name)
 
     def tearDown(self):
+        sys.path.remove(self.temp_dir.name)
         self.temp_dir.cleanup()
 
     @patch('subprocess.run')
@@ -41,14 +44,17 @@ class TestPyFileExecutor(unittest.TestCase):
         mock_subprocess_run.return_value = Mock(returncode=0, stderr=b'')
         
         executor = PyFileExecutor(self.file_path, self.code)
-        executed_code, error_output = executor.execute()
+        save_error = executor.save_code_to_file(executor.file_path, executor.code)
+        
+        self.assertIsNone(save_error)
 
+        error_output = executor.execute_code('script')
+        
         self.assertEqual(mock_subprocess_run.call_count, 1)
-        expected_command = ['python', self.file_path]
+        expected_command = ['python', '-m', 'script']
         mock_subprocess_run.assert_called_with(expected_command, capture_output=True)
 
         self.assertIsNone(error_output)
-        self.assertEqual(executed_code, self.code)
 
     @patch('subprocess.run')
     def test_execute_with_error(self, mock_subprocess_run):
@@ -56,14 +62,17 @@ class TestPyFileExecutor(unittest.TestCase):
         mock_subprocess_run.return_value = Mock(returncode=1, stderr=b'Error: Division by zero')
         
         executor = PyFileExecutor(self.file_path, self.code)
-        executed_code, error_output = executor.execute()
+        save_error = executor.save_code_to_file(executor.file_path, executor.code)
+        
+        self.assertIsNone(save_error)
 
+        error_output = executor.execute_code('script')
+        
         self.assertEqual(mock_subprocess_run.call_count, 1)
-        expected_command = ['python', self.file_path]
+        expected_command = ['python', '-m', 'script']
         mock_subprocess_run.assert_called_with(expected_command, capture_output=True)
 
         self.assertEqual(error_output, 'Error: Division by zero')
-        self.assertEqual(executed_code, self.code)
 
     @patch('os.makedirs')
     @patch('subprocess.run')
@@ -73,17 +82,19 @@ class TestPyFileExecutor(unittest.TestCase):
 
         directory = os.path.dirname(self.file_path)
         executor = PyFileExecutor(self.file_path, self.code)
-        executed_code, error_output = executor.execute()
+        save_error = executor.save_code_to_file(executor.file_path, executor.code)
         
+        self.assertIsNone(save_error)
         self.assertEqual(mock_makedirs.call_count, 1)
         mock_makedirs.assert_called_with(directory, exist_ok=True)
 
+        error_output = executor.execute_code('script')
+        
         self.assertEqual(mock_subprocess_run.call_count, 1)
-        expected_command = ['python', self.file_path]
+        expected_command = ['python', '-m', 'script']
         mock_subprocess_run.assert_called_with(expected_command, capture_output=True)
 
         self.assertIsNone(error_output)
-        self.assertEqual(executed_code, self.code)
 
 if __name__ == '__main__':
     unittest.main()

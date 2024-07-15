@@ -18,6 +18,9 @@ class ParserCreator:
         self.parser.add_argument("--show_models", action='store_true', help="Show available models for TogetherAI.")
         self.parser.add_argument("--save_path", type=str, default='response.tmp', help="Path to save the chat completion response.")
         self.parser.add_argument("--run_code", action='store_true', help="Run the generated code if any.")
+        self.parser.add_argument("--run_code_with_unittest", action='store_true', help="Generate a unittest, then a code, then run the code against the unittest.")
+
+
 
 if __name__ == "__main__":
     creator = ParserCreator()  # Create an instance of ParserCreator

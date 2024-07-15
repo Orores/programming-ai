@@ -28,7 +28,7 @@ class CodeErrorFormatter:
         Returns:
         - str: The formatted string.
         """
-        aformatted_string = f"code:\n{code}\n\nerror:\n{error_output}"
+        formatted_string = f"code:\n{code}\n\nerror:\n{error_output}"
         return formatted_string
 
 

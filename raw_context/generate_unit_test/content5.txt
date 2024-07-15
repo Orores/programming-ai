@@ -1,0 +1,37 @@
+import unittest
+from sandbox_scripts.my_function import split_and_take
+
+class TestSplitAndTake(unittest.TestCase):
+    
+    def test_basic_split_and_take(self):
+        self.assertEqual(split_and_take("hello world this is a test", "world", 2), ["this", "is"])
+    
+    def test_no_split_string_found(self):
+        self.assertEqual(split_and_take("hello world this is a test", "notfound", 2), [])
+        
+    def test_split_string_at_start(self):
+        self.assertEqual(split_and_take("world this is a test", "world", 3), ["this", "is", "a"])
+        
+    def test_split_string_at_end(self):
+        self.assertEqual(split_and_take("hello world", "world", 2), [])
+        
+    def test_n_greater_than_elements(self):
+        self.assertEqual(split_and_take("hello world this is a test", "world", 10), ["this", "is", "a", "test"])
+    
+    def test_n_zero(self):
+        self.assertEqual(split_and_take("hello world this is a test", "world", 0), [])
+        
+    def test_empty_string(self):
+        self.assertEqual(split_and_take("", "world", 2), [])
+    
+    def test_empty_split_string(self):
+        self.assertEqual(split_and_take("hello world this is a test", "", 2), ["hello", "world"])
+    
+    def test_split_string_not_in_string(self):
+        self.assertEqual(split_and_take("hello world this is a test", "foo", 2), [])
+        
+    def test_multiple_occurrences_of_split_string(self):
+        self.assertEqual(split_and_take("hello world world this is a test", "world", 2), ["world", "this"])
+
+if __name__ == '__main__':
+    unittest.main()

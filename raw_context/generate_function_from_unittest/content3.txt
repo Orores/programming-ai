@@ -1,0 +1,17 @@
+def split_and_take(s, split_string, n):
+    # If the split_string is empty, split into words and return the first n words
+    if split_string == "":
+        return s.split()[:n]
+    
+    # Try to split the string at the first occurrence of split_string
+    parts = s.split(split_string, 1)
+    
+    # If split_string is not found, return an empty list
+    if len(parts) == 1:
+        return []
+    
+    # Split the part after split_string into words
+    words_after_split = parts[1].split()
+    
+    # Return the first n words (or fewer if there aren't enough words)
+    return words_after_split[:n]

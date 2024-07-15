@@ -13,6 +13,9 @@ from .PyFileExecutor import PyFileExecutor
 from .CodeErrorFormatter import CodeErrorFormatter
 from .TogetherAIChatCompletion import TogetherAIChatCompletion
 from .TogetherAIModelRetriever import TogetherAIModelRetriever
+from .RemoveLanguageDelimiters import CodeExtractor
+
+
 
 class ChatBot:
     """
@@ -91,10 +94,71 @@ class ChatBot:
                 file_path=file_path,
                 code=response,
             )
-            executed_code, error_output = py_file_executor.execute()
-            return executed_code, error_output
+            error_output = py_file_executor.save_code_to_file(file_path, response)
+            error_output = py_file_executor.execute_code(file_path)
+            return error_output
         else:
-            return None, None
+            return None
+
+    def retry_api_request(self, args, response_content, max_attempts=3):
+        conversation = None  # Initialize conversation variable for API requests
+
+        for attempt in range(max_attempts):
+            if conversation is not None:
+                # Make an API request only after the initial attempt
+                response = self.make_api_request(args, conversation)
+                print("Chat Completion Response:", response)
+                self.openai_completion_saver.save_to_file(response, args.save_path)
+                response_content = response['choices'][0]['message']['content']
+            
+            error_output = self.execute_code(args, response_content)
+            extracted_code = CodeExtractor.extract_code(response_content)
+            executed_code = extracted_code if extracted_code else response_content
+            if file_path.startswith('/') or file_path.startswith('\\'):
+                print("Warning: File path starts with a leading slash, which is unusual.")
+
+            if error_output:
+                print("Error Output:", error_output)
+                conversation = CodeErrorFormatter.format_code_error(
+                    code=executed_code,
+                    error_output=error_output,
+                )
+                conversation = self.str_to_dict_list(conversation)
+                conversation = self.extend_context(args, conversation)
+            else:
+                print("Execution completed successfully.")
+                return True
+        else:
+            return False
+
+    def run_code_with_unittest(self, args, response_content, max_attempts=3):
+        conversation = None  # Initialize conversation variable for API requests
+
+        for attempt in range(max_attempts):
+            if conversation is not None:
+                # Make an API request only after the initial attempt
+                response = self.make_api_request(args, conversation)
+                print("Chat Completion Response:", response)
+                self.openai_completion_saver.save_to_file(response, args.save_path)
+                response_content = response['choices'][0]['message']['content']
+            
+            error_output = self.execute_code(args, response_content)
+            
+            if error_output:
+                print("Error Output:", error_output)
+                conversation = CodeErrorFormatter.format_code_error(
+                    code=executed_code,
+                    error_output=error_output,
+                )
+                conversation = self.str_to_dict_list(conversation)
+                conversation = self.extend_context(args, conversation)
+            else:
+                print("Execution completed successfully.")
+                return True
+        else:
+            return False
+
+
 
     def run(self):
         args = self.parser.parse_args()
@@ -103,36 +167,27 @@ class ChatBot:
             self.context_manager = ContextManager(context_folder = 'context_prompts/context.json', is_single_file = True)
             context_names = self.context_manager.get_all_context_names()
             print("Available Context Names:", context_names)
-        elif args.show_models:
+        if args.show_models:
             models = self.togetherai_model_retriever.get_available_models()
             print("Available Models for TogetherAI:\n")
             self.togetherai_model_retriever.print_models_table(models)
 
-        else:
+        if args.file_path or args.question:
             conversation = self.decide_conversation(args)
             conversation = self.str_to_dict_list(conversation)
             conversation = self.extend_context(args, conversation)
-            
-            for attempt in range(3):
-                response = self.make_api_request(args, conversation)
-                print("Chat Completion Response:", response)
-                self.openai_completion_saver.save_to_file(response, args.save_path)
-                response_content = response['choices'][0]['message']['content']
-                if args.run_code:
-                    executed_code, error_output = self.execute_code(args, response_content)
-                    if error_output:
-                        print("Error Output:", error_output)
-                        conversation = CodeErrorFormatter.format_code_error(
-                            code=executed_code,
-                            error_output=error_output,
-                        )
-                        conversation = self.str_to_dict_list(conversation)
-                        conversation = self.extend_context(args, conversation)
-                    else:
-                        print("Execution completed successfully.")
-                        break
-                else:
-                    break
+            response = self.make_api_request(args, conversation)
+            print("Chat Completion Response:", response)
+            self.openai_completion_saver.save_to_file(response, args.save_path)
+            response_content = response['choices'][0]['message']['content']
+        
+        if args.run_code:
+            success = self.retry_api_request(args, response_content)
+        if args.run_code_with_unittest:
+            success = self.run_code_with_unittest(args, response_content)
+
+
+
 
 def main():
     bot = ChatBot()

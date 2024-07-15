@@ -1,0 +1,3 @@
+Write a unittest for a function that takes a string splits it based on a split string and then takes the next n elements of the right part of the split. 
+
+The code is located in sandbox_scripts/my_function.py
