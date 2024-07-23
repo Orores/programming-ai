@@ -1,9 +1,7 @@
 import unittest
 import os
-import sys
 import tempfile
 import json
-from unittest.mock import patch
 from AutoChatBot.ConversationJsonReader import ConversationJsonReader
 
 class TestConversationJsonReader(unittest.TestCase):
@@ -53,8 +51,7 @@ class TestConversationJsonReader(unittest.TestCase):
         cls.temp_dir.cleanup()
 
     def test_read_correct_json_file(self):
-        reader = ConversationJsonReader(self.json_file_correct_path)
-        conversations = reader.read_file(self.json_file_correct_path)
+        conversations = ConversationJsonReader.read_file(self.json_file_correct_path)
         expected_conversations = [
             {"role": "user", "content": "Hello"},
             {"role": "system", "content": "How can I assist you?"}
@@ -63,17 +60,14 @@ class TestConversationJsonReader(unittest.TestCase):
 
     def test_read_incorrect_json_file(self):
         with self.assertRaises(ValueError):
-            reader = ConversationJsonReader(self.json_file_incorrect_path)
-            reader.read_file(self.json_file_incorrect_path)
+            ConversationJsonReader.read_file(self.json_file_incorrect_path)
 
     def test_file_not_found(self):
         with self.assertRaises(FileNotFoundError):
-            reader = ConversationJsonReader("/path/to/nonexistent/file")
-            reader.read_file("/path/to/nonexistent/file")
+            ConversationJsonReader.read_file("/path/to/nonexistent/file")
 
     def test_read_correct_single_json_file(self):
-        reader = ConversationJsonReader(self.json_file_single_correct_path, is_single_file=True, subdirectory_name="subdirectory_name")
-        conversations = reader.read_file(self.json_file_single_correct_path)
+        conversations = ConversationJsonReader.read_file(self.json_file_single_correct_path, is_single_file=True, subdirectory_name="subdirectory_name")
         expected_conversations = [
             {"role": "user", "content": "Hi there"},
             {"role": "system", "content": "Hello! How can I help you today?"}
@@ -82,13 +76,11 @@ class TestConversationJsonReader(unittest.TestCase):
 
     def test_read_incorrect_single_json_file(self):
         with self.assertRaises(ValueError):
-            reader = ConversationJsonReader(self.json_file_single_incorrect_path, is_single_file=True, subdirectory_name="subdirectory_name")
-            reader.read_file(self.json_file_single_incorrect_path)
+            ConversationJsonReader.read_file(self.json_file_single_incorrect_path, is_single_file=True, subdirectory_name="subdirectory_name")
 
     def test_subdirectory_not_found(self):
         with self.assertRaises(ValueError):
-            reader = ConversationJsonReader(self.json_file_single_correct_path, is_single_file=True, subdirectory_name="non_existent_subdirectory")
-            reader.read_file(self.json_file_single_correct_path)
+            ConversationJsonReader.read_file(self.json_file_single_correct_path, is_single_file=True, subdirectory_name="non_existent_subdirectory")
 
 if __name__ == '__main__':
     unittest.main()
