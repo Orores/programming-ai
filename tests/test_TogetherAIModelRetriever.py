@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import patch
 from io import StringIO
-import sys
 from dotenv import load_dotenv
 import os
 from AutoChatBot.TogetherAIModelRetriever import TogetherAIModelRetriever
@@ -16,12 +15,9 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
         cls.api_key = os.getenv('TOGETHERAI_API_KEY')
         assert cls.api_key is not None, "TOGETHERAI_API_KEY environment variable not set."
 
-        # Initialize the TogetherAIModelRetriever
-        cls.model_retriever = TogetherAIModelRetriever(api_key=cls.api_key)
-
     def test_get_available_models(self):
         # Make the API request to get available models
-        models = self.model_retriever.get_available_models()
+        models = TogetherAIModelRetriever.get_available_models(self.api_key)
 
         # Check if the response is a list
         self.assertIsInstance(models, list, "The response is not a list")
@@ -65,7 +61,7 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
         ]
 
         # Call the method to print models
-        self.model_retriever.print_models_table(mock_models)
+        TogetherAIModelRetriever.print_models_table(mock_models)
 
         # Capture the output
         output = mock_stdout.getvalue()

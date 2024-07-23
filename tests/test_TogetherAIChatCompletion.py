@@ -11,11 +11,8 @@ class TestTogetherAIChatCompletion(unittest.TestCase):
         load_dotenv()
 
         # Load the TOGETHERAI_API_KEY from environment variables
-        api_key = os.getenv('TOGETHERAI_API_KEY')
-        assert api_key is not None, "TOGETHERAI_API_KEY environment variable not set."
-
-        # Initialize the TogetherAIChatCompletion with desired parameters
-        cls.chat_completion = TogetherAIChatCompletion(api_key=api_key, model="cognitivecomputations/dolphin-2.5-mixtral-8x7b", max_tokens=2000)
+        cls.api_key = os.getenv('TOGETHERAI_API_KEY')
+        assert cls.api_key is not None, "TOGETHERAI_API_KEY environment variable not set."
 
         # Define a conversation example to pass
         cls.conversation = [
@@ -23,7 +20,7 @@ class TestTogetherAIChatCompletion(unittest.TestCase):
         ]
 
         # Make the API request
-        cls.response = cls.chat_completion.make_api_request(cls.conversation)
+        cls.response = TogetherAIChatCompletion.make_api_request(cls.conversation, api_key=cls.api_key, model="cognitivecomputations/dolphin-2.5-mixtral-8x7b", max_tokens=2000)
 
     def test_response_is_dict(self):
         # Check if the response is a dictionary

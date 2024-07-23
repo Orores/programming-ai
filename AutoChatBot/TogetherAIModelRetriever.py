@@ -7,18 +7,21 @@ class TogetherAIModelRetriever:
     TogetherAIModelRetriever: This class handles retrieving available models from the TogetherAI API.
     """
 
-    def __init__(self, api_key=None):
+    @staticmethod
+    def get_api_key():
         load_dotenv()
-        self.api_key = api_key if api_key else os.getenv("TOGETHERAI_API_KEY")
-        self.endpoint_url = 'https://api.together.xyz/v1/models'
+        return os.getenv("TOGETHERAI_API_KEY")
 
-    def get_available_models(self):
+    @staticmethod
+    def get_available_models(api_key=None):
+        api_key = api_key if api_key else TogetherAIModelRetriever.get_api_key()
+        endpoint_url = 'https://api.together.xyz/v1/models'
         headers = {
             "accept": "application/json",
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {api_key}",
         }
 
-        response = requests.get(self.endpoint_url, headers=headers)
+        response = requests.get(endpoint_url, headers=headers)
         
         if response.status_code == 200:
             models = response.json()
@@ -26,7 +29,8 @@ class TogetherAIModelRetriever:
         else:
             raise Exception('Failed to retrieve models from TogetherAI API')
 
-    def print_models_table(self, models):
+    @staticmethod
+    def print_models_table(models):
         # Define the header and row format
         headers = ["Name", "Type", "Pricing (Hourly)", "Pricing (Input)", "Pricing (Output)", "Pricing (Base)"]
         row_format = "{:<40} {:<10} {:<8} {:<8} {:<8} {:<8}"
@@ -49,7 +53,7 @@ class TogetherAIModelRetriever:
 
 # Testing the class (optional)
 if __name__ == '__main__':
-    retriever = TogetherAIModelRetriever()
-    models = retriever.get_available_models()
+    api_key = TogetherAIModelRetriever.get_api_key()
+    models = TogetherAIModelRetriever.get_available_models(api_key)
     print("Available Models for TogetherAI:\n")
-    retriever.print_models_table(models)
+    TogetherAIModelRetriever.print_models_table(models)
