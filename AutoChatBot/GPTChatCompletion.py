@@ -5,25 +5,25 @@ import argparse
 
 class GPT3ChatCompletion:
     """
-    GPT3ChatCompletion: This class handles OpenAI API chat completion requests.
+    GPT3ChatCompletion: This class handles OpenAI API chat completion requests using static methods.
     
-    Init parameters:
-    - api_key (str, optional): The API key for authentication with the OpenAI API.
-    - model (str): The model to be used for chat completion. Default is "gpt-3.5-turbo".
-    - temperature (float): Controls randomness in the generation. Lower values make the generation more deterministic.
-    - max_tokens (int): The maximum number of tokens to generate. Requests can use up to 4096 tokens shared between prompt and completion.
-    - stop_sequences (list[str], optional): Sequences where the API should stop generating further tokens.
-    - frequency_penalty (float): The penalty for frequency of tokens in the generated text.
-    - presence_penalty (float): The penalty for new tokens based on their presence in the text so far.
-    - top_p (float): Nucleus sampling parameter. A higher value means more diversity in the generation.
-    
-    Main method:
-    - make_api_request(conversation): Sends a request to the OpenAI API with the specified conversation and returns the response.
+    Static methods:
+    - load_api_key(): Loads the API key from the environment or .env file.
+    - make_api_request(api_key, conversation, model, temperature, max_tokens, stop_sequences, frequency_penalty, presence_penalty, top_p): Sends a request to the OpenAI API with the specified parameters and returns the response.
+    - update_attributes(current_values, **kwargs): Updates a dictionary of current values with provided keyword arguments.
     
     Example usage:
         conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
-        chat_completion = GPT3ChatCompletion(model="gpt-3.5-turbo", max_tokens=100)
-        response = chat_completion.make_api_request(conversation)
+        response = GPT3ChatCompletion.make_api_request(
+            api_key="your_api_key",
+            conversation=conversation,
+            model="gpt-3.5-turbo",
+            max_tokens=100,
+            temperature=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            top_p=1
+        )
     
     Response object example:
         {
@@ -42,54 +42,44 @@ class GPT3ChatCompletion:
         }
     """
 
-    def __init__(self, api_key=None, model="gpt-3.5-turbo", temperature=1, max_tokens=100, stop_sequences=None, frequency_penalty=0, presence_penalty=0, top_p=1):
+    @staticmethod
+    def load_api_key():
         load_dotenv()
-        self.api_key = api_key if api_key else os.getenv("OPENAI_API_KEY")
-        self.model = model
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        self.stop_sequences = stop_sequences
-        self.frequency_penalty = frequency_penalty
-        self.presence_penalty = presence_penalty
-        self.top_p = top_p
-        self.endpoint_url = 'https://api.openai.com/v1/chat/completions'
+        return os.getenv("OPENAI_API_KEY")
 
-    def update_attributes(self, **kwargs):
+    @staticmethod
+    def update_attributes(current_values, **kwargs):
         for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
+            if key in current_values:
+                current_values[key] = value
             else:
-                raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{key}'")
+                raise AttributeError(f"'GPT3ChatCompletion' object has no attribute '{key}'")
+        return current_values
 
+    @staticmethod
     def make_api_request(
-            self,
+            api_key,
             conversation,
-            model=None,
-            temperature=None,
-            max_tokens=None,
+            model="gpt-3.5-turbo",
+            temperature=1,
+            max_tokens=100,
             stop_sequences=None,
-            frequency_penalty=None,
-            presence_penalty=None,
-            top_p=None
+            frequency_penalty=0,
+            presence_penalty=0,
+            top_p=1
             ):
 
-        # Use Class defaults if None are provided
-        model = model if model is not None else self.model
-        temperature = temperature if temperature is not None else self.temperature
-        max_tokens = max_tokens if max_tokens is not None else self.max_tokens
-        stop_sequences = stop_sequences if stop_sequences is not None else self.stop_sequences
-        frequency_penalty = frequency_penalty if frequency_penalty is not None else self.frequency_penalty
-        presence_penalty = presence_penalty if presence_penalty is not None else self.presence_penalty
-        top_p = top_p if top_p is not None else self.top_p
-
-        # The following check does not work if the input is not a dict
+        if api_key is None:
+            raise ValueError("API key is required")
+        
         if conversation is None:
-            raise ValueError("No question was asked")
+            raise ValueError("No conversation provided")
         if isinstance(conversation, str): 
             conversation = [
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": conversation}
             ]
+
         data = {
             "model": model,
             "temperature": temperature,
@@ -101,10 +91,10 @@ class GPT3ChatCompletion:
             "messages": conversation
         }
         headers = {
-            'Authorization': f'Bearer {self.api_key}',
+            'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json'
         }
-        response = requests.post(self.endpoint_url, headers=headers, json=data)
+        response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
         return response.json()
 
 if __name__ == '__main__':
@@ -119,7 +109,17 @@ if __name__ == '__main__':
     parser.add_argument("--question", type=str, help="The question or prompt to ask the model.")
 
     args = parser.parse_args()
-    chat_completion = GPT3ChatCompletion(
+    
+    api_key = GPT3ChatCompletion.load_api_key()
+    
+    conversation = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": args.question}
+    ]
+    
+    response = GPT3ChatCompletion.make_api_request(
+        api_key=api_key,
+        conversation=conversation,
         model=args.model,
         max_tokens=args.max_tokens,
         temperature=args.temperature,
@@ -128,12 +128,5 @@ if __name__ == '__main__':
         top_p=args.top_p,
         stop_sequences=args.stop_sequences
     )
-
-    conversation = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": args.question}
-    ]
     
-    response = chat_completion.make_api_request(conversation)
     print("Chat Completion Response:", response)
-

@@ -1,8 +1,7 @@
 import unittest
 from dotenv import load_dotenv
 import os
-import sys
-from AutoChatBot.GPTChatCompletion import GPT3ChatCompletion
+from AutoChatBot.GPTChatCompletion import GPT3ChatCompletion  # Adjust the import according to your module path
 
 class TestGPT3ChatCompletion(unittest.TestCase):
     @classmethod
@@ -11,17 +10,19 @@ class TestGPT3ChatCompletion(unittest.TestCase):
         load_dotenv()
 
         # Load the OPENAI_API_KEY from environment variables
-        api_key = os.getenv('OPENAI_API_KEY')
-        assert api_key is not None, "OPENAI_API_KEY environment variable not set."
-
-        # Initialize the GPT3ChatCompletion with desired parameters
-        cls.chat_completion = GPT3ChatCompletion(api_key=api_key, model="gpt-3.5-turbo", max_tokens=2000)
+        cls.api_key = os.getenv('OPENAI_API_KEY')
+        assert cls.api_key is not None, "OPENAI_API_KEY environment variable not set."
 
         # Define a conversation example to pass
-        conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
+        cls.conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
 
         # Make the API request
-        cls.response = cls.chat_completion.make_api_request(conversation)
+        cls.response = GPT3ChatCompletion.make_api_request(
+            api_key=cls.api_key,
+            conversation=cls.conversation,
+            model="gpt-3.5-turbo",
+            max_tokens=100
+        )
 
     def test_response_contains_choices(self):
         # Check if the API call was successful
@@ -46,4 +47,3 @@ class TestGPT3ChatCompletion(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
