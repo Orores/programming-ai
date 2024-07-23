@@ -25,10 +25,8 @@ class ChatCompletionSaver:
     }
     """
 
-    def __init__(self, save_path=None):
-        self.save_path = save_path
-
-    def save_to_file(self, response, save_path):
+    @staticmethod
+    def save_to_file(response, save_path):
         """
         Saves the message content from the provided response to the specified file.
 
