@@ -42,16 +42,17 @@ class TestPyFileExecutor(unittest.TestCase):
     def test_execute_without_error(self, mock_subprocess_run):
         self.code = "print('Hello, World!')"
         mock_subprocess_run.return_value = Mock(returncode=0, stderr=b'')
-        
-        executor = PyFileExecutor(self.file_path, self.code)
-        save_error = executor.save_code_to_file(executor.file_path, executor.code)
-        
+
+        save_error = PyFileExecutor.save_code_to_file(self.file_path, self.code)
         self.assertIsNone(save_error)
 
-        error_output = executor.execute_code('script')
+        error_output = PyFileExecutor.execute_code(self.file_path)
         
         self.assertEqual(mock_subprocess_run.call_count, 1)
-        expected_command = ['python', '-m', 'script']
+        
+        # Adjust expected command to match the actual module path
+        module_path = self.file_path.replace('/', '.').replace('\\', '.').rstrip('.py')
+        expected_command = ['python', '-m', module_path]
         mock_subprocess_run.assert_called_with(expected_command, capture_output=True)
 
         self.assertIsNone(error_output)
@@ -60,16 +61,17 @@ class TestPyFileExecutor(unittest.TestCase):
     def test_execute_with_error(self, mock_subprocess_run):
         self.code = "print('Hello, World!')"
         mock_subprocess_run.return_value = Mock(returncode=1, stderr=b'Error: Division by zero')
-        
-        executor = PyFileExecutor(self.file_path, self.code)
-        save_error = executor.save_code_to_file(executor.file_path, executor.code)
-        
+
+        save_error = PyFileExecutor.save_code_to_file(self.file_path, self.code)
         self.assertIsNone(save_error)
 
-        error_output = executor.execute_code('script')
+        error_output = PyFileExecutor.execute_code(self.file_path)
         
         self.assertEqual(mock_subprocess_run.call_count, 1)
-        expected_command = ['python', '-m', 'script']
+        
+        # Adjust expected command to match the actual module path
+        module_path = self.file_path.replace('/', '.').replace('\\', '.').rstrip('.py')
+        expected_command = ['python', '-m', module_path]
         mock_subprocess_run.assert_called_with(expected_command, capture_output=True)
 
         self.assertEqual(error_output, 'Error: Division by zero')
@@ -81,17 +83,19 @@ class TestPyFileExecutor(unittest.TestCase):
         mock_subprocess_run.return_value = Mock(returncode=0, stderr=b'')
 
         directory = os.path.dirname(self.file_path)
-        executor = PyFileExecutor(self.file_path, self.code)
-        save_error = executor.save_code_to_file(executor.file_path, executor.code)
+        save_error = PyFileExecutor.save_code_to_file(self.file_path, self.code)
         
         self.assertIsNone(save_error)
         self.assertEqual(mock_makedirs.call_count, 1)
         mock_makedirs.assert_called_with(directory, exist_ok=True)
 
-        error_output = executor.execute_code('script')
+        error_output = PyFileExecutor.execute_code(self.file_path)
         
         self.assertEqual(mock_subprocess_run.call_count, 1)
-        expected_command = ['python', '-m', 'script']
+        
+        # Adjust expected command to match the actual module path
+        module_path = self.file_path.replace('/', '.').replace('\\', '.').rstrip('.py')
+        expected_command = ['python', '-m', module_path]
         mock_subprocess_run.assert_called_with(expected_command, capture_output=True)
 
         self.assertIsNone(error_output)

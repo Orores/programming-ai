@@ -4,49 +4,37 @@ from .RemoveLanguageDelimiters import CodeExtractor
 
 class PyFileExecutor:
     """
-    PyFileExecutor: This class takes a file path and a string, saves the string as a .py file, and executes it using a subprocess.
-
-    Init parameters:
-    - file_path (str): Path to the .py file.
-    - code (str): String representing the Python code to be executed.
-
-    Main methods:
-    - save_code_to_file(): Saves the code as a .py file.
-    - execute_code(): Executes the saved .py file using a subprocess.
+    PyFileExecutor: This class provides static methods to save a string as a .py file and execute it using a subprocess.
 
     Example usage:
-        executor = PyFileExecutor(file_path="script.py", code="print('Hello, World!')")
-        error_output = executor.save_code_to_file()
+        error_output = PyFileExecutor.save_code_to_file(file_path="script.py", code="print('Hello, World!')")
         if error_output:
             print("Error Output:", error_output)
         else:
-            executed_code, error_output = executor.execute_code()
+            executed_code, error_output = PyFileExecutor.execute_code(file_path="script.py")
             if error_output:
                 print("Error Output:", error_output)
             else:
                 print("Execution completed successfully.")
     """
 
-    def __init__(self, file_path, code, language='python'):
-        extracted_code = CodeExtractor.extract_code(code, language)
-        self.code = extracted_code if extracted_code else code
-        if file_path.startswith('/') or file_path.startswith('\\'):
-            print("Warning: File path starts with a leading slash, which is unusual.")
-        self.file_path = file_path
-
     @staticmethod
-    def save_code_to_file(file_path, code):
+    def save_code_to_file(file_path, code, language='python'):
         """
-        Saves the provided code to the specified file path as a .py file.
+        Saves the provided code to the specified file path as a .py file after extracting the code.
 
         Parameters:
         - file_path (str): Path to the .py file.
         - code (str): Code to be saved to the file.
+        - language (str): Language of the code to be extracted.
 
         Returns:
         - str: Error output if there is an error, None if there is no error.
         """
         try:
+            extracted_code = CodeExtractor.extract_code(code, language)
+            code_to_save = extracted_code if extracted_code else code
+
             # Create the directory if it does not exist
             directory, file_name = os.path.split(file_path)
             if directory:
@@ -54,7 +42,7 @@ class PyFileExecutor:
 
             # Save the code as a .py file
             with open(file_path, 'w') as file:
-                file.write(code)
+                file.write(code_to_save)
 
             return None
         except Exception as e:
@@ -69,7 +57,7 @@ class PyFileExecutor:
         - file_path (str): Path to the .py file to be executed.
 
         Returns:
-        - tuple: (executed_code_str, error_output) where executed_code_str is the code to be executed and error_output is the error output if there is an error, None if there is no error.
+        - str: Error output if there is an error, None if there is no error.
         """
         try:
             # Convert file path to module path using dot notation
@@ -97,15 +85,14 @@ print('Hello, World!')
 ```
     '''
     file_path = "sandbox_scripts/script.py"
-    executor = PyFileExecutor(file_path=file_path, code=input_string, language='python')
-    error_output = PyFileExecutor.save_code_to_file(executor.file_path, executor.code)
+    error_output = PyFileExecutor.save_code_to_file(file_path=file_path, code=input_string, language='python')
     if error_output:
         print("Error Output:", error_output)
     else:
-        error_output = PyFileExecutor.execute_code(executor.file_path)
+        error_output = PyFileExecutor.execute_code(file_path)
         if error_output:
-            print("Executed Code:\n", executor.code)
+            print("Executed Code:\n", input_string)
             print("Error Output:", error_output)
         else:
-            print("Executed Code:\n", executor.code)
+            print("Executed Code:\n", input_string)
             print("Execution completed successfully.")
