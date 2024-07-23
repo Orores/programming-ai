@@ -1,12 +1,11 @@
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import patch, mock_open
 from AutoChatBot.GetFunctionContextFromError import ErrorContextExtractor
 
 class TestErrorContextExtractor(unittest.TestCase):
 
     def setUp(self):
         self.code_base_dir = "/mock/path/"
-        self.extractor = ErrorContextExtractor(code_base_dir=self.code_base_dir)
         self.error_string = """
         Traceback (most recent call last):
           File "/mock/path/module1.py", line 10, in <module>
@@ -24,7 +23,7 @@ class TestErrorContextExtractor(unittest.TestCase):
             ("/mock/path/module2.py", 20),
             ("/mock/path/module3.py", 30)
         ]
-        self.assertEqual(self.extractor.parse_error_string(self.error_string), expected_output)
+        self.assertEqual(ErrorContextExtractor.parse_error_string(self.error_string), expected_output)
 
     @patch('builtins.open', new_callable=mock_open, read_data="\n\n\n\n\n\n\n\n\ndef some_function():\npass\n")
     @patch('os.path.isfile', return_value=True)
@@ -32,8 +31,7 @@ class TestErrorContextExtractor(unittest.TestCase):
         file_path = "/mock/path/module1.py"
         line_number = 10
         expected_output = "def some_function():\npass"
-        actual_output = self.extractor.extract_function_source(file_path, line_number)
-        print(actual_output)
+        actual_output = ErrorContextExtractor.extract_function_source(file_path, line_number)
         self.assertEqual(actual_output, expected_output)
 
 if __name__ == '__main__':

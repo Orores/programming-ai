@@ -11,19 +11,11 @@ class ErrorContextExtractor:
     - parse_error_string(error_string): Parses the error string to extract file paths and line numbers.
     - extract_function_source(file_path, line_number): Extracts the function source code from the specified file and line number.
     - display_functions(functions): Displays the extracted functions.
-    - process(error_string): Main method to process the error string and display the function sources.
+    - process(error_string, code_base_dir): Main method to process the error string and display the function sources.
     """
 
-    def __init__(self, code_base_dir):
-        """
-        Initializes the ErrorContextExtractor with the directory of the user's codebase.
-        
-        Args:
-        - code_base_dir (str): The base directory of the user's code.
-        """
-        self.code_base_dir = code_base_dir
-
-    def parse_error_string(self, error_string):
+    @staticmethod
+    def parse_error_string(error_string):
         """
         Parses the error string to extract file paths and line numbers.
         
@@ -38,7 +30,8 @@ class ErrorContextExtractor:
         errors = [(match[0], int(match[1])) for match in matches]
         return errors
 
-    def extract_function_source(self, file_path, line_number):
+    @staticmethod
+    def extract_function_source(file_path, line_number):
         """
         Extracts the function source code from the specified file and line number.
         
@@ -73,7 +66,8 @@ class ErrorContextExtractor:
         function_code = "\n".join(lines[start_line:end_line])
         return function_code
 
-    def display_functions(self, functions):
+    @staticmethod
+    def display_functions(functions):
         """
         Displays the extracted functions.
         
@@ -86,22 +80,24 @@ class ErrorContextExtractor:
             print(function_code)
             print("\n" + "="*50 + "\n")
 
-    def process(self, error_string):
+    @staticmethod
+    def process(error_string, code_base_dir):
         """
         Main method to process the error string and display the function sources.
         
         Args:
         - error_string (str): The error string to process.
+        - code_base_dir (str): The base directory of the user's code.
         """
-        parsed_errors = self.parse_error_string(error_string)
+        parsed_errors = ErrorContextExtractor.parse_error_string(error_string)
         
         functions = []
         for file_path, line_number in parsed_errors:
-            if file_path.startswith(self.code_base_dir):
-                function_code = self.extract_function_source(file_path, line_number)
+            if file_path.startswith(code_base_dir):
+                function_code = ErrorContextExtractor.extract_function_source(file_path, line_number)
                 functions.append((file_path, line_number, function_code))
         
-        self.display_functions(functions)
+        ErrorContextExtractor.display_functions(functions)
 
 if __name__ == "__main__":
     error_string = """
@@ -122,5 +118,4 @@ Ran 1 test in 0.000s
 
 FAILED (errors=1)
     """
-    processor = ErrorContextExtractor(code_base_dir="/home/orores/programming-ai/")
-    processor.process(error_string)
+    ErrorContextExtractor.process(error_string, code_base_dir="/home/orores/programming-ai/")
