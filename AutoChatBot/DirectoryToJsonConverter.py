@@ -33,40 +33,13 @@ class DirectoryToJsonConverter:
     ...
     """
 
-    def __init__(self, input_directory, output_directory, json_mode='single'):
-        self.input_directory = input_directory
-        self.output_directory = output_directory
-        self.json_mode = json_mode
+    @staticmethod
+    def convert_directories_to_json(input_directory, output_directory):
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
 
-    def convert_directories_to_json(self):
-        """
-        Converts subdirectories containing 'role_i.txt' and 'content_i.txt' files into JSON objects.
-
-        The method reads 'role_i.txt' and 'content_i.txt' files within each subdirectory of the input directory.
-        It constructs JSON objects representing the subdirectory's content, where each object contains 'role' and 'content' keys.
-        The JSON objects are then saved as separate files in the output directory.
-
-        Input:
-        - None (Operates on the instance's input_directory and output_directory attributes)
-
-        Output:
-        - Creates JSON files in the output directory, each representing a subdirectory's content.
-          Each JSON file contains an array of objects with 'role' and 'content' keys:
-          [
-              {"role": "role_1_string", "content": "content_1_string"},
-              {"role": "role_2_string", "content": "content_2_string"},
-              ...
-          ]
-
-        Raises:
-        - No explicit exceptions are raised within this method.
-        """
-
-        if not os.path.exists(self.output_directory):
-            os.makedirs(self.output_directory)
-
-        for subdir in os.listdir(self.input_directory):
-            subdir_path = os.path.join(self.input_directory, subdir)
+        for subdir in os.listdir(input_directory):
+            subdir_path = os.path.join(input_directory, subdir)
             
             roles_contents = []
             for i in range(1, 1000): # Assuming up to 1000 subdirectories
@@ -85,49 +58,21 @@ class DirectoryToJsonConverter:
                     role_content = {"role": role_fp.read().strip(), "content": content_fp.read().strip()}
                     roles_contents.append(role_content)
             
-            output_json_file = os.path.join(self.output_directory, f'{subdir}.json')
+            output_json_file = os.path.join(output_directory, f'{subdir}.json')
             with open(output_json_file, 'w') as json_fp:
                 json.dump(roles_contents, json_fp, indent=4)
             
             print(f"Converted '{subdir}' to JSON and saved to '{output_json_file}'")
 
-    def convert_directories_to_single_json(self):
-        """
-        Converts subdirectories containing 'role_i.txt' and 'content_i.txt' files into a single JSON object.
-
-        The method reads 'role_i.txt' and 'content_i.txt' files within each subdirectory of the input directory.
-        It constructs a single JSON object with directory names as keys and a list of dictionaries as values.
-        Each dictionary represents the content of a subdirectory, containing 'role' and 'content' keys.
-
-        Input:
-        - None (Operates on the instance's input_directory and output_directory attributes)
-
-        Output:
-        - Creates a single JSON file in the output directory, representing all subdirectories.
-          The JSON file contains directory names as keys, and each value is an array of objects with 'role' and 'content' keys:
-          {
-              "subdirectory1": [
-                  {"role": "role_1_string", "content": "content_1_string"},
-                  {"role": "role_2_string", "content": "content_2_string"},
-                  ...
-              ],
-              "subdirectory2": [
-                  ...
-              ],
-              ...
-          }
-
-        Raises:
-        - No explicit exceptions are raised within this method.
-        """
-
-        if not os.path.exists(self.output_directory):
-            os.makedirs(self.output_directory)
+    @staticmethod
+    def convert_directories_to_single_json(input_directory, output_directory):
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
 
         directory_data = {}
 
-        for subdir in os.listdir(self.input_directory):
-            subdir_path = os.path.join(self.input_directory, subdir)
+        for subdir in os.listdir(input_directory):
+            subdir_path = os.path.join(input_directory, subdir)
             
             subdir_obj = {'context': []}
 
@@ -156,54 +101,18 @@ class DirectoryToJsonConverter:
 
             print(f"Converted '{subdir}' to JSON and included in the single JSON file")
 
-        output_json_file = os.path.join(self.output_directory, 'context.json')
+        output_json_file = os.path.join(output_directory, 'context.json')
         with open(output_json_file, 'w') as json_fp:
             json.dump(directory_data, json_fp, indent=4)
         
         print(f"All subdirectories have been converted to a single JSON file saved to '{output_json_file}'")
 
-    def convert_directories_to_json_based_on_mode(self):
-        """
-        Converts subdirectories containing 'role_i.txt' and 'content_i.txt' files into JSON objects based on the json_mode parameter.
-
-        The method reads 'role_i.txt' and 'content_i.txt' files within each subdirectory of the input directory.
-        It constructs JSON objects representing the subdirectory's content, where each object contains 'role' and 'content' keys.
-        The JSON objects are then saved as separate files in the output directory if json_mode is 'multiple'.
-        If json_mode is 'single', a single JSON file representing all subdirectories will be created.
-
-        Input:
-        - json_mode: A string indicating the mode to determine the JSON conversion method ('single' or 'multiple')
-
-        Output:
-        - Creates JSON files in the output directory if json_mode is 'multiple', each representing a subdirectory's content.
-          Each JSON file contains an array of objects with 'role' and 'content' keys:
-          [
-              {"role": "role_1_string", "content": "content_1_string"},
-              {"role": "role_2_string", "content": "content_2_string"},
-              ...
-          ]
-        - Creates a single JSON file in the output directory if json_mode is 'single', representing all subdirectories.
-          The JSON file contains directory names as keys, and each value is an array of objects with 'role' and 'content' keys:
-          {
-              "subdirectory1": [
-                  {"role": "role_1_string", "content": "content_1_string"},
-                  {"role": "role_2_string", "content": "content_2_string"},
-                  ...
-              ],
-              "subdirectory2": [
-                  ...
-              ],
-              ...
-          }
-
-        Raises:
-        - No explicit exceptions are raised within this method.
-        """
-
-        if self.json_mode == 'multiple':
-            self.convert_directories_to_json()
-        elif self.json_mode == 'single':
-            self.convert_directories_to_single_json()
+    @staticmethod
+    def convert_directories_to_json_based_on_mode(input_directory, output_directory, json_mode):
+        if json_mode == 'multiple':
+            DirectoryToJsonConverter.convert_directories_to_json(input_directory, output_directory)
+        elif json_mode == 'single':
+            DirectoryToJsonConverter.convert_directories_to_single_json(input_directory, output_directory)
         else:
             print("Invalid json_mode. Please use 'single' or 'multiple'.")
 
@@ -213,5 +122,4 @@ if __name__ == '__main__':
     output_directory = 'AutoChatBot/context_prompts'
     json_mode = 'single'
 
-    converter = DirectoryToJsonConverter(input_directory, output_directory, json_mode)
-    converter.convert_directories_to_json_based_on_mode()
+    DirectoryToJsonConverter.convert_directories_to_json_based_on_mode(input_directory, output_directory, json_mode)
