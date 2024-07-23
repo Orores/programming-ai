@@ -9,8 +9,8 @@ class TestParserCreator(unittest.TestCase):
                      "--presence_penalty", "0.3", "--top_p", "0.8", "--stop_sequences", "bye", "--question", "How are you?",
                      "--file_path", "/path/to/file", "--save_path", "result.txt", "--context", "/path/to/context", "--run_code", "--show_available_context"]
         with patch("sys.argv", ["ParserCreator.py"] + test_args):
-            creator = ParserCreator()
-            args = creator.parser.parse_args()
+            parser = ParserCreator.create_parser()
+            args = parser.parse_args()
 
             # Check if arguments are parsed correctly
             self.assertEqual(args.api, "openai")
