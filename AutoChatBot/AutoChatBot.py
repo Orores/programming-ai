@@ -16,7 +16,6 @@ from .TogetherAIModelRetriever import TogetherAIModelRetriever
 from .RemoveLanguageDelimiters import CodeExtractor
 
 
-
 class ChatBot:
     """
     ChatBot: This class combines the functionality of both GPT3ChatCompletion and FileReader classes.
@@ -31,20 +30,15 @@ class ChatBot:
     BOLD = '\33[1m'
 
     def __init__(self):
-        self.gpt3_chat_completion = GPT3ChatCompletion()
-        self.togetherai_chat_completion = TogetherAIChatCompletion()
-        self.parser = ParserCreator().parser
-        self.conversation_json_reader = ConversationJsonReader()
-        self.string_file_reader = StringFileReader()
+        self.parser = ParserCreator.create_parser()
         self.openai_completion_saver = ChatCompletionSaver()
-        self.togetherai_model_retriever = TogetherAIModelRetriever()  # Instantiate the new class
 
     def decide_conversation(self, args):
         if args.file_path:
             try:
-                conversation = self.conversation_json_reader.read_file(args.file_path)
+                conversation = ConversationJsonReader.read_file(args.file_path)
             except ValueError as e:
-                conversation = self.string_file_reader.read_file(args.file_path)
+                conversation = StringFileReader.read_file(args.file_path)
         elif args.question:
             conversation = args.question
         else:
@@ -58,9 +52,9 @@ class ChatBot:
 
     def extend_context(self, args, conversation):
         if args.context is not None:
-            self.context_manager = ContextManager(context_folder = 'context_prompts/context.json', is_single_file = True)
+            context_data = ContextManager.load_context_data(context_folder='context_prompts/context.json', is_single_file=True)
             try:
-                context = self.context_manager.retrieve_context(args.context)
+                context = ContextManager.retrieve_context(context_data, args.context)
                 context.extend(conversation)
                 conversation = context
             except FileNotFoundError:
@@ -69,7 +63,9 @@ class ChatBot:
 
     def make_api_request(self, args, conversation):
         if args.api == "openai":
-            response = self.gpt3_chat_completion.make_api_request(
+            api_key = GPT3ChatCompletion.load_api_key()
+            response = GPT3ChatCompletion.make_api_request(
+                api_key=api_key,
                 conversation=conversation,
                 model=args.model,
                 temperature=args.temperature,
@@ -80,8 +76,10 @@ class ChatBot:
                 top_p=args.top_p,
             )
         elif args.api == "togetherai":
-            response = self.togetherai_chat_completion.make_api_request(
-                conversation=conversation
+            api_key = TogetherAIChatCompletion.load_api_key()
+            response = TogetherAIChatCompletion.make_api_request(
+                conversation=conversation,
+                api_key=api_key
             )
         else:
             raise ValueError("Invalid API selection. Choose 'openai' or 'togetherai'.")
@@ -90,12 +88,8 @@ class ChatBot:
     def execute_code(self, args, response):
         file_path = 'sandbox_scripts/myscript.py'
         if args.run_code:
-            py_file_executor = PyFileExecutor(
-                file_path=file_path,
-                code=response,
-            )
-            error_output = py_file_executor.save_code_to_file(file_path, response)
-            error_output = py_file_executor.execute_code(file_path)
+            error_output = PyFileExecutor.save_code_to_file(file_path, response)
+            error_output = PyFileExecutor.execute_code(file_path)
             return error_output
         else:
             return None
@@ -158,19 +152,16 @@ class ChatBot:
         else:
             return False
 
-
-
     def run(self):
         args = self.parser.parse_args()
         if args.show_available_context:
-            # Alternatively you can just pass the directory and set "is_single_file" to false
-            self.context_manager = ContextManager(context_folder = 'context_prompts/context.json', is_single_file = True)
-            context_names = self.context_manager.get_all_context_names()
+            context_data = ContextManager.load_context_data(context_folder='context_prompts/context.json', is_single_file=True)
+            context_names = ContextManager.get_all_context_names(context_data)
             print("Available Context Names:", context_names)
         if args.show_models:
-            models = self.togetherai_model_retriever.get_available_models()
+            models = TogetherAIModelRetriever.get_available_models()
             print("Available Models for TogetherAI:\n")
-            self.togetherai_model_retriever.print_models_table(models)
+            TogetherAIModelRetriever.print_models_table(models)
 
         if args.file_path or args.question:
             conversation = self.decide_conversation(args)
@@ -185,8 +176,6 @@ class ChatBot:
             success = self.retry_api_request(args, response_content)
         if args.run_code_with_unittest:
             success = self.run_code_with_unittest(args, response_content)
-
-
 
 
 def main():
