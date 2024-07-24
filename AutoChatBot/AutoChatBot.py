@@ -29,11 +29,8 @@ class ChatBot:
     ORANGE = '\33[93m'
     BOLD = '\33[1m'
 
-    def __init__(self):
-        self.parser = ParserCreator.create_parser()
-        self.openai_completion_saver = ChatCompletionSaver()
-
-    def decide_conversation(self, args):
+    @staticmethod
+    def decide_conversation(args):
         if args.file_path:
             try:
                 conversation = ConversationJsonReader.read_file(args.file_path)
@@ -42,15 +39,18 @@ class ChatBot:
         elif args.question:
             conversation = args.question
         else:
-            self.parser.error(self.FAIL + self.BOLD + 'Please enter the word you want the machine to say. Enter -h for help')
+            parser = ParserCreator.create_parser()
+            parser.error(ChatBot.FAIL + ChatBot.BOLD + 'Please enter the word you want the machine to say. Enter -h for help')
         return conversation
 
-    def str_to_dict_list(self, conversation):
+    @staticmethod
+    def str_to_dict_list(conversation):
         if isinstance(conversation, str):
             conversation = [{"role": "user", "content": conversation}]
         return conversation
 
-    def extend_context(self, args, conversation):
+    @staticmethod
+    def extend_context(args, conversation):
         if args.context is not None:
             context_data = ContextManager.load_context_data(context_folder='context_prompts/context.json', is_single_file=True)
             try:
@@ -61,7 +61,8 @@ class ChatBot:
                 exit()
         return conversation
 
-    def make_api_request(self, args, conversation):
+    @staticmethod
+    def make_api_request(args, conversation):
         if args.api == "openai":
             api_key = GPT3ChatCompletion.load_api_key()
             response = GPT3ChatCompletion.make_api_request(
@@ -85,7 +86,8 @@ class ChatBot:
             raise ValueError("Invalid API selection. Choose 'openai' or 'togetherai'.")
         return response
 
-    def execute_code(self, args, response):
+    @staticmethod
+    def execute_code(args, response):
         file_path = 'sandbox_scripts/myscript.py'
         if args.run_code:
             error_output = PyFileExecutor.save_code_to_file(file_path, response)
@@ -94,18 +96,19 @@ class ChatBot:
         else:
             return None
 
-    def retry_api_request(self, args, response_content, max_attempts=3):
+    @staticmethod
+    def retry_api_request(args, response_content, max_attempts=3):
         conversation = None  # Initialize conversation variable for API requests
 
         for attempt in range(max_attempts):
             if conversation is not None:
                 # Make an API request only after the initial attempt
-                response = self.make_api_request(args, conversation)
+                response = ChatBot.make_api_request(args, conversation)
                 print("Chat Completion Response:", response)
-                self.openai_completion_saver.save_to_file(response, args.save_path)
+                ChatCompletionSaver.save_to_file(response, args.save_path)
                 response_content = response['choices'][0]['message']['content']
             
-            error_output = self.execute_code(args, response_content)
+            error_output = ChatBot.execute_code(args, response_content)
             extracted_code = CodeExtractor.extract_code(response_content)
             executed_code = extracted_code if extracted_code else response_content
             if file_path.startswith('/') or file_path.startswith('\\'):
@@ -117,26 +120,27 @@ class ChatBot:
                     code=executed_code,
                     error_output=error_output,
                 )
-                conversation = self.str_to_dict_list(conversation)
-                conversation = self.extend_context(args, conversation)
+                conversation = ChatBot.str_to_dict_list(conversation)
+                conversation = ChatBot.extend_context(args, conversation)
             else:
                 print("Execution completed successfully.")
                 return True
         else:
             return False
 
-    def run_code_with_unittest(self, args, response_content, max_attempts=3):
+    @staticmethod
+    def run_code_with_unittest(args, response_content, max_attempts=3):
         conversation = None  # Initialize conversation variable for API requests
 
         for attempt in range(max_attempts):
             if conversation is not None:
                 # Make an API request only after the initial attempt
-                response = self.make_api_request(args, conversation)
+                response = ChatBot.make_api_request(args, conversation)
                 print("Chat Completion Response:", response)
-                self.openai_completion_saver.save_to_file(response, args.save_path)
+                ChatCompletionSaver.save_to_file(response, args.save_path)
                 response_content = response['choices'][0]['message']['content']
             
-            error_output = self.execute_code(args, response_content)
+            error_output = ChatBot.execute_code(args, response_content)
             
             if error_output:
                 print("Error Output:", error_output)
@@ -144,16 +148,18 @@ class ChatBot:
                     code=executed_code,
                     error_output=error_output,
                 )
-                conversation = self.str_to_dict_list(conversation)
-                conversation = self.extend_context(args, conversation)
+                conversation = ChatBot.str_to_dict_list(conversation)
+                conversation = ChatBot.extend_context(args, conversation)
             else:
                 print("Execution completed successfully.")
                 return True
         else:
             return False
 
-    def run(self):
-        args = self.parser.parse_args()
+    @staticmethod
+    def run():
+        parser = ParserCreator.create_parser()
+        args = parser.parse_args()
         if args.show_available_context:
             context_data = ContextManager.load_context_data(context_folder='context_prompts/context.json', is_single_file=True)
             context_names = ContextManager.get_all_context_names(context_data)
@@ -164,23 +170,22 @@ class ChatBot:
             TogetherAIModelRetriever.print_models_table(models)
 
         if args.file_path or args.question:
-            conversation = self.decide_conversation(args)
-            conversation = self.str_to_dict_list(conversation)
-            conversation = self.extend_context(args, conversation)
-            response = self.make_api_request(args, conversation)
+            conversation = ChatBot.decide_conversation(args)
+            conversation = ChatBot.str_to_dict_list(conversation)
+            conversation = ChatBot.extend_context(args, conversation)
+            response = ChatBot.make_api_request(args, conversation)
             print("Chat Completion Response:", response)
-            self.openai_completion_saver.save_to_file(response, args.save_path)
+            ChatCompletionSaver.save_to_file(response, args.save_path)
             response_content = response['choices'][0]['message']['content']
         
         if args.run_code:
-            success = self.retry_api_request(args, response_content)
+            ChatBot.retry_api_request(args, response_content)
         if args.run_code_with_unittest:
-            success = self.run_code_with_unittest(args, response_content)
+            ChatBot.run_code_with_unittest(args, response_content)
 
 
 def main():
-    bot = ChatBot()
-    bot.run()
+    ChatBot.run()
 
 if __name__ == '__main__':
     main()
