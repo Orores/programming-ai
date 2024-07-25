@@ -52,7 +52,7 @@ class ChatBot:
     @staticmethod
     def extend_context(args, conversation):
         if args.context is not None:
-            context_data = ContextManager.load_context_data(context_folder='context_prompts')
+            context_data = ContextManager.load_context_data(context_folder='context')
             context = ContextManager.get_specific_context(context_data, args.context)
             if isinstance(context, list):  # Ensure context retrieval is successful
                 context.extend(conversation)
@@ -173,6 +173,7 @@ class ChatBot:
             conversation = ChatBot.decide_conversation(args)
             conversation = ChatBot.str_to_dict_list(conversation)
             conversation = ChatBot.extend_context(args, conversation)
+            print(conversation)
             response = ChatBot.make_api_request(args, conversation)
             print("Chat Completion Response:", response)
             ChatCompletionSaver.save_to_file(response, args.save_path)
