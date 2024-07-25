@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import os
-import sys
 import json
 from AutoChatBot.DirectoryToJsonConverter import DirectoryToJsonConverter
 
@@ -82,21 +81,32 @@ class TestDirectoryToJsonConverterSingle(unittest.TestCase):
         with open(os.path.join(subdir2, 'content_1.txt'), 'w') as f:
             f.write('content_1_string')
 
+        # Add optional description, tags, and id files
+        with open(os.path.join(subdir1, 'description.txt'), 'w') as f:
+            f.write('context for bots')
+        with open(os.path.join(subdir1, 'tags.txt'), 'w') as f:
+            f.write('bot\nsimple')
+        with open(os.path.join(subdir1, 'id.txt'), 'w') as f:
+            f.write('122223334')
+
     def tearDown(self):
         self.input_directory.cleanup()
 
     def test_convert_directories_to_single_json(self):
         with tempfile.TemporaryDirectory() as output_directory:
-            DirectoryToJsonConverter.convert_directories_to_single_json(self.input_directory.name, output_directory)
+            output_json_path = os.path.join(output_directory, 'context.json')
+            DirectoryToJsonConverter.convert_directories_to_single_json(self.input_directory.name, output_json_path)
 
-            output_json_file = os.path.join(output_directory, 'context.json')
-            self.assertTrue(os.path.exists(output_json_file), "The output JSON file was not created.")
+            self.assertTrue(os.path.exists(output_json_path), "The output JSON file was not created.")
 
-            with open(output_json_file, 'r') as f:
+            with open(output_json_path, 'r') as f:
                 output_data = json.load(f)
 
             expected_output_data = {
                 'subdir1': {
+                    'description': 'context for bots',
+                    'tags': ['bot', 'simple'],
+                    'id': '122223334',
                     'context': [
                         {'role': 'role_1_string', 'content': 'content_1_string'},
                         {'role': 'role_2_string', 'content': 'content_2_string'}
@@ -161,11 +171,12 @@ class TestDirectoryToJsonConverterBasedOnMode(unittest.TestCase):
 
     def test_convert_directories_to_single_json(self):
         output_directory = os.path.join(self.temp_dir.name, 'output')
-        DirectoryToJsonConverter.convert_directories_to_json_based_on_mode(self.temp_dir.name, output_directory, 'single')
+        output_json_path = os.path.join(output_directory, 'context.json')
+        DirectoryToJsonConverter.convert_directories_to_json_based_on_mode(self.temp_dir.name, output_json_path, 'single')
 
-        self.assertTrue(os.path.exists(os.path.join(output_directory, 'context.json')))
+        self.assertTrue(os.path.exists(output_json_path))
 
-        with open(os.path.join(output_directory, 'context.json'), 'r') as f:
+        with open(output_json_path, 'r') as f:
             json_data = json.load(f)
             expected_data = {
                 "subdir1": {

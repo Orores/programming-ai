@@ -1,5 +1,6 @@
 import os
 import json
+import argparse
 
 class DirectoryToJsonConverter:
     """
@@ -65,7 +66,8 @@ class DirectoryToJsonConverter:
             print(f"Converted '{subdir}' to JSON and saved to '{output_json_file}'")
 
     @staticmethod
-    def convert_directories_to_single_json(input_directory, output_directory):
+    def convert_directories_to_single_json(input_directory, output_json_path):
+        output_directory = os.path.dirname(output_json_path)
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
 
@@ -80,6 +82,16 @@ class DirectoryToJsonConverter:
             if os.path.exists(description_file):
                 with open(description_file, 'r') as desc_fp:
                     subdir_obj['description'] = desc_fp.read().strip()
+
+            tags_file = os.path.join(subdir_path, 'tags.txt')
+            if os.path.exists(tags_file):
+                with open(tags_file, 'r') as tags_fp:
+                    subdir_obj['tags'] = tags_fp.read().splitlines()
+
+            id_file = os.path.join(subdir_path, 'id.txt')
+            if os.path.exists(id_file):
+                with open(id_file, 'r') as id_fp:
+                    subdir_obj['id'] = id_fp.read().strip()
             
             for i in range(1, 1000): # Assuming up to 1000 subdirectories
                 role_file_1 = os.path.join(subdir_path, f'role_{i}.txt')
@@ -101,25 +113,26 @@ class DirectoryToJsonConverter:
 
             print(f"Converted '{subdir}' to JSON and included in the single JSON file")
 
-        output_json_file = os.path.join(output_directory, 'context.json')
-        with open(output_json_file, 'w') as json_fp:
+        with open(output_json_path, 'w') as json_fp:
             json.dump(directory_data, json_fp, indent=4)
         
-        print(f"All subdirectories have been converted to a single JSON file saved to '{output_json_file}'")
+        print(f"All subdirectories have been converted to a single JSON file saved to '{output_json_path}'")
 
     @staticmethod
-    def convert_directories_to_json_based_on_mode(input_directory, output_directory, json_mode):
+    def convert_directories_to_json_based_on_mode(input_directory, output_path, json_mode):
         if json_mode == 'multiple':
-            DirectoryToJsonConverter.convert_directories_to_json(input_directory, output_directory)
+            DirectoryToJsonConverter.convert_directories_to_json(input_directory, output_path)
         elif json_mode == 'single':
-            DirectoryToJsonConverter.convert_directories_to_single_json(input_directory, output_directory)
+            DirectoryToJsonConverter.convert_directories_to_single_json(input_directory, output_path)
         else:
             print("Invalid json_mode. Please use 'single' or 'multiple'.")
 
-# Example usage
 if __name__ == '__main__':
-    input_directory = 'raw_context'
-    output_directory = 'AutoChatBot/context_prompts'
-    json_mode = 'single'
+    parser = argparse.ArgumentParser(description='Convert directory to JSON.')
+    parser.add_argument('--input_directory', type=str, help='Input directory containing subdirectories.')
+    parser.add_argument('--output_path', type=str, help='Output path for the JSON file(s).')
+    parser.add_argument('--json_mode', type=str, choices=['single', 'multiple'], help='Mode for JSON conversion: single or multiple.')
 
-    DirectoryToJsonConverter.convert_directories_to_json_based_on_mode(input_directory, output_directory, json_mode)
+    args = parser.parse_args()
+
+    DirectoryToJsonConverter.convert_directories_to_json_based_on_mode(args.input_directory, args.output_path, args.json_mode)
