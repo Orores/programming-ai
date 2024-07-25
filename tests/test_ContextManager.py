@@ -41,6 +41,13 @@ class TestContextManager(unittest.TestCase):
             json.dump(context_data_1, f)
         with open(os.path.join(self.test_dir.name, 'context2.json'), 'w') as f:
             json.dump(context_data_2, f)
+        
+        # Create an empty JSON file
+        open(os.path.join(self.test_dir.name, 'empty.json'), 'w').close()
+
+        # Create an invalid JSON file
+        with open(os.path.join(self.test_dir.name, 'invalid.json'), 'w') as f:
+            f.write("{invalid JSON}")
 
     def tearDown(self):
         # Cleanup the temporary directory
@@ -72,6 +79,14 @@ class TestContextManager(unittest.TestCase):
             }
         }
         self.assertEqual(context_data, expected_data)
+
+    def test_load_context_data_with_empty_file(self):
+        context_data = ContextManager.load_context_data(self.test_dir.name)
+        self.assertNotIn('empty', context_data)
+
+    def test_load_context_data_with_invalid_file(self):
+        context_data = ContextManager.load_context_data(self.test_dir.name)
+        self.assertNotIn('invalid', context_data)
 
     def test_retrieve_context(self):
         context_data = ContextManager.load_context_data(self.test_dir.name)
@@ -107,6 +122,23 @@ class TestContextManager(unittest.TestCase):
             {"role": "user", "content": "do you drive a car?"},
         ]
         self.assertEqual(specific_context, expected_context)
+
+    def test_get_specific_context_nonexistent(self):
+        context_data = ContextManager.load_context_data(self.test_dir.name)
+        specific_context = ContextManager.get_specific_context(context_data, 'nonexistent', n=3)
+        self.assertEqual(specific_context, "Context 'nonexistent' does not exist.")
+
+    def test_get_specific_context_with_no_messages(self):
+        context_data = {
+            "empty_context": {
+                "description": "Empty context",
+                "tags": [],
+                "id": 'empty123',
+                "context": []
+            }
+        }
+        specific_context = ContextManager.get_specific_context(context_data, 'empty_context', n=3)
+        self.assertEqual(specific_context, [None])
 
 if __name__ == "__main__":
     unittest.main()

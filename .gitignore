@@ -1,3 +1,6 @@
+# Addon Context folder
+context/addon/
+
 # Debian build folder
 deb_dist/
 

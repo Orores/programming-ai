@@ -30,9 +30,13 @@ class ContextManager:
             for file_name in files:
                 if file_name.endswith(".json"):
                     file_path = os.path.join(root, file_name)
-                    with open(file_path, 'r') as file:
-                        data = json.load(file)
-                        context_data.update(data)
+                    try:
+                        with open(file_path, 'r') as file:
+                            data = json.load(file)
+                            if data:  # Check if data is not empty
+                                context_data.update(data)
+                    except json.JSONDecodeError:
+                        print(f"Warning: Failed to decode JSON from file '{file_path}'. Skipping.")
         return context_data
 
     @staticmethod
@@ -93,7 +97,7 @@ class ContextManager:
 # Usage example:
 if __name__ == "__main__":
     # Example for multiple JSON files in a directory
-    context_folder = 'context_prompts'
+    context_folder = 'context'
     context_data = ContextManager.load_context_data(context_folder)
 
     # Retrieve context from a specific context name
@@ -106,5 +110,5 @@ if __name__ == "__main__":
     print(all_context_names)
 
     # Retrieve specific context
-    specific_context = ContextManager.get_specific_context(context_data, 'apple', n=5)
+    specific_context = ContextManager.get_specific_context(context_data, 'banana', n=5)
     print(specific_context)

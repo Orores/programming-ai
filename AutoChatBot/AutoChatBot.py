@@ -52,12 +52,13 @@ class ChatBot:
     @staticmethod
     def extend_context(args, conversation):
         if args.context is not None:
-            context_data = ContextManager.load_context_data(context_folder='context_prompts/context.json', is_single_file=True)
-            try:
-                context = ContextManager.retrieve_context(context_data, args.context)
+            context_data = ContextManager.load_context_data(context_folder='context_prompts')
+            context = ContextManager.get_specific_context(context_data, args.context)
+            if isinstance(context, list):  # Ensure context retrieval is successful
                 context.extend(conversation)
                 conversation = context
-            except FileNotFoundError:
+            else:
+                print(context)  # Print error message if context does not exist
                 exit()
         return conversation
 
@@ -161,9 +162,8 @@ class ChatBot:
         parser = ParserCreator.create_parser()
         args = parser.parse_args()
         if args.show_available_context:
-            context_data = ContextManager.load_context_data(context_folder='context_prompts/context.json', is_single_file=True)
+            context_data = ContextManager.load_context_data(context_folder='context')
             context_names = ContextManager.get_all_context_names(context_data)
-            print("Available Context Names:", context_names)
         if args.show_models:
             models = TogetherAIModelRetriever.get_available_models()
             print("Available Models for TogetherAI:\n")
