@@ -6,7 +6,7 @@ from AutoChatBot.ParserCreator import ParserCreator  # Assuming your script file
 class TestParserCreator(unittest.TestCase):
     def test_parse_args(self):
         test_args = ["--api", "openai", "--model", "gpt-3.5-turbo", "--max_tokens", "200", "--temperature", "0.7", "--frequency_penalty", "0.5",
-                     "--presence_penalty", "0.3", "--top_p", "0.8", "--stop_sequences", "bye", "--question", "How are you?",
+                     "--presence_penalty", "0.3", "--top_p", "0.8", "--top_k", "60", "--repetition_penalty", "1.2", "--stop_sequences", "bye", "--question", "How are you?",
                      "--file_path", "/path/to/file", "--save_path", "result.txt", "--context", "/path/to/context", "--run_code", "--show_available_context"]
         with patch("sys.argv", ["ParserCreator.py"] + test_args):
             parser = ParserCreator.create_parser()
@@ -20,6 +20,8 @@ class TestParserCreator(unittest.TestCase):
             self.assertEqual(args.frequency_penalty, 0.5)
             self.assertEqual(args.presence_penalty, 0.3)
             self.assertEqual(args.top_p, 0.8)
+            self.assertEqual(args.top_k, 60)
+            self.assertEqual(args.repetition_penalty, 1.2)
             self.assertEqual(args.stop_sequences, ["bye"])
             self.assertEqual(args.question, "How are you?")
             self.assertEqual(args.file_path, "/path/to/file")

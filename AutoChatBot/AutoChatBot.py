@@ -81,7 +81,14 @@ class ChatBot:
             api_key = TogetherAIChatCompletion.load_api_key()
             response = TogetherAIChatCompletion.make_api_request(
                 conversation=conversation,
-                api_key=api_key
+                api_key=api_key,
+                model=args.model,
+                temperature=args.temperature,
+                max_tokens=args.max_tokens,
+                stop_sequences=args.stop_sequences,
+                frequency_penalty=args.frequency_penalty,
+                presence_penalty=args.presence_penalty,
+                top_p=args.top_p,
             )
         else:
             raise ValueError("Invalid API selection. Choose 'openai' or 'togetherai'.")
