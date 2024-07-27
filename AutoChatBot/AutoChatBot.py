@@ -85,10 +85,9 @@ class ChatBot:
                 model=args.model,
                 temperature=args.temperature,
                 max_tokens=args.max_tokens,
-                stop_sequences=args.stop_sequences,
-                frequency_penalty=args.frequency_penalty,
-                presence_penalty=args.presence_penalty,
                 top_p=args.top_p,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty,
             )
         else:
             raise ValueError("Invalid API selection. Choose 'openai' or 'togetherai'.")
@@ -180,7 +179,6 @@ class ChatBot:
             conversation = ChatBot.decide_conversation(args)
             conversation = ChatBot.str_to_dict_list(conversation)
             conversation = ChatBot.extend_context(args, conversation)
-            print(conversation)
             response = ChatBot.make_api_request(args, conversation)
             print("Chat Completion Response:", response)
             ChatCompletionSaver.save_to_file(response, args.save_path)
