@@ -74,7 +74,7 @@ class ContextManager:
         return context_list
 
     @staticmethod
-    def get_specific_context(context_data, context_name, n=10):
+    def get_specific_context(context_data, context_name, n=100):
         """
         Retrieve the last n user/assistant exchanges along with the initial system message.
 
