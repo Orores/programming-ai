@@ -30,7 +30,7 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
             self.assertIsInstance(model, dict, "A model in the response list is not a dictionary")
 
             # Check if the dictionary contains expected keys
-            self.assertIn('display_name', model, "Model dictionary does not contain 'display_name'")
+            self.assertIn('id', model, "Model dictionary does not contain 'id'")
             self.assertIn('type', model, "Model dictionary does not contain 'type'")
             self.assertIn('pricing', model, "Model dictionary does not contain 'pricing'")
 
@@ -39,7 +39,7 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
         # Mock model data
         mock_models = [
             {
-                "display_name": "Mock Model 1",
+                "id": "mock_model_1",
                 "type": "language",
                 "pricing": {
                     "hourly": 0,
@@ -49,7 +49,7 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
                 }
             },
             {
-                "display_name": "Mock Model 2",
+                "id": "mock_model_2",
                 "type": "chat",
                 "pricing": {
                     "hourly": 0,
@@ -68,10 +68,10 @@ class TestTogetherAIModelRetriever(unittest.TestCase):
 
         # Define the expected output
         expected_output = (
-            "Name                                     Type       Pricing (Hourly) Pricing (Input) Pricing (Output) Pricing (Base)\n"
+            "ID                                       Type       Pricing (Hourly) Pricing (Input) Pricing (Output) Pricing (Base)\n"
             "------------------------------------------------------------------------------------------------------------------------\n"
-            "Mock Model 1                             language   0        0.1      0.1      0       \n"
-            "Mock Model 2                             chat       0        0.2      0.2      0       \n"
+            "mock_model_1                             language   0        0.1      0.1      0       \n"
+            "mock_model_2                             chat       0        0.2      0.2      0       \n"
         )
 
         # Check if the output matches the expected output

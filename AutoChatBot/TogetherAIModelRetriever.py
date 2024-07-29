@@ -32,7 +32,7 @@ class TogetherAIModelRetriever:
     @staticmethod
     def print_models_table(models):
         # Define the header and row format
-        headers = ["Name", "Type", "Pricing (Hourly)", "Pricing (Input)", "Pricing (Output)", "Pricing (Base)"]
+        headers = ["ID", "Type", "Pricing (Hourly)", "Pricing (Input)", "Pricing (Output)", "Pricing (Base)"]
         row_format = "{:<40} {:<10} {:<8} {:<8} {:<8} {:<8}"
         
         # Print the header
@@ -41,7 +41,7 @@ class TogetherAIModelRetriever:
         
         # Print each model
         for model in models:
-            display_name = model.get('display_name', 'N/A')
+            model_id = model.get('id', 'N/A')
             model_type = model.get('type', 'N/A')
             pricing = model.get('pricing', {})
             hourly = pricing.get('hourly', 'N/A')
@@ -49,7 +49,7 @@ class TogetherAIModelRetriever:
             output_cost = pricing.get('output', 'N/A')
             base_cost = pricing.get('base', 'N/A')
             
-            print(row_format.format(display_name, model_type, hourly, input_cost, output_cost, base_cost))
+            print(row_format.format(model_id, model_type, hourly, input_cost, output_cost, base_cost))
 
 # Testing the class (optional)
 if __name__ == '__main__':
