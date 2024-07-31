@@ -31,7 +31,19 @@ class ChatBot:
             conversation = ConversationPreparer.decide_conversation(args)
             conversation = ConversationPreparer.str_to_dict_list(conversation)
             conversation = ConversationPreparer.extend_context(args, conversation)
-            response = ChatAPIHandler.make_api_request(args, conversation)
+            response = ChatAPIHandler.make_api_request(
+                api=args.api,
+                model=args.model,
+                temperature=args.temperature,
+                max_tokens=args.max_tokens,
+                top_p=args.top_p,
+                conversation=conversation,
+                frequency_penalty=args.frequency_penalty,
+                presence_penalty=args.presence_penalty,
+                stop_sequences=args.stop_sequences,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty
+            )
             print("Chat Completion Response:", response)
             ChatCompletionSaver.save_to_file(response, args.save_path)
             response_content = response['choices'][0]['message']['content']
