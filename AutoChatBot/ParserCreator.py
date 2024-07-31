@@ -22,6 +22,7 @@ class ParserCreator:
         parser.add_argument("--save_path", type=str, default='response.tmp', help="Path to save the chat completion response.")
         parser.add_argument("--run_code", action='store_true', help="Run the generated code if any.")
         parser.add_argument("--run_code_with_unittest", action='store_true', help="Generate a unittest, then a code, then run the code against the unittest.")
+        parser.add_argument("--code_save_path", type=str, default='sandbox_script/script.py', help="Path to save the generated code.")
         return parser
 
 if __name__ == "__main__":
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     print(f"File Path: {args.file_path}")
     print(f"Save Path: {args.save_path}")
     print(f"Context: {args.context}")
+    print(f"Code Save Path: {args.code_save_path}")
     if args.run_code:
         print("Run code option is enabled.")
     else:
