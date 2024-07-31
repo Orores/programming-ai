@@ -16,7 +16,7 @@ class ChatBot:
     BOLD = '\33[1m'
 
     @staticmethod
-    def run():
+    def main():
         parser = ParserCreator.create_parser()
         args = parser.parse_args()
         if args.show_available_context:
@@ -49,13 +49,40 @@ class ChatBot:
             response_content = response['choices'][0]['message']['content']
         
         if args.run_code:
-            CodeExecutor.retry_api_request(args, response_content)
+            CodeExecutor.retry_api_request(
+                api=args.api,
+                model=args.model,
+                temperature=args.temperature,
+                max_tokens=args.max_tokens,
+                top_p=args.top_p,
+                frequency_penalty=args.frequency_penalty,
+                presence_penalty=args.presence_penalty,
+                stop_sequences=args.stop_sequences,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty,
+                save_path=args.save_path,
+                code_save_path=args.code_save_path,
+                run_code=args.run_code,
+                response_content=response_content
+            )
         if args.run_code_with_unittest:
-            CodeExecutor.run_code_with_unittest(args, response_content)
+            CodeExecutor.run_code_with_unittest(
+                api=args.api,
+                model=args.model,
+                temperature=args.temperature,
+                max_tokens=args.max_tokens,
+                top_p=args.top_p,
+                frequency_penalty=args.frequency_penalty,
+                presence_penalty=args.presence_penalty,
+                stop_sequences=args.stop_sequences,
+                top_k=args.top_k,
+                repetition_penalty=args.repetition_penalty,
+                save_path=args.save_path,
+                code_save_path=args.code_save_path,
+                run_code=args.run_code_with_unittest,
+                response_content=response_content
+            )
 
-
-def main():
-    ChatBot.run()
 
 if __name__ == '__main__':
-    main()
+    ChatBot.main()
