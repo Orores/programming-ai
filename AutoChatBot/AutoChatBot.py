@@ -9,6 +9,27 @@ from .ChatAPIHandler import ChatAPIHandler
 from .CodeExecutor import CodeExecutor
 
 class ChatBot:
+    """
+    The main ChatBot class to execute the chatbot functionalities.
+
+    Constants
+    ---------
+    FAIL : str
+        Red color escape code for error messages.
+    OKGREEN : str
+        Green color escape code for success messages.
+    OKCYAN : str
+        Cyan color escape code for informational messages.
+    ORANGE : str
+        Orange color escape code for warning messages.
+    BOLD : str
+        Escape code for bold text.
+
+    Methods
+    -------
+    main():
+        The main method to run the chatbot.
+    """
     FAIL = '\33[91m'
     OKGREEN = '\33[92m'
     OKCYAN = '\33[96m'
@@ -17,20 +38,26 @@ class ChatBot:
 
     @staticmethod
     def main():
+        """
+        The main method to run the chatbot. Parses arguments and executes the chatbot logic.
+        """
         parser = ParserCreator.create_parser()
         args = parser.parse_args()
+        
         if args.show_available_context:
             context_data = ContextManager.load_context_data(context_folder='context')
             context_names = ContextManager.get_all_context_names(context_data)
+            print("Available contexts:", context_names)
+        
         if args.show_models:
             models = TogetherAIModelRetriever.get_available_models()
             print("Available Models for TogetherAI:\n")
             TogetherAIModelRetriever.print_models_table(models)
 
         if args.file_path or args.question:
-            conversation = ConversationPreparer.decide_conversation(args)
+            conversation = ConversationPreparer.decide_conversation(file_path=args.file_path, question=args.question)
             conversation = ConversationPreparer.str_to_dict_list(conversation)
-            conversation = ConversationPreparer.extend_context(args, conversation)
+            conversation = ConversationPreparer.extend_context(context_name=args.context, conversation=conversation)
             response = ChatAPIHandler.make_api_request(
                 api=args.api,
                 model=args.model,
@@ -65,6 +92,7 @@ class ChatBot:
                 run_code=args.run_code,
                 response_content=response_content
             )
+            
         if args.run_code_with_unittest:
             CodeExecutor.run_code_with_unittest(
                 api=args.api,

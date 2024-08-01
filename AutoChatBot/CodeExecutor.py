@@ -27,7 +27,7 @@ class CodeExecutor:
             return None
 
     @staticmethod
-    def retry_api_request(api, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, stop_sequences, top_k, repetition_penalty, save_path, code_save_path, run_code, response_content, max_attempts=3):
+    def retry_api_request(api, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, stop_sequences, top_k, repetition_penalty, save_path, code_save_path, run_code, response_content, max_attempts=3, context_name=None):
         """
         Retries API requests and executes the code if needed.
 
@@ -47,6 +47,7 @@ class CodeExecutor:
             run_code (bool): Flag indicating whether to execute the code.
             response_content (str): The initial code/content to execute.
             max_attempts (int): Maximum number of retry attempts.
+            context_name (str, optional): The name of the context to be appended (default is None).
 
         Returns:
             bool: True if execution completed successfully, False otherwise.
@@ -74,7 +75,7 @@ class CodeExecutor:
                     error_output=error_output,
                 )
                 conversation = ConversationPreparer.str_to_dict_list(conversation)
-                conversation = ConversationPreparer.extend_context(api, conversation)
+                conversation = ConversationPreparer.extend_context(context_name, conversation)
             else:
                 print("Execution completed successfully.")
                 return True
