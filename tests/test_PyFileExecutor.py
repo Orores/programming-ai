@@ -1,25 +1,3 @@
-"""
-### Explanation:
-1. **Test Setup and Teardown**:
-   - `setUp` method initializes a temporary directory and constructs a file path for the script.
-   - `tearDown` method ensures the temporary directory is cleaned up after tests are run.
-
-2. **Mocks**:
-   - `subprocess.run` is mocked to simulate the execution of the Python script without actually running it.
-   - `os.makedirs` is mocked to test directory creation logic without affecting the real filesystem.
-
-3. **Test Cases**:
-   - **`test_execute_without_error`**: Tests the execution of the script when there is no error (`returncode = 0`).
-   - **`test_execute_with_error`**: Tests the execution of the script when there is an error (`returncode = 1`).
-   - **`test_execute_with_directory`**: Tests the script execution and directory creation logic.
-
-The tests verify:
-- The `subprocess.run` method is called with the correct command.
-- The directory creation logic is correctly called.
-- The error output is correctly captured if any.
-- The executed code matches the input code.
-"""
-
 import unittest
 import os
 import tempfile
@@ -28,7 +6,31 @@ from unittest.mock import patch, Mock
 from AutoChatBot.PyFileExecutor import PyFileExecutor
 
 class TestPyFileExecutor(unittest.TestCase):
-    
+    """
+    ### Explanation:
+    1. **Test Setup and Teardown**:
+       - `setUp` method initializes a temporary directory and constructs a file path for the script.
+       - `tearDown` method ensures the temporary directory is cleaned up after tests are run.
+
+    2. **Mocks**:
+       - `subprocess.run` is mocked to simulate the execution of the Python script without actually running it.
+       - `os.makedirs` is mocked to test directory creation logic without affecting the real filesystem.
+
+    3. **Test Cases**:
+       - **`test_execute_without_error`**: Tests the execution of the script when there is no error (`returncode = 0`).
+       - **`test_execute_with_error`**: Tests the execution of the script when there is an error (`returncode = 1`).
+       - **`test_execute_with_directory`**: Tests the script execution and directory creation logic.
+       - **`test_is_error`**: Tests the `is_error` function to ensure it correctly identifies errors.
+
+    The tests verify:
+    - The `subprocess.run` method is called with the correct command.
+    - The directory creation logic is correctly called.
+    - The error output is correctly captured if any.
+    - The executed code matches the input code.
+    - The `is_error` function works as intended.
+    """
+
+   
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.file_path = os.path.join(self.temp_dir.name, 'script.py')
@@ -100,5 +102,12 @@ class TestPyFileExecutor(unittest.TestCase):
 
         self.assertIsNone(error_output)
 
+    def test_is_error(self):
+        self.assertTrue(PyFileExecutor.is_error("Error: Something went wrong"))
+        self.assertFalse(PyFileExecutor.is_error("All tests ran successfully OK"))
+        self.assertFalse(PyFileExecutor.is_error(""))
+
 if __name__ == '__main__':
     unittest.main()
+
+

@@ -60,7 +60,10 @@ class PyFileExecutor:
         Returns:
         - bool: True if there is an error, False otherwise.
         """
-        return not output.strip().endswith("OK")
+        if output.strip().endswith("OK") or output.strip() == "":
+            return False
+        else:
+            return True
 
     @staticmethod
     def execute_code(file_path):
