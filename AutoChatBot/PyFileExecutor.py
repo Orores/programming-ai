@@ -43,10 +43,24 @@ class PyFileExecutor:
             # Save the code as a .py file
             with open(file_path, 'w') as file:
                 file.write(code_to_save)
+                print('Code written to: ',file_path)
 
             return None
         except Exception as e:
             return str(e)
+
+    @staticmethod
+    def is_error(output):
+        """
+        Checks if the given output string indicates an error.
+
+        Parameters:
+        - output (str): The output string to be checked.
+
+        Returns:
+        - bool: True if there is an error, False otherwise.
+        """
+        return not output.strip().endswith("OK")
 
     @staticmethod
     def execute_code(file_path):
@@ -70,15 +84,17 @@ class PyFileExecutor:
             process = subprocess.run(command, capture_output=True)
 
             # Check if there is any error output
-            if process.stderr:
-                return process.stderr.decode().strip()
+            stderr_output = process.stderr.decode().strip()
+            if stderr_output and PyFileExecutor.is_error(stderr_output):
+                return stderr_output
             else:
                 return None
         except Exception as e:
             return str(e)
 
-# Usage example:
-if __name__ == "__main__":
+
+
+def main():
     input_string = '''
 ```python
 print('Hello, World!')
@@ -96,3 +112,12 @@ print('Hello, World!')
         else:
             print("Executed Code:\n", input_string)
             print("Execution completed successfully.")
+
+def main_light():
+    error = PyFileExecutor.execute_code('tests/test_myscript.py')
+    print('ERROR: ')
+    print(error)
+
+# Usage example:
+if __name__ == "__main__":
+    main_light()
