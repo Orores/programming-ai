@@ -160,6 +160,22 @@
         ],
         "description": "Takes:\nPython class with code\nDescription of what type of method to add\n\nReturns:\nCode for the new class method"
     },
+    "generate_unittest_using_form": {
+        "context": [
+            {
+                "role": "system",
+                "content": "you are a programmer who exclusively writes unittests"
+            },
+            {
+                "role": "user",
+                "content": "Write me a python class for retrieving the text content of a wikipedia article. I provide the article name and the script gives me the content.\n\nBut first write a unittest, because I want to use the test driven development approach. Now show me only the unittest:"
+            },
+            {
+                "role": "assistant",
+                "content": "import unittest\nfrom unittest.mock import patch\nimport requests\nfrom sandbox_scripts.myscript import WikipediaFetcher\n\nclass TestWikipediaFetcher(unittest.TestCase):\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_success(self, mock_get):\n        mock_response = {\n            \"query\": {\n                \"pages\": {\n                    \"12345\": {\n                        \"pageid\": 12345,\n                        \"ns\": 0,\n                        \"title\": \"Python (programming language)\",\n                        \"extract\": \"Python is an interpreted high-level general-purpose programming language.\"\n                    }\n                }\n            }\n        }\n        mock_get.return_value.json.return_value = mock_response\n\n        page_title = \"Python (programming language)\"\n        expected_content = \"Python is an interpreted high-level general-purpose programming language.\"\n        actual_content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        self.assertEqual(expected_content, actual_content)\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_no_extract(self, mock_get):\n        mock_response = {\n            \"query\": {\n                \"pages\": {\n                    \"12345\": {\n                        \"pageid\": 12345,\n                        \"ns\": 0,\n                        \"title\": \"Python (programming language)\"\n                        # No 'extract' field\n                    }\n                }\n            }\n        }\n        mock_get.return_value.json.return_value = mock_response\n\n        page_title = \"Python (programming language)\"\n        expected_content = \"\"\n        actual_content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        self.assertEqual(expected_content, actual_content)\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_invalid_page(self, mock_get):\n        mock_response = {\n            \"query\": {\n                \"pages\": {\n                    \"-1\": {\n                        \"missing\": True\n                    }\n                }\n            }\n        }\n        mock_get.return_value.json.return_value = mock_response\n\n        page_title = \"NonExistentPage\"\n        expected_content = \"\"\n        actual_content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        self.assertEqual(expected_content, actual_content)\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_error_handling(self, mock_get):\n        mock_get.side_effect = requests.exceptions.RequestException(\"Request failed\")\n\n        page_title = \"Python (programming language)\"\n        with self.assertRaises(requests.exceptions.RequestException):\n            WikipediaFetcher.fetch_wikipedia_page(page_title)\n\n    def test_fetch_wikipedia_page_actual_api_call(self):\n        page_title = \"Python (programming language)\"\n        content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        # Check if the content is not empty\n        self.assertNotEqual(content, \"\")\n\nif __name__ == \"__main__\":\n    unittest.main()"
+            }
+        ]
+    },
     "genTestFromClass": {
         "context": [
             {
@@ -244,7 +260,7 @@
         "context": [
             {
                 "role": "system",
-                "content": "you are primitive robot that writes unittests"
+                "content": ""
             },
             {
                 "role": "user",
@@ -397,6 +413,22 @@
             {
                 "role": "assistant",
                 "content": "import os\nimport subprocess\n\ndef execute_py_file(\n    file_path: str,\n    code: str, \n    ):\n    \"\"\"\n    This function takes a file path and a string, saves the string as a .py file, and executes it using a subprocess.\n\n    Parameters:\n    - file_path (str): Path to the .py file.\n    - code (str): String representing the Python code to be executed.\n\n    Returns:\n    - str or None: Error output if there is an error, None if there is no error.\n    \"\"\"\n\n    try:\n        # Step 1: Create the directory if it does not exist\n        directory, file_name = os.path.split(file_path)\n        if directory:\n            os.makedirs(directory, exist_ok=True)\n\n        # Step 2: Save the code as a .py file\n        with open(file_path, 'w') as file:\n            file.write(code)\n\n        # Step 3: Prepare the command for executing the .py file\n        command = [\"python\"]\n        if directory:\n            command.extend([os.path.join(directory, file_name)])\n        else:\n            command.append(file_name)\n\n        # Step 4: Execute the .py file using a subprocess\n        process = subprocess.run(command, capture_output=True)\n\n        # Step 5: Check if there is any error output\n        if process.stderr:\n            return process.stderr.decode().strip()\n        else:\n            return None\n    except Exception as e:\n        return str(e)"
+            }
+        ]
+    },
+    "generate_class_from_unittest": {
+        "context": [
+            {
+                "role": "system",
+                "content": "you are a programmer who exclusively write code based on unittests"
+            },
+            {
+                "role": "user",
+                "content": "Write me a python class for retrieving the text content of a wikipedia article. I provide the article name and the script gives me the content.\n\nI like using the Test Driven Development so I already created a unittest.\n\nFILE: sandbox_tests/test_myscript\nTYPE: unittest\nCONTENT:\n\nimport unittest\nfrom unittest.mock import patch\nimport requests\nfrom sandbox_scripts.myscript import WikipediaFetcher\n\nclass TestWikipediaFetcher(unittest.TestCase):\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_success(self, mock_get):\n        mock_response = {\n            \"query\": {\n                \"pages\": {\n                    \"12345\": {\n                        \"pageid\": 12345,\n                        \"ns\": 0,\n                        \"title\": \"Python (programming language)\",\n                        \"extract\": \"Python is an interpreted high-level general-purpose programming language.\"\n                    }\n                }\n            }\n        }\n        mock_get.return_value.json.return_value = mock_response\n\n        page_title = \"Python (programming language)\"\n        expected_content = \"Python is an interpreted high-level general-purpose programming language.\"\n        actual_content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        self.assertEqual(expected_content, actual_content)\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_no_extract(self, mock_get):\n        mock_response = {\n            \"query\": {\n                \"pages\": {\n                    \"12345\": {\n                        \"pageid\": 12345,\n                        \"ns\": 0,\n                        \"title\": \"Python (programming language)\"\n                        # No 'extract' field\n                    }\n                }\n            }\n        }\n        mock_get.return_value.json.return_value = mock_response\n\n        page_title = \"Python (programming language)\"\n        expected_content = \"\"\n        actual_content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        self.assertEqual(expected_content, actual_content)\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_invalid_page(self, mock_get):\n        mock_response = {\n            \"query\": {\n                \"pages\": {\n                    \"-1\": {\n                        \"missing\": True\n                    }\n                }\n            }\n        }\n        mock_get.return_value.json.return_value = mock_response\n\n        page_title = \"NonExistentPage\"\n        expected_content = \"\"\n        actual_content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        self.assertEqual(expected_content, actual_content)\n\n    @patch('requests.get')\n    def test_fetch_wikipedia_page_error_handling(self, mock_get):\n        mock_get.side_effect = requests.exceptions.RequestException(\"Request failed\")\n\n        page_title = \"Python (programming language)\"\n        with self.assertRaises(requests.exceptions.RequestException):\n            WikipediaFetcher.fetch_wikipedia_page(page_title)\n\n    def test_fetch_wikipedia_page_actual_api_call(self):\n        page_title = \"Python (programming language)\"\n        content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n        \n        # Check if the content is not empty\n        self.assertNotEqual(content, \"\")\n\nif __name__ == \"__main__\":\n    unittest.main()\n\nFILE: sandbox_scripts/myscript.py\nTYPE: application code\nCONTENT:"
+            },
+            {
+                "role": "assistant",
+                "content": "import requests\n\nclass WikipediaFetcher:\n    @staticmethod\n    def fetch_wikipedia_page(page_title):\n        \"\"\"\n        Fetches the content of a Wikipedia page as a string.\n\n        Args:\n            page_title (str): The title of the Wikipedia page to fetch.\n\n        Returns:\n            str: The content of the Wikipedia page as a string.\n        \"\"\"\n        url = f\"https://en.wikipedia.org/w/api.php\"\n        params = {\n            \"action\": \"query\",\n            \"format\": \"json\",\n            \"prop\": \"extracts\",\n            \"explaintext\": True,\n            \"titles\": page_title,\n        }\n        \n        response = requests.get(url, params=params)\n        data = response.json()\n        \n        pages = data.get(\"query\", {}).get(\"pages\", {})\n        page = next(iter(pages.values()))\n        \n        return page.get(\"extract\", \"\")\n\n# Example usage:\nif __name__ == \"__main__\":\n    page_title = \"Python (programming language)\"\n    content = WikipediaFetcher.fetch_wikipedia_page(page_title)\n    print(content)"
             }
         ]
     },

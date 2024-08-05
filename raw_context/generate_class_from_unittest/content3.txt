@@ -1,0 +1,36 @@
+import requests
+
+class WikipediaFetcher:
+    @staticmethod
+    def fetch_wikipedia_page(page_title):
+        """
+        Fetches the content of a Wikipedia page as a string.
+
+        Args:
+            page_title (str): The title of the Wikipedia page to fetch.
+
+        Returns:
+            str: The content of the Wikipedia page as a string.
+        """
+        url = f"https://en.wikipedia.org/w/api.php"
+        params = {
+            "action": "query",
+            "format": "json",
+            "prop": "extracts",
+            "explaintext": True,
+            "titles": page_title,
+        }
+        
+        response = requests.get(url, params=params)
+        data = response.json()
+        
+        pages = data.get("query", {}).get("pages", {})
+        page = next(iter(pages.values()))
+        
+        return page.get("extract", "")
+
+# Example usage:
+if __name__ == "__main__":
+    page_title = "Python (programming language)"
+    content = WikipediaFetcher.fetch_wikipedia_page(page_title)
+    print(content)

@@ -1,0 +1,3 @@
+Write me a python class for retrieving the text content of a wikipedia article. I provide the article name and the script gives me the content.
+
+But first write a unittest, because I want to use the test driven development approach. Now show me only the unittest:
