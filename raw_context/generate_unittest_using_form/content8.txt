@@ -1,0 +1,5 @@
+I want code that debayers an image, single class, I can pass it the image path and the bayer pattern (like bggr)
+
+But first write a unittest, because I want to use the test driven development approach. I also want to use static methods only and the functional programming paradigm. Now show me only the unittest:
+
+
