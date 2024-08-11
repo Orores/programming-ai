@@ -1,3 +1,6 @@
 I want code that creates a luminance histogramm of a picture.
 
-But first write a unittest, because I want to use the test driven development approach. I also want to use static methods only and the functional programming paradigm. Now show me only the unittest:
+CLASS_FILEPATH: image_utils/luminance_histogram.py 
+CLASS_NAME: LuminanceHistogram
+
+But first write a unittest. I want to use the test driven development approach. I also want to use static methods only. I want to use the functional programming paradigm. I will show you the unittest now:

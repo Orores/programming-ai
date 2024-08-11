@@ -1,0 +1,6 @@
+I want python code that tracks my daily bodybuilding progress. IT can track my performance data and generate visual plot of my progress.
+
+CLASS_FILEPATH: workout_app/workout_tracker.py 
+CLASS_NAME: WorkoutTracker
+
+But first write a unittest. I want to use the test driven development approach. I also want to use static methods only. I want to use the functional programming paradigm. I will show you the unittest now:

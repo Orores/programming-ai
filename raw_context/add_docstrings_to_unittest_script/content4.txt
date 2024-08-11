@@ -1,0 +1,33 @@
+import unittest
+from unittest.mock import patch
+from sandbox_scripts.guess_number import GuessNumberGame
+
+class TestGuessNumberGame(unittest.TestCase):
+
+    def setUp(self):
+        self.settings = {'min': 1, 'max': 100, 'number_to_guess': 42}
+
+    def test_guess_correct(self):
+        result = GuessNumberGame.guess(self.settings, 42)
+        self.assertEqual(result, "Correct")
+    
+    def test_guess_higher(self):
+        result = GuessNumberGame.guess(self.settings, 30)
+        self.assertEqual(result, "Higher")
+    
+    def test_guess_lower(self):
+        result = GuessNumberGame.guess(self.settings, 50)
+        self.assertEqual(result, "Lower")
+    
+    @patch('builtins.input', side_effect=['42'])
+    @patch('builtins.print')
+    def test_play_game_correct(self, mock_print, mock_input):
+        self.settings['number_to_guess'] = 42
+        with patch('random.randint', return_value=42):
+            GuessNumberGame.play_game(self.settings)
+        mock_print.assert_any_call("Congratulations! You guessed the number.")
+
+if __name__ == "__main__":
+    unittest.main()
+
+add docstring to the unittest. Show the full updated code

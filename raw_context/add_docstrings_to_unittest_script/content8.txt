@@ -3,47 +3,13 @@ import numpy as np
 from PIL import Image
 import tempfile
 import os
-from image_utils.debayer import Debayer
+from sandbox_scripts.debayer import Debayer
 
 class TestDebayer(unittest.TestCase):
-    """
-    Short Description:
-    This class contains unit tests for the Debayer class, which is responsible for converting Bayer filter images 
-    to full-color images using different Bayer patterns.
-
-    Testing Strategy:
-    The testing strategy covers the following cases:
-    1. Correct debayering of images using different Bayer patterns ('bggr', 'rggb', 'grbg', 'gbrg').
-    2. Verification of the debayered image's shape and color channel values.
-
-    Methods:
-    - create_bayer_image:
-        Creates a simple Bayer pattern image for testing.
-    - test_debayer_bggr:
-        Tests the `debayer_image` method with the 'bggr' Bayer pattern.
-    - test_debayer_rggb:
-        Tests the `debayer_image` method with the 'rggb' Bayer pattern.
-    - test_debayer_grbg:
-        Tests the `debayer_image` method with the 'grbg' Bayer pattern.
-    - test_debayer_gbrg:
-        Tests the `debayer_image` method with the 'gbrg' Bayer pattern.
-
-    Properties Ensured:
-    - Correct debayering of images for different Bayer patterns.
-    - Verification of the debayered image's shape and color channel values.
-    """
 
     def create_bayer_image(self, pattern, width=4, height=4):
         """
         Create a simple Bayer pattern image.
-
-        Parameters:
-        pattern (str): The Bayer pattern ('bggr', 'rggb', 'grbg', 'gbrg').
-        width (int, optional): The width of the image. Default is 4.
-        height (int, optional): The height of the image. Default is 4.
-
-        Returns:
-        np.ndarray: A numpy array representing the Bayer pattern image.
         """
         data = np.zeros((height, width), dtype=np.uint8)
         
@@ -71,16 +37,6 @@ class TestDebayer(unittest.TestCase):
         return data
 
     def test_debayer_bggr(self):
-        """
-        Short Description:
-        Tests the `debayer_image` method with the 'bggr' Bayer pattern.
-
-        Test Strategy:
-        Creates a Bayer pattern image with the 'bggr' pattern, saves it, and then debayers it using the `debayer_image` method.
-
-        Expected Outcome:
-        The debayered image should have the correct shape and color channel values.
-        """
         bayer_pattern = 'bggr'
         bayer_data = self.create_bayer_image(bayer_pattern)
 
@@ -106,16 +62,6 @@ class TestDebayer(unittest.TestCase):
             os.remove(temp_file_path)
 
     def test_debayer_rggb(self):
-        """
-        Short Description:
-        Tests the `debayer_image` method with the 'rggb' Bayer pattern.
-
-        Test Strategy:
-        Creates a Bayer pattern image with the 'rggb' pattern, saves it, and then debayers it using the `debayer_image` method.
-
-        Expected Outcome:
-        The debayered image should have the correct shape and color channel values.
-        """
         bayer_pattern = 'rggb'
         bayer_data = self.create_bayer_image(bayer_pattern)
 
@@ -140,17 +86,8 @@ class TestDebayer(unittest.TestCase):
         finally:
             os.remove(temp_file_path)
 
+    # Additional tests for 'grbg' and 'gbrg' patterns can be added similarly
     def test_debayer_grbg(self):
-        """
-        Short Description:
-        Tests the `debayer_image` method with the 'grbg' Bayer pattern.
-
-        Test Strategy:
-        Creates a Bayer pattern image with the 'grbg' pattern, saves it, and then debayers it using the `debayer_image` method.
-
-        Expected Outcome:
-        The debayered image should have the correct shape and color channel values.
-        """
         bayer_pattern = 'grbg'
         bayer_data = self.create_bayer_image(bayer_pattern)
 
@@ -176,16 +113,6 @@ class TestDebayer(unittest.TestCase):
             os.remove(temp_file_path)
 
     def test_debayer_gbrg(self):
-        """
-        Short Description:
-        Tests the `debayer_image` method with the 'gbrg' Bayer pattern.
-
-        Test Strategy:
-        Creates a Bayer pattern image with the 'gbrg' pattern, saves it, and then debayers it using the `debayer_image` method.
-
-        Expected Outcome:
-        The debayered image should have the correct shape and color channel values.
-        """
         bayer_pattern = 'gbrg'
         bayer_data = self.create_bayer_image(bayer_pattern)
 
@@ -212,3 +139,5 @@ class TestDebayer(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+add docstring to the unittest. Show the full updated code

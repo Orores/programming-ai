@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from gaming.guess_number import GuessNumberGame
+from sandbox_scripts.guess_number import GuessNumberGame
 
 class TestGuessNumberGame(unittest.TestCase):
     """

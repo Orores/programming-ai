@@ -1,12 +1,52 @@
 import unittest
 from unittest.mock import patch
 import requests
-from sandbox_scripts.myscript import WikipediaFetcher
+from scraper.wikipedia_fetcher import WikipediaFetcher
 
 class TestWikipediaFetcher(unittest.TestCase):
+    """
+    Short Description:
+    This class contains unit tests for the WikipediaFetcher class, which fetches content from Wikipedia pages.
+    
+    Testing Strategy:
+    The testing strategy covers the following cases:
+    1. Successful fetch of a Wikipedia page with an extract.
+    2. Fetch of a Wikipedia page without an extract field.
+    3. Fetch of a non-existent Wikipedia page.
+    4. Handling of request exceptions.
+    5. Actual API call to ensure the WikipediaFetcher works with real data.
+
+    Methods:
+    - test_fetch_wikipedia_page_success:
+        Tests the `fetch_wikipedia_page` method for a successful fetch with an extract.
+    - test_fetch_wikipedia_page_no_extract:
+        Tests the `fetch_wikipedia_page` method for a page without an extract field.
+    - test_fetch_wikipedia_page_invalid_page:
+        Tests the `fetch_wikipedia_page` method for a non-existent Wikipedia page.
+    - test_fetch_wikipedia_page_error_handling:
+        Tests the `fetch_wikipedia_page` method for handling request exceptions.
+    - test_fetch_wikipedia_page_actual_api_call:
+        Tests the `fetch_wikipedia_page` method with an actual API call to ensure real-world functionality.
+
+    Properties Ensured:
+    - Correct handling of pages with and without extracts.
+    - Appropriate response for non-existent pages.
+    - Proper exception handling for request errors.
+    - Verification of real-world API functionality.
+    """
 
     @patch('requests.get')
     def test_fetch_wikipedia_page_success(self, mock_get):
+        """
+        Short Description:
+        Tests the `fetch_wikipedia_page` method for a successful fetch with an extract.
+
+        Test Strategy:
+        Uses a mock response to simulate a successful API call with an extract field.
+
+        Expected Outcome:
+        The method should return the content of the extract field.
+        """
         mock_response = {
             "query": {
                 "pages": {
@@ -29,6 +69,16 @@ class TestWikipediaFetcher(unittest.TestCase):
 
     @patch('requests.get')
     def test_fetch_wikipedia_page_no_extract(self, mock_get):
+        """
+        Short Description:
+        Tests the `fetch_wikipedia_page` method for a page without an extract field.
+
+        Test Strategy:
+        Uses a mock response to simulate an API call where the extract field is missing.
+
+        Expected Outcome:
+        The method should return an empty string.
+        """
         mock_response = {
             "query": {
                 "pages": {
@@ -51,6 +101,16 @@ class TestWikipediaFetcher(unittest.TestCase):
 
     @patch('requests.get')
     def test_fetch_wikipedia_page_invalid_page(self, mock_get):
+        """
+        Short Description:
+        Tests the `fetch_wikipedia_page` method for a non-existent Wikipedia page.
+
+        Test Strategy:
+        Uses a mock response to simulate an API call for a non-existent page.
+
+        Expected Outcome:
+        The method should return an empty string.
+        """
         mock_response = {
             "query": {
                 "pages": {
@@ -70,6 +130,16 @@ class TestWikipediaFetcher(unittest.TestCase):
 
     @patch('requests.get')
     def test_fetch_wikipedia_page_error_handling(self, mock_get):
+        """
+        Short Description:
+        Tests the `fetch_wikipedia_page` method for handling request exceptions.
+
+        Test Strategy:
+        Simulates a request exception using a mock side effect.
+
+        Expected Outcome:
+        The method should raise a requests.exceptions.RequestException.
+        """
         mock_get.side_effect = requests.exceptions.RequestException("Request failed")
 
         page_title = "Python (programming language)"
@@ -77,6 +147,16 @@ class TestWikipediaFetcher(unittest.TestCase):
             WikipediaFetcher.fetch_wikipedia_page(page_title)
 
     def test_fetch_wikipedia_page_actual_api_call(self):
+        """
+        Short Description:
+        Tests the `fetch_wikipedia_page` method with an actual API call to ensure real-world functionality.
+
+        Test Strategy:
+        Calls the method with a real Wikipedia page title.
+
+        Expected Outcome:
+        The method should return non-empty content.
+        """
         page_title = "Python (programming language)"
         content = WikipediaFetcher.fetch_wikipedia_page(page_title)
         

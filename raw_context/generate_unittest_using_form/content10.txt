@@ -1,0 +1,6 @@
+I want code that takes a directory and return a neatly formatted string of all .py file contatnets, all labeled with the appriate path in nice way. 
+
+CLASS_FILEPATH: context_utils/directory_reader.py 
+CLASS_NAME: DirectoryReader
+
+But first write a unittest. I want to use the test driven development approach. I also want to use static methods only. I want to use the functional programming paradigm. I will show you the unittest now:

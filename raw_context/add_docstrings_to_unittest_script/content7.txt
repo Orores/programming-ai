@@ -3,43 +3,11 @@ import numpy as np
 import tempfile
 import os
 import unittest
-from image_utils.luminance_histogram import LuminanceHistogram
+from sandbox_scripts.luminance_histogram import LuminanceHistogram
 
 class TestLuminanceHistogram(unittest.TestCase):
-    """
-    Short Description:
-    This class contains unit tests for the LuminanceHistogram class, which computes and plots luminance histograms from images.
-    
-    Testing Strategy:
-    The testing strategy covers the following cases:
-    1. Computing the luminance histogram with default parameters.
-    2. Computing the luminance histogram with custom parameters.
-    3. Plotting and saving the luminance histogram to a file.
-
-    Methods:
-    - test_compute_luminance_histogram_default_params:
-        Tests the `compute_luminance_histogram` method with default parameters (bins=5, range=(0, 256)).
-    - test_compute_luminance_histogram_custom_params:
-        Tests the `compute_luminance_histogram` method with custom parameters (bins=10, range=(0, 256)).
-    - test_plot_and_save_histogram:
-        Tests the `plot_and_save_histogram` method by plotting and saving the histogram to a file.
-
-    Properties Ensured:
-    - Correct computation of luminance histograms with default and custom parameters.
-    - Successful plotting and saving of luminance histograms.
-    """
 
     def test_compute_luminance_histogram_default_params(self):
-        """
-        Short Description:
-        Tests the `compute_luminance_histogram` method with default parameters (bins=5, range=(0, 256)).
-
-        Test Strategy:
-        Uses a simple grayscale image with known luminance values and computes the histogram.
-
-        Expected Outcome:
-        The computed histogram should match the expected histogram.
-        """
         # Create a temporary directory
         with tempfile.TemporaryDirectory() as tempdir:
             # Define the path for the test image
@@ -67,16 +35,6 @@ class TestLuminanceHistogram(unittest.TestCase):
             self.assertEqual(expected_histogram, actual_histogram)
 
     def test_compute_luminance_histogram_custom_params(self):
-        """
-        Short Description:
-        Tests the `compute_luminance_histogram` method with custom parameters (bins=10, range=(0, 256)).
-
-        Test Strategy:
-        Uses a simple grayscale image with known luminance values and computes the histogram with custom parameters.
-
-        Expected Outcome:
-        The computed histogram should match the expected histogram.
-        """
         # Create a temporary directory
         with tempfile.TemporaryDirectory() as tempdir:
             # Define the path for the test image
@@ -104,16 +62,6 @@ class TestLuminanceHistogram(unittest.TestCase):
             self.assertEqual(expected_histogram, actual_histogram)
 
     def test_plot_and_save_histogram(self):
-        """
-        Short Description:
-        Tests the `plot_and_save_histogram` method by plotting and saving the histogram to a file.
-
-        Test Strategy:
-        Uses a simple grayscale image to generate a histogram, then plots and saves it to a file.
-
-        Expected Outcome:
-        The histogram plot should be successfully saved to the specified file path.
-        """
         # Create a temporary directory
         with tempfile.TemporaryDirectory() as tempdir:
             # Use the previous test to generate a histogram

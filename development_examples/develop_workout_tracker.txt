@@ -1,0 +1,525 @@
+I want python code that tracks my daily bodybuilding progress. IT can track my performance data and generate visual plot of my progress.
+
+UNITTEST_FILEPATH: sandbox_tests/test_workout_tracker.py
+UNITTEST_CONTENT:
+
+import unittest
+import tempfile
+import os
+import json
+import matplotlib.pyplot as plt
+from sandbox_scripts.workout_tracker import WorkoutTracker
+
+class TestWorkoutTracker(unittest.TestCase):
+    """
+    Short Description:
+    This class contains unit tests for the WorkoutTracker class, which tracks daily bodybuilding progress and generates visual plots of performance data.
+    
+    Testing Strategy:
+    The testing strategy covers the following cases:
+    1. Adding workout data and saving it to a file.
+    2. Loading workout data from a file.
+    3. Plotting workout progress and saving the plot to a file.
+
+    Methods:
+    - setUp:
+        Initializes the settings for the tests, including the temporary file path.
+    - test_add_and_save_workout_data:
+        Tests the `add_workout_data` and `save_to_file` methods for adding and saving workout data.
+    - test_load_workout_data:
+        Tests the `load_from_file` method for loading workout data from a file.
+    - test_plot_workout_progress:
+        Tests the `plot_workout_progress` method for plotting workout progress and saving the plot to a file.
+
+    Properties Ensured:
+    - Correct addition and saving of workout data.
+    - Proper loading of workout data from files.
+    - Successful plotting and saving of workout progress.
+    """
+
+    def setUp(self):
+        """
+        Short Description:
+        Initializes the settings for the tests, including the temporary file path.
+
+        Test Strategy:
+        Sets up a temporary file path for storing workout data and plots.
+
+        Expected Outcome:
+        The settings should be correctly initialized.
+        """
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.data_file = os.path.join(self.tempdir.name, "workout_data.json")
+        self.plot_file = os.path.join(self.tempdir.name, "workout_plot.png")
+
+    def tearDown(self):
+        """
+        Short Description:
+        Cleans up the temporary directory after tests.
+
+        Expected Outcome:
+        The temporary directory should be removed.
+        """
+        self.tempdir.cleanup()
+
+    def test_add_and_save_workout_data(self):
+        """
+        Short Description:
+        Tests the `add_workout_data` and `save_to_file` methods for adding and saving workout data.
+
+        Test Strategy:
+        Adds workout data and saves it to a file, then checks if the file contains the correct data.
+
+        Expected Outcome:
+        The file should contain the correct workout data in JSON format.
+        """
+        workout_data = {
+            "date": "2023-10-01",
+            "exercise": "bench_press",
+            "sets": 3,
+            "reps": [10, 8, 6],
+            "weight": [100, 110, 120]
+        }
+        WorkoutTracker.add_workout_data(self.data_file, workout_data)
+        WorkoutTracker.save_to_file(self.data_file)
+
+        with open(self.data_file, 'r') as file:
+            data = json.load(file)
+        
+        self.assertIn("2023-10-01", data)
+        self.assertEqual(data["2023-10-01"]["bench_press"]["sets"], 3)
+        self.assertEqual(data["2023-10-01"]["bench_press"]["reps"], [10, 8, 6])
+        self.assertEqual(data["2023-10-01"]["bench_press"]["weight"], [100, 110, 120])
+
+    def test_load_workout_data(self):
+        """
+        Short Description:
+        Tests the `load_from_file` method for loading workout data from a file.
+
+        Test Strategy:
+        Saves workout data to a file, loads it, and checks if the loaded data matches the original data.
+
+        Expected Outcome:
+        The loaded data should match the original workout data.
+        """
+        workout_data = {
+            "date": "2023-10-01",
+            "exercise": "bench_press",
+            "sets": 3,
+            "reps": [10, 8, 6],
+            "weight": [100, 110, 120]
+        }
+        WorkoutTracker.add_workout_data(self.data_file, workout_data)
+        WorkoutTracker.save_to_file(self.data_file)
+
+        loaded_data = WorkoutTracker.load_from_file(self.data_file)
+        
+        self.assertIn("2023-10-01", loaded_data)
+        self.assertEqual(loaded_data["2023-10-01"]["bench_press"]["sets"], 3)
+        self.assertEqual(loaded_data["2023-10-01"]["bench_press"]["reps"], [10, 8, 6])
+        self.assertEqual(loaded_data["2023-10-01"]["bench_press"]["weight"], [100, 110, 120])
+
+    def test_plot_workout_progress(self):
+        """
+        Short Description:
+        Tests the `plot_workout_progress` method for plotting workout progress and saving the plot to a file.
+
+        Test Strategy:
+        Adds workout data and plots the progress, then checks if the plot file exists.
+
+        Expected Outcome:
+        The plot file should exist and contain the workout progress plot.
+        """
+        workout_data = [
+            {"date": "2023-10-01", "exercise": "bench_press", "weight": [100, 110, 120]},
+            {"date": "2023-10-02", "exercise": "bench_press", "weight": [105, 115, 125]},
+            {"date": "2023-10-03", "exercise": "bench_press", "weight": [110, 120, 130]},
+        ]
+        
+        for data in workout_data:
+            WorkoutTracker.add_workout_data(self.data_file, data)
+        
+        WorkoutTracker.save_to_file(self.data_file)
+        WorkoutTracker.plot_workout_progress(self.data_file, "bench_press", self.plot_file)
+
+        self.assertTrue(os.path.exists(self.plot_file))
+
+if __name__ == "__main__":
+    unittest.main()
+
+CLASS_FILEPATH: sandbox_scripts/workout_tracker.py 
+CLASS_NAME: WorkoutTracker
+CLASS_CONTENT:
+
+import json
+import os
+from collections import defaultdict
+import matplotlib.pyplot as plt
+
+class WorkoutTracker:
+    @staticmethod
+    def add_workout_data(file_path, workout_data):
+        """
+        Adds workout data to the specified file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+            workout_data (dict): Dictionary containing workout data.
+        """
+        # Load existing data if file exists, otherwise create a new dictionary
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+        else:
+            data = defaultdict(dict)
+
+        # Extract the date and exercise from the workout data
+        date = workout_data["date"]
+        exercise = workout_data["exercise"]
+
+        # Add the workout data to the dictionary
+        data[date][exercise] = {
+            "sets": workout_data["sets"],
+            "reps": workout_data["reps"],
+            "weight": workout_data["weight"]
+        }
+
+        # Save the updated data back to the file
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    @staticmethod
+    def save_to_file(file_path):
+        """
+        Method to ensure data is saved to the file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+        """
+        # This method is kept for compatibility with the unittests
+        pass
+
+    @staticmethod
+    def load_from_file(file_path):
+        """
+        Loads workout data from the specified file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+
+        Returns:
+            dict: Dictionary containing the loaded workout data.
+        """
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            return data
+        return {}
+
+    @staticmethod
+    def plot_workout_progress(file_path, exercise, plot_file):
+        """
+        Plots workout progress for the specified exercise and saves the plot to a file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+            exercise (str): The exercise to plot progress for.
+            plot_file (str): Path to the file where the plot should be saved.
+        """
+        data = WorkoutTracker.load_from_file(file_path)
+
+        dates = []
+        weights = []
+
+        for date, exercises in sorted(data.items()):
+            if exercise in exercises:
+                dates.append(date)
+                weights.append(max(exercises[exercise]["weight"]))
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(dates, weights, marker='o', linestyle='-', color='b')
+        plt.xlabel('Date')
+        plt.ylabel('Weight Lifted (lbs)')
+        plt.title(f'Progress for {exercise.capitalize()}')
+        plt.grid(True)
+        plt.savefig(plot_file)
+        plt.close()  # Close the plot to avoid displaying it in interactive environments
+
+# Example usage:
+if __name__ == "__main__":
+    workout_tracker = WorkoutTracker()
+    workout_data = {
+        "date": "2023-10-01",
+        "exercise": "bench_press",
+        "sets": 3,
+        "reps": [10, 8, 6],
+        "weight": [100, 110, 120]
+    }
+    workout_tracker.add_workout_data("workout_data.json", workout_data)
+    workout_tracker.save_to_file("workout_data.json")
+    workout_tracker.plot_workout_progress("workout_data.json", "bench_press", "workout_plot.png")
+
+
+ERROR:
+Traceback (most recent call last):
+  File "/home/orores/programming-ai/sandbox_tests/test_workout_tracker.py", line 135, in test_
+plot_workout_progress
+    WorkoutTracker.add_workout_data(self.data_file, data)
+  File "/home/orores/programming-ai/sandbox_scripts/workout_tracker.py", line 29, in add_worko
+ut_data
+    "sets": workout_data["sets"],
+KeyError: 'sets'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+FAILED (errors=1)
+
+TASK:
+Fix the error by rewriting the application code
+
+CLASS_FILEPATH: sandbox_scripts/workout_tracker.py 
+CLASS_NAME: WorkoutTracker
+FIXED_CLASS_CONTENT:
+
+import json
+import os
+from collections import defaultdict
+import matplotlib.pyplot as plt
+
+class WorkoutTracker:
+    @staticmethod
+    def add_workout_data(file_path, workout_data):
+        """
+        Adds workout data to the specified file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+            workout_data (dict): Dictionary containing workout data.
+        """
+        # Load existing data if file exists, otherwise create a new dictionary
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+        else:
+            data = defaultdict(dict)
+
+        # Extract the date and exercise from the workout data
+        date = workout_data["date"]
+        exercise = workout_data["exercise"]
+
+        # Add the workout data to the dictionary
+        data[date][exercise] = {
+            "sets": workout_data.get("sets", []),
+            "reps": workout_data.get("reps", []),
+            "weight": workout_data.get("weight", [])
+        }
+
+        # Save the updated data back to the file
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    @staticmethod
+    def save_to_file(file_path):
+        """
+        Method to ensure data is saved to the file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+        """
+        # This method is kept for compatibility with the unittests
+        pass
+
+    @staticmethod
+    def load_from_file(file_path):
+        """
+        Loads workout data from the specified file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+
+        Returns:
+            dict: Dictionary containing the loaded workout data.
+        """
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            return data
+        return {}
+
+    @staticmethod
+    def plot_workout_progress(file_path, exercise, plot_file):
+        """
+        Plots workout progress for the specified exercise and saves the plot to a file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+            exercise (str): The exercise to plot progress for.
+            plot_file (str): Path to the file where the plot should be saved.
+        """
+        data = WorkoutTracker.load_from_file(file_path)
+
+        dates = []
+        weights = []
+
+        for date, exercises in sorted(data.items()):
+            if exercise in exercises:
+                dates.append(date)
+                weights.append(max(exercises[exercise]["weight"]))
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(dates, weights, marker='o', linestyle='-', color='b')
+        plt.xlabel('Date')
+        plt.ylabel('Weight Lifted (lbs)')
+        plt.title(f'Progress for {exercise.capitalize()}')
+        plt.grid(True)
+        plt.savefig(plot_file)
+        plt.close()  # Close the plot to avoid displaying it in interactive environments
+
+# Example usage:
+if __name__ == "__main__":
+    workout_tracker = WorkoutTracker()
+    workout_data = {
+        "date": "2023-10-01",
+        "exercise": "bench_press",
+        "sets": 3,
+        "reps": [10, 8, 6],
+        "weight": [100, 110, 120]
+    }
+    workout_tracker.add_workout_data("workout_data.json", workout_data)
+    workout_tracker.save_to_file("workout_data.json")
+    workout_tracker.plot_workout_progress("workout_data.json", "bench_press", "workout_plot.png")
+
+ERROR:
+Traceback (most recent call last):
+  File "/home/orores/programming-ai/sandbox_tests/test_workout_tracker.py", line 135, in test_
+plot_workout_progress
+    WorkoutTracker.add_workout_data(self.data_file, data)
+  File "/home/orores/programming-ai/sandbox_scripts/workout_tracker.py", line 28, in add_worko
+ut_data
+    data[date][exercise] = {
+KeyError: '2023-10-02'
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+FAILED (errors=1)
+
+TASK:
+Fix the error by rewriting the application code
+
+CLASS_FILEPATH: sandbox_scripts/workout_tracker.py 
+CLASS_NAME: WorkoutTracker
+FIXED_CLASS_CONTENT:
+
+import json
+import os
+from collections import defaultdict
+import matplotlib.pyplot as plt
+
+class WorkoutTracker:
+    @staticmethod
+    def add_workout_data(file_path, workout_data):
+        """
+        Adds workout data to the specified file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+            workout_data (dict): Dictionary containing workout data.
+        """
+        # Load existing data if file exists, otherwise create a new dictionary
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+        else:
+            data = defaultdict(dict)
+
+        # Extract the date and exercise from the workout data
+        date = workout_data["date"]
+        exercise = workout_data["exercise"]
+
+        # Ensure the date key exists in the dictionary
+        if date not in data:
+            data[date] = {}
+
+        # Add the workout data to the dictionary
+        data[date][exercise] = {
+            "sets": workout_data.get("sets", []),
+            "reps": workout_data.get("reps", []),
+            "weight": workout_data.get("weight", [])
+        }
+
+        # Save the updated data back to the file
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    @staticmethod
+    def save_to_file(file_path):
+        """
+        Method to ensure data is saved to the file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+        """
+        # This method is kept for compatibility with the unittests
+        pass
+
+    @staticmethod
+    def load_from_file(file_path):
+        """
+        Loads workout data from the specified file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+
+        Returns:
+            dict: Dictionary containing the loaded workout data.
+        """
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            return data
+        return {}
+
+    @staticmethod
+    def plot_workout_progress(file_path, exercise, plot_file):
+        """
+        Plots workout progress for the specified exercise and saves the plot to a file.
+
+        Args:
+            file_path (str): Path to the file where workout data is stored.
+            exercise (str): The exercise to plot progress for.
+            plot_file (str): Path to the file where the plot should be saved.
+        """
+        data = WorkoutTracker.load_from_file(file_path)
+
+        dates = []
+        weights = []
+
+        for date, exercises in sorted(data.items()):
+            if exercise in exercises:
+                dates.append(date)
+                weights.append(max(exercises[exercise]["weight"]))
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(dates, weights, marker='o', linestyle='-', color='b')
+        plt.xlabel('Date')
+        plt.ylabel('Weight Lifted (lbs)')
+        plt.title(f'Progress for {exercise.capitalize()}')
+        plt.grid(True)
+        plt.savefig(plot_file)
+        plt.close()  # Close the plot to avoid displaying it in interactive environments
+
+# Example usage:
+if __name__ == "__main__":
+    workout_tracker = WorkoutTracker()
+    workout_data = {
+        "date": "2023-10-01",
+        "exercise": "bench_press",
+        "sets": 3,
+        "reps": [10, 8, 6],
+        "weight": [100, 110, 120]
+    }
+    workout_tracker.add_workout_data("workout_data.json", workout_data)
+    workout_tracker.save_to_file("workout_data.json")
+    workout_tracker.plot_workout_progress("workout_data.json", "bench_press", "workout_plot.png")
