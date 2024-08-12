@@ -22,7 +22,7 @@ with open('README.md', 'r', encoding="utf-8") as file:
 
 setup(
     name='AutoChatBot',
-    version='1.1.0',
+    version='1.1.1',
     description='CLI chatbot that uses togetherai or openai api',
     long_description=long_description,
     long_description_content_type="text/markdown",

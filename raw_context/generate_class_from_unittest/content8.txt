@@ -1,0 +1,156 @@
+I want python code that gives me a luminance histogramm of an image
+
+I like using the Test Driven Development so I already created a unittest.
+
+UNITTEST_FILEPATH: tests/test_luminance_histogram.py
+UNITTEST_CONTENT:
+
+from PIL import Image
+import numpy as np
+import tempfile
+import os
+import unittest
+from image_utils.luminance_histogram import LuminanceHistogram
+
+class TestLuminanceHistogram(unittest.TestCase):
+    """
+    Short Description:
+    This class contains unit tests for the LuminanceHistogram class, which computes and plots luminance histograms from images.
+    
+    Testing Strategy:
+    The testing strategy covers the following cases:
+    1. Computing the luminance histogram with default parameters.
+    2. Computing the luminance histogram with custom parameters.
+    3. Plotting and saving the luminance histogram to a file.
+
+    Methods:
+    - test_compute_luminance_histogram_default_params:
+        Tests the `compute_luminance_histogram` method with default parameters (bins=5, range=(0, 256)).
+    - test_compute_luminance_histogram_custom_params:
+        Tests the `compute_luminance_histogram` method with custom parameters (bins=10, range=(0, 256)).
+    - test_plot_and_save_histogram:
+        Tests the `plot_and_save_histogram` method by plotting and saving the histogram to a file.
+
+    Properties Ensured:
+    - Correct computation of luminance histograms with default and custom parameters.
+    - Successful plotting and saving of luminance histograms.
+    """
+
+    def test_compute_luminance_histogram_default_params(self):
+        """
+        Short Description:
+        Tests the `compute_luminance_histogram` method with default parameters (bins=5, range=(0, 256)).
+
+        Test Strategy:
+        Uses a simple grayscale image with known luminance values and computes the histogram.
+
+        Expected Outcome:
+        The computed histogram should match the expected histogram.
+        """
+        # Create a temporary directory
+        with tempfile.TemporaryDirectory() as tempdir:
+            # Define the path for the test image
+            img_path = os.path.join(tempdir, "test_image.png")
+            
+            # Create a simple grayscale image with known luminance values
+            data = np.array([
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255]
+            ], dtype=np.uint8)
+            
+            img = Image.fromarray(data, mode='L')
+            img.save(img_path)
+
+            # Expected histogram with default parameters (bins=5, range=(0, 256))
+            expected_histogram = [5, 5, 5, 5, 5]
+
+            # Compute the actual histogram
+            actual_histogram = LuminanceHistogram.compute_luminance_histogram(img_path)
+
+            # Assert the histogram is as expected
+            self.assertEqual(expected_histogram, actual_histogram)
+
+    def test_compute_luminance_histogram_custom_params(self):
+        """
+        Short Description:
+        Tests the `compute_luminance_histogram` method with custom parameters (bins=10, range=(0, 256)).
+
+        Test Strategy:
+        Uses a simple grayscale image with known luminance values and computes the histogram with custom parameters.
+
+        Expected Outcome:
+        The computed histogram should match the expected histogram.
+        """
+        # Create a temporary directory
+        with tempfile.TemporaryDirectory() as tempdir:
+            # Define the path for the test image
+            img_path = os.path.join(tempdir, "test_image.png")
+            
+            # Create a simple grayscale image with known luminance values
+            data = np.array([
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255]
+            ], dtype=np.uint8)
+            
+            img = Image.fromarray(data, mode='L')
+            img.save(img_path)
+
+            # Expected histogram with custom parameters (bins=10, range=(0, 256))
+            expected_histogram = [5, 0, 5, 0, 0, 5, 0, 5, 0, 5]
+
+            # Compute the actual histogram
+            actual_histogram = LuminanceHistogram.compute_luminance_histogram(img_path, bins=10, luminance_range=(0, 256))
+
+            # Assert the histogram is as expected
+            self.assertEqual(expected_histogram, actual_histogram)
+
+    def test_plot_and_save_histogram(self):
+        """
+        Short Description:
+        Tests the `plot_and_save_histogram` method by plotting and saving the histogram to a file.
+
+        Test Strategy:
+        Uses a simple grayscale image to generate a histogram, then plots and saves it to a file.
+
+        Expected Outcome:
+        The histogram plot should be successfully saved to the specified file path.
+        """
+        # Create a temporary directory
+        with tempfile.TemporaryDirectory() as tempdir:
+            # Use the previous test to generate a histogram
+            img_path = os.path.join(tempdir, "test_image.png")
+            
+            data = np.array([
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255],
+                [0, 64, 128, 192, 255]
+            ], dtype=np.uint8)
+            
+            img = Image.fromarray(data, mode='L')
+            img.save(img_path)
+
+            histogram = LuminanceHistogram.compute_luminance_histogram(img_path, bins=10, luminance_range=(0, 256))
+
+            # Define the path for the histogram plot
+            plot_path = os.path.join(tempdir, "histogram_plot.png")
+
+            # Plot and save the histogram
+            LuminanceHistogram.plot_and_save_histogram(histogram, plot_path, bins=10, luminance_range=(0, 256))
+
+            # Check if the plot was saved
+            self.assertTrue(os.path.exists(plot_path))
+
+if __name__ == "__main__":
+    unittest.main()
+
+CLASS_FILEPATH: image_utils/luminance_histogram.py 
+CLASS_NAME: LuminanceHistogram
+CLASS_CONTENT:

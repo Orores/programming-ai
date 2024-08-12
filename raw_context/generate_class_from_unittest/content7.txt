@@ -1,0 +1,79 @@
+import numpy as np
+from PIL import Image
+
+class Debayer:
+    """
+    Short Description:
+    This class provides functionality to convert raw Bayer-filtered images into RGB images using different Bayer patterns.
+
+    Methods:
+    - debayer_image(image_path: str, pattern: str) -> Image:
+        Converts a Bayer-filtered image to an RGB image using the specified Bayer pattern.
+    """
+
+    @staticmethod
+    def debayer_image(image_path: str, pattern: str) -> Image:
+        """
+        Short Description:
+        Converts a Bayer-filtered image to an RGB image using the specified Bayer pattern.
+
+        Parameters:
+        image_path (str): Path to the Bayer-filtered image file.
+            Example: "path/to/bayer_image.png"
+        pattern (str): Bayer pattern used in the image. Supported patterns are 'bggr', 'rggb', 'grbg', 'gbrg'.
+            Example: "bggr"
+
+        Returns:
+        Image: Debayered RGB image.
+            Example: <PIL.Image.Image image mode=RGB size=widthxheight at memory_location>
+
+        Raises:
+        ValueError: If an unsupported Bayer pattern is provided.
+            Example: ValueError("Unsupported Bayer pattern")
+
+        How to Use:
+        This method takes the path to a Bayer-filtered image and the Bayer pattern, converts the image to an RGB image, and returns it.
+
+        Usage Example:
+        >>> debayered_img = Debayer.debayer_image('path/to/bayer_image.png', 'bggr')
+        >>> debayered_img.show()
+        """
+        # Load the image
+        bayer_image = Image.open(image_path)
+        bayer_array = np.array(bayer_image)
+
+        # Get the shape of the bayer array
+        height, width = bayer_array.shape
+
+        # Initialize the output image array
+        debayered_image = np.zeros((height, width, 3), dtype=np.uint8)
+
+        if pattern == 'bggr':
+            debayered_image[::2, ::2, 2] = bayer_array[::2, ::2]  # Blue channel
+            debayered_image[1::2, 1::2, 1] = bayer_array[1::2, 1::2]  # Green channel
+            debayered_image[::2, 1::2, 1] = bayer_array[::2, 1::2]  # Green channel
+            debayered_image[1::2, ::2, 0] = bayer_array[1::2, ::2]  # Red channel
+        elif pattern == 'rggb':
+            debayered_image[::2, ::2, 0] = bayer_array[::2, ::2]  # Red channel
+            debayered_image[1::2, 1::2, 2] = bayer_array[1::2, 1::2]  # Blue channel
+            debayered_image[::2, 1::2, 1] = bayer_array[::2, 1::2]  # Green channel
+            debayered_image[1::2, ::2, 1] = bayer_array[1::2, ::2]  # Green channel
+        elif pattern == 'grbg':
+            debayered_image[::2, 1::2, 0] = bayer_array[::2, 1::2]  # Red channel
+            debayered_image[1::2, ::2, 2] = bayer_array[1::2, ::2]  # Blue channel
+            debayered_image[::2, ::2, 1] = bayer_array[::2, ::2]  # Green channel
+            debayered_image[1::2, 1::2, 1] = bayer_array[1::2, 1::2]  # Green channel
+        elif pattern == 'gbrg':
+            debayered_image[::2, 1::2, 2] = bayer_array[::2, 1::2]  # Blue channel
+            debayered_image[1::2, ::2, 0] = bayer_array[1::2, ::2]  # Red channel
+            debayered_image[::2, ::2, 1] = bayer_array[::2, ::2]  # Green channel
+            debayered_image[1::2, 1::2, 1] = bayer_array[1::2, 1::2]  # Green channel
+        else:
+            raise ValueError("Unsupported Bayer pattern")
+
+        return Image.fromarray(debayered_image)
+
+# Example usage:
+if __name__ == "__main__":
+    debayered_img = Debayer.debayer_image('path/to/bayer_image.png', 'bggr')
+    debayered_img.show()

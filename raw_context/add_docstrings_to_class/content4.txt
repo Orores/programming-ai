@@ -1,0 +1,61 @@
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+class LuminanceHistogram:
+
+    @staticmethod
+    def compute_luminance_histogram(img_path, bins=5, luminance_range=(0, 256)):
+        """
+        Compute the luminance histogram for an image.
+
+        Parameters:
+        img_path (str): The path to the image file.
+        bins (int): The number of bins for the histogram.
+        luminance_range (tuple): The range of luminance values.
+
+        Returns:
+        list: A list containing the histogram of luminance values.
+        """
+        # Open the image using PIL
+        img = Image.open(img_path)
+
+        # Convert the image to grayscale (luminance)
+        grayscale_img = img.convert('L')
+
+        # Get the luminance values as a flat array
+        luminance_values = np.array(grayscale_img.getdata())
+
+        # Compute the histogram
+        histogram, _ = np.histogram(luminance_values, bins=bins, range=luminance_range)
+
+        return histogram.tolist()
+
+    @staticmethod
+    def plot_and_save_histogram(histogram, save_path, bins=5, luminance_range=(0, 256)):
+        """
+        Plot and save the luminance histogram.
+
+        Parameters:
+        histogram (list): The histogram data to plot.
+        save_path (str): The directory path to save the plot.
+        bins (int): The number of bins for the histogram.
+        luminance_range (tuple): The range of luminance values.
+        """
+        # Plot the histogram
+        plt.bar(range(len(histogram)), histogram, width=1.0, edgecolor='black')
+        plt.xlabel('Luminance Value Bins')
+        plt.ylabel('Frequency')
+        plt.title('Luminance Histogram')
+        plt.xticks(ticks=range(len(histogram)), labels=[f"{luminance_range[0] + i * (luminance_range[1] - luminance_range[0]) // bins}-{luminance_range[0] + (i + 1) * (luminance_range[1] - luminance_range[0]) // bins}" for i in range(bins)])
+        
+        # Ensure the save directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        # Save the plot to the specified directory
+        plt.savefig(save_path)
+        plt.close()
+
+
+Class rewritten with better docstrings:

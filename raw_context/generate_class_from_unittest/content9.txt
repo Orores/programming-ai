@@ -1,0 +1,93 @@
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+class LuminanceHistogram:
+    """
+    Short Description:
+    This class provides functionalities to compute and plot luminance histograms of images.
+
+    Methods:
+    - compute_luminance_histogram(img_path: str, bins: int = 5, luminance_range: tuple = (0, 256)) -> list:
+        Computes the luminance histogram for an image.
+    - plot_and_save_histogram(histogram: list, save_path: str, bins: int = 5, luminance_range: tuple = (0, 256)):
+        Plots and saves the luminance histogram.
+    """
+    
+    @staticmethod
+    def compute_luminance_histogram(img_path: str, bins: int = 5, luminance_range: tuple = (0, 256)) -> list:
+        """
+        Short Description:
+        Compute the luminance histogram for an image.
+
+        Parameters:
+        img_path (str): The path to the image file.
+            Example: "image.jpg"
+        bins (int, optional): The number of bins for the histogram. Default is 5.
+            Example: 10
+        luminance_range (tuple, optional): The range of luminance values. Default is (0, 256).
+            Example: (0, 255)
+
+        Returns:
+        list: A list containing the histogram of luminance values.
+            Example: [10, 20, 30, 40, 50]
+
+        How to Use:
+        This method reads an image file, converts it to grayscale, and computes the histogram of luminance values.
+
+        Usage Example:
+        >>> histogram = LuminanceHistogram.compute_luminance_histogram("image.jpg", bins=10, luminance_range=(0, 255))
+        >>> print(histogram)
+        [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        """
+        # Open the image using PIL
+        img = Image.open(img_path)
+
+        # Convert the image to grayscale (luminance)
+        grayscale_img = img.convert('L')
+
+        # Get the luminance values as a flat array
+        luminance_values = np.array(grayscale_img.getdata())
+
+        # Compute the histogram
+        histogram, _ = np.histogram(luminance_values, bins=bins, range=luminance_range)
+
+        return histogram.tolist()
+
+    @staticmethod
+    def plot_and_save_histogram(histogram: list, save_path: str, bins: int = 5, luminance_range: tuple = (0, 256)):
+        """
+        Short Description:
+        Plot and save the luminance histogram.
+
+        Parameters:
+        histogram (list): The histogram data to plot.
+            Example: [10, 20, 30, 40, 50]
+        save_path (str): The directory path to save the plot.
+            Example: "histograms/luminance_histogram.png"
+        bins (int, optional): The number of bins for the histogram. Default is 5.
+            Example: 10
+        luminance_range (tuple, optional): The range of luminance values. Default is (0, 256).
+            Example: (0, 255)
+
+        How to Use:
+        This method takes a histogram list, plots it, and saves the plot to a specified directory.
+
+        Usage Example:
+        >>> histogram = [10, 20, 30, 40, 50]
+        >>> LuminanceHistogram.plot_and_save_histogram(histogram, "histograms/luminance_histogram.png", bins=5, luminance_range=(0, 255))
+        """
+        # Plot the histogram
+        plt.bar(range(len(histogram)), histogram, width=1.0, edgecolor='black')
+        plt.xlabel('Luminance Value Bins')
+        plt.ylabel('Frequency')
+        plt.title('Luminance Histogram')
+        plt.xticks(ticks=range(len(histogram)), labels=[f"{luminance_range[0] + i * (luminance_range[1] - luminance_range[0]) // bins}-{luminance_range[0] + (i + 1) * (luminance_range[1] - luminance_range[0]) // bins}" for i in range(bins)])
+        
+        # Ensure the save directory exists
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        # Save the plot to the specified directory
+        plt.savefig(save_path)
+        plt.close()  # Close the plot to avoid displaying it in interactive environments

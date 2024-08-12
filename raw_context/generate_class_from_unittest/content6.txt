@@ -1,0 +1,227 @@
+I want python code that debayers images.
+
+I like using the Test Driven Development so I already created a unittest.
+
+UNITTEST_FILEPATH: tests/test_image_utils.py
+UNITTEST_CONTENT:
+
+import unittest
+import numpy as np
+from PIL import Image
+import tempfile
+import os
+from image_utils.debayer import Debayer
+
+class TestDebayer(unittest.TestCase):
+    """
+    Short Description:
+    This class contains unit tests for the Debayer class, which is responsible for converting Bayer filter images 
+    to full-color images using different Bayer patterns.
+
+    Testing Strategy:
+    The testing strategy covers the following cases:
+    1. Correct debayering of images using different Bayer patterns ('bggr', 'rggb', 'grbg', 'gbrg').
+    2. Verification of the debayered image's shape and color channel values.
+
+    Methods:
+    - create_bayer_image:
+        Creates a simple Bayer pattern image for testing.
+    - test_debayer_bggr:
+        Tests the `debayer_image` method with the 'bggr' Bayer pattern.
+    - test_debayer_rggb:
+        Tests the `debayer_image` method with the 'rggb' Bayer pattern.
+    - test_debayer_grbg:
+        Tests the `debayer_image` method with the 'grbg' Bayer pattern.
+    - test_debayer_gbrg:
+        Tests the `debayer_image` method with the 'gbrg' Bayer pattern.
+
+    Properties Ensured:
+    - Correct debayering of images for different Bayer patterns.
+    - Verification of the debayered image's shape and color channel values.
+    """
+
+    def create_bayer_image(self, pattern, width=4, height=4):
+        """
+        Create a simple Bayer pattern image.
+
+        Parameters:
+        pattern (str): The Bayer pattern ('bggr', 'rggb', 'grbg', 'gbrg').
+        width (int, optional): The width of the image. Default is 4.
+        height (int, optional): The height of the image. Default is 4.
+
+        Returns:
+        np.ndarray: A numpy array representing the Bayer pattern image.
+        """
+        data = np.zeros((height, width), dtype=np.uint8)
+        
+        if pattern == 'bggr':
+            data[::2, ::2] = 255  # Blue
+            data[1::2, 1::2] = 255  # Green
+            data[::2, 1::2] = 128  # Green
+            data[1::2, ::2] = 128  # Red
+        elif pattern == 'rggb':
+            data[::2, ::2] = 255  # Red
+            data[1::2, 1::2] = 255  # Blue
+            data[::2, 1::2] = 128  # Green
+            data[1::2, ::2] = 128  # Green
+        elif pattern == 'grbg':
+            data[::2, 1::2] = 255  # Red
+            data[1::2, ::2] = 255  # Blue
+            data[::2, ::2] = 128  # Green
+            data[1::2, 1::2] = 128  # Green
+        elif pattern == 'gbrg':
+            data[::2, 1::2] = 255  # Blue
+            data[1::2, ::2] = 255  # Red
+            data[::2, ::2] = 128  # Green
+            data[1::2, 1::2] = 128  # Green
+
+        return data
+
+    def test_debayer_bggr(self):
+        """
+        Short Description:
+        Tests the `debayer_image` method with the 'bggr' Bayer pattern.
+
+        Test Strategy:
+        Creates a Bayer pattern image with the 'bggr' pattern, saves it, and then debayers it using the `debayer_image` method.
+
+        Expected Outcome:
+        The debayered image should have the correct shape and color channel values.
+        """
+        bayer_pattern = 'bggr'
+        bayer_data = self.create_bayer_image(bayer_pattern)
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            img = Image.fromarray(bayer_data, mode='L')
+            img.save(temp_file.name)
+            temp_file_path = temp_file.name
+
+        try:
+            debayered_image = Debayer.debayer_image(temp_file_path, bayer_pattern)
+            debayered_image_array = np.array(debayered_image)
+
+            # Expected debayered image shape
+            self.assertEqual(debayered_image_array.shape, (4, 4, 3))
+
+            # Check if the debayered image has the correct values
+            self.assertTrue(np.all(debayered_image_array[::2, ::2, 2] == 255))  # Blue channel
+            self.assertTrue(np.all(debayered_image_array[1::2, 1::2, 1] == 255))  # Green channel
+            self.assertTrue(np.all(debayered_image_array[::2, 1::2, 1] == 128))  # Green channel
+            self.assertTrue(np.all(debayered_image_array[1::2, ::2, 0] == 128))  # Red channel
+
+        finally:
+            os.remove(temp_file_path)
+
+    def test_debayer_rggb(self):
+        """
+        Short Description:
+        Tests the `debayer_image` method with the 'rggb' Bayer pattern.
+
+        Test Strategy:
+        Creates a Bayer pattern image with the 'rggb' pattern, saves it, and then debayers it using the `debayer_image` method.
+
+        Expected Outcome:
+        The debayered image should have the correct shape and color channel values.
+        """
+        bayer_pattern = 'rggb'
+        bayer_data = self.create_bayer_image(bayer_pattern)
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            img = Image.fromarray(bayer_data, mode='L')
+            img.save(temp_file.name)
+            temp_file_path = temp_file.name
+
+        try:
+            debayered_image = Debayer.debayer_image(temp_file_path, bayer_pattern)
+            debayered_image_array = np.array(debayered_image)
+
+            # Expected debayered image shape
+            self.assertEqual(debayered_image_array.shape, (4, 4, 3))
+
+            # Check if the debayered image has the correct values
+            self.assertTrue(np.all(debayered_image_array[::2, ::2, 0] == 255))  # Red channel
+            self.assertTrue(np.all(debayered_image_array[1::2, 1::2, 2] == 255))  # Blue channel
+            self.assertTrue(np.all(debayered_image_array[::2, 1::2, 1] == 128))  # Green channel
+            self.assertTrue(np.all(debayered_image_array[1::2, ::2, 1] == 128))  # Green channel
+
+        finally:
+            os.remove(temp_file_path)
+
+    def test_debayer_grbg(self):
+        """
+        Short Description:
+        Tests the `debayer_image` method with the 'grbg' Bayer pattern.
+
+        Test Strategy:
+        Creates a Bayer pattern image with the 'grbg' pattern, saves it, and then debayers it using the `debayer_image` method.
+
+        Expected Outcome:
+        The debayered image should have the correct shape and color channel values.
+        """
+        bayer_pattern = 'grbg'
+        bayer_data = self.create_bayer_image(bayer_pattern)
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            img = Image.fromarray(bayer_data, mode='L')
+            img.save(temp_file.name)
+            temp_file_path = temp_file.name
+
+        try:
+            debayered_image = Debayer.debayer_image(temp_file_path, bayer_pattern)
+            debayered_image_array = np.array(debayered_image)
+
+            # Expected debayered image shape
+            self.assertEqual(debayered_image_array.shape, (4, 4, 3))
+
+            # Check if the debayered image has the correct values
+            self.assertTrue(np.all(debayered_image_array[::2, 1::2, 0] == 255))  # Red channel
+            self.assertTrue(np.all(debayered_image_array[1::2, ::2, 2] == 255))  # Blue channel
+            self.assertTrue(np.all(debayered_image_array[::2, ::2, 1] == 128))  # Green channel
+            self.assertTrue(np.all(debayered_image_array[1::2, 1::2, 1] == 128))  # Green channel
+
+        finally:
+            os.remove(temp_file_path)
+
+    def test_debayer_gbrg(self):
+        """
+        Short Description:
+        Tests the `debayer_image` method with the 'gbrg' Bayer pattern.
+
+        Test Strategy:
+        Creates a Bayer pattern image with the 'gbrg' pattern, saves it, and then debayers it using the `debayer_image` method.
+
+        Expected Outcome:
+        The debayered image should have the correct shape and color channel values.
+        """
+        bayer_pattern = 'gbrg'
+        bayer_data = self.create_bayer_image(bayer_pattern)
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            img = Image.fromarray(bayer_data, mode='L')
+            img.save(temp_file.name)
+            temp_file_path = temp_file.name
+
+        try:
+            debayered_image = Debayer.debayer_image(temp_file_path, bayer_pattern)
+            debayered_image_array = np.array(debayered_image)
+
+            # Expected debayered image shape
+            self.assertEqual(debayered_image_array.shape, (4, 4, 3))
+
+            # Check if the debayered image has the correct values
+            self.assertTrue(np.all(debayered_image_array[::2, 1::2, 2] == 255))  # Blue channel
+            self.assertTrue(np.all(debayered_image_array[1::2, ::2, 0] == 255))  # Red channel
+            self.assertTrue(np.all(debayered_image_array[::2, ::2, 1] == 128))  # Green channel
+            self.assertTrue(np.all(debayered_image_array[1::2, 1::2, 1] == 128))  # Green channel
+
+        finally:
+            os.remove(temp_file_path)
+
+if __name__ == "__main__":
+    unittest.main()
+
+CLASS_FILEPATH: image_utils/debayer.py 
+CLASS_NAME: Debayer
+CLASS_CONTENT:
+
+
