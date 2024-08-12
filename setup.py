@@ -32,17 +32,13 @@ setup(
     license='MIT',
     packages=['AutoChatBot'],
     package_dir={'AutoChatBot': 'AutoChatBot/'},
-    package_data={
-        "AutoChatBot": ["context_prompts/*"]
-    },
-    include_package_data = True,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI approved :: MIT License',
         'Operating System :: POSIX :: Linux',
     ],
     entry_points={
-        'console_scripts': ['AutoChatBot=AutoChatBot.AutoChatBot:main']
+        'console_scripts': ['AutoChatBot=AutoChatBot.AutoChatBot:ChatBot.main']
     },
     keywords='chatbot',
     python_requires=">=3.6",

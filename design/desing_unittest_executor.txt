@@ -1,0 +1,64 @@
+unittest execture method design
+  - IN: user request for some class, class_name, class_Script_path, unittest script path, context_name, json_path for context
+  - load context from context name and json path for context using the context manager
+    - In: context name, json path
+    - Out: specific conversation from the context
+  - default context name for writing unittests is "generate_unittest_using_form" 
+  - Creates a dict:
+    user story: request
+    class name : class_name
+    class_scriot_path : class_Script_path
+    unittest_script_path : unittest_script path
+  - Creates string from the dict:
+    USER STORY: 
+    CLASS NAME:
+    CLASS SCRIPT PATH:
+    UNITTEST_SCRIPT_PATH
+    - string from dict shoudl be outsourced to a methid and the method shall read from the context dict, how the context expects stuff to be formatted
+    - the context is a dict of past conversation with fully formatted string where the ai has succesfully fulfilled the request
+  - now we have a string message and the message history from contextmanager
+  - we extend the message history by our new message
+
+  - unittest loop startt
+    - we make an api nlp bot request with qour dict of message history
+    - the the nlp bot will write the unittest.
+    - we process the resposen to get the reposnse string from the comples response structure using a dedicated method that shall be improted
+    - we do some filtering to get out the python code, also a method for that
+    - we save the unittest to the specified directory, using a special method for that
+    - we take the user story and the class naming staff, we add the bot reply for the unitetst as string
+    - we expand that messagt by 
+      APPLICATION_CODE_CLASSE_NAME = CLass name
+      APLICATION CODE SAVE LOCATION = code save location
+      APLLICATION CODE CONTENT: (empty so the bot will ocmpletey)
+
+    - This is only an example structure, because the real structure will be laoded from anotehr cotnext name.
+    - default context name for writing code from unittests is "generate_class_from_unittest"
+    - load the context with the context menage
+    - add out new meesasage to the context as string (the one that includes the unittest and asks for the application code content)
+    - we do api request again
+    - bot answers an we decode the answer
+    - we write the class to the application code save location
+    - we run the unittest using a py file executor class (to be imported)
+    - if there are error it return the error
+    - we extend the message with the error by doing
+    - usert strory bla ble unittest bla bla application caode blable ERROR: (Error szring)
+    - we load the contet for trrating errors
+    - we extend the context again
+    - we make the api request again
+    - default context name is "fix_class_from_unittest_error"
+    - there is also a "fix_unittest_from_unittest_error", which will be used to rewrtie the unittest not the error, if we couldn'T fix the applicatio ncode and suspect that the problem is in the unittest.#
+    - after every fix we run the unittest again using the pyfileexecutor
+    - the loops is as follows:
+    once we have the unitest and application code
+     - for x (defauklt x = 5):
+          - rewrite unitetest, try running again (except first run)
+          - for y (default 5)
+                 - reewrite application code
+                - try running again 
+
+     the goal at the end is to have a working application code which is ensured by running the unittest each time. above x and y are 5 * 5  = 25, thus the code writing agent that uses unittest termiantes one a code solution is found that satisfies the unittest that is based on the user story or if the x * y are expired, then the proframmer is notified that the gaent ahs failed, other wise the user is notified that the aganet succeeded
+          
+
+
+
+   
