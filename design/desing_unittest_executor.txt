@@ -61,4 +61,131 @@ unittest execture method design
 
 
 
-   
+ **Formatted Idea:**
+
+### Automated Code Writing Agent Using Test-Driven Development
+
+**Objective:**
+Create an agent that automatically generates code and ensures its correctness through test-driven development (TDD).
+
+**Workflow:**
+
+1. **Initialization:**
+   - **Input:** User request, class name, class script path, unittest script path, context name, JSON path for context.
+   - **Load Context:** Utilize the Context Manager to load specific conversation context based on the provided context name and JSON path. This context is a collection of past conversations where the AI successfully fulfilled similar requests.
+     - **Input:** Context name, JSON path.
+     - **Output:** Specific conversation context.
+
+2. **Request Preparation:**
+   - **Default Context for Writing Unittests:** `"generate_unittest_using_form"`
+   - **Create Dictionary:**
+     - **User Story:** User request.
+     - **Class Name:** Provided class name.
+     - **Class Script Path:** Provided class script path.
+     - **Unittest Script Path:** Provided unittest script path.
+   - **Format String from Dictionary:**
+     - Utilize a method to format the string based on the context dictionary, ensuring the format aligns with successful past requests.
+   - **Extend Message History:** Append the newly formatted message to the existing message history.
+
+3. **Unittest Generation Loop:**
+   - **API Request:** Send the extended message history to the NLP bot to generate a unittest.
+   - **Process Response:**
+     - Extract response string using a dedicated method.
+     - Filter out the Python code.
+     - Save the unittest to the specified directory using a dedicated saving method.
+   - **Prepare Application Code Request:**
+     - Transform the user story and class naming information.
+     - Add the bot's unittest response as a string.
+     - **Format:** Include placeholders for class name, save location, and empty content for the bot to complete.
+
+4. **Application Code Generation Loop:**
+   - **Default Context for Writing Code from Unittests:** `"generate_class_from_unittest"`
+   - **Load Context:** Use the Context Manager to load the context for writing code from unittests.
+   - **Extend Message History:** Include the new message (unittest and code request) to the context.
+   - **API Request:** Send the updated message history to the NLP bot for generating application code.
+   - **Process Response:** Decode the bot's response and write the class to the specified location.
+   - **Run Unittest:** Use the PyFileExecutor class to execute the unittest.
+   - **Handle Errors:**
+     - **If Errors Occur:** 
+       - Extend the message with error details.
+       - **Default Context for Fixing Class from Unittest Error:** `"fix_class_from_unittest_error"`
+       - **Default Context for Fixing Unittest from Unittest Error:** `"fix_unittest_from_unittest_error"`
+     - **Retry Loop:** 
+       - For `x` (default 5) times: Rewrite unittest if necessary.
+       - For `y` (default 5) times: Rewrite application code if necessary.
+   - **Completion:** Notify the user about success or failure after retries.
+
+**Implementation Plan:**
+
+**Classes and Methods Reuse:**
+1. **ContextManager:**
+   - `load_context_data`
+   - `retrieve_context`
+   - `get_all_context_names`
+   - `get_specific_context`
+
+2. **ParserCreator:**
+   - `create_parser`
+
+3. **ConversationPreparer:**
+   - `decide_conversation`
+   - `str_to_dict_list`
+   - `extend_context`
+
+4. **ChatAPIHandler:**
+   - `make_api_request`
+
+5. **CodeExecutor:**
+   - `execute_code`
+   - `retry_api_request`
+
+6. **PyFileExecutor:**
+   - `save_code_to_file`
+   - `execute_code`
+   - `is_error`
+
+**Classes and Methods to Implement:**
+
+**New Classes/Methods:**
+
+1. **UnittestFormatter:**
+   - **Methods:**
+     - `format_unittest_request(user_story, class_name, class_script_path, unittest_script_path)`: Formats the unittest request string based on the user story and class details.
+
+2. **ResponseProcessor:**
+   - **Methods:**
+     - `extract_response_string(response)`: Extracts the response string from the API response.
+     - `filter_python_code(response_string)`: Filters out and returns Python code from the response string.
+
+3. **UnittestSaver:**
+   - **Methods:**
+     - `save_unittest(unittest_code, save_path)`: Saves the unittest code to the specified path.
+
+4. **ApplicationCodeRequestFormatter:**
+   - **Methods:**
+     - `format_application_code_request(user_story, class_name, class_script_path, unittest_code)`: Formats the application code request string based on the unittest code and class details.
+
+5. **ErrorContextLoader:**
+   - **Methods:**
+     - `load_error_context(error_string, context_name)`: Loads the error context based on the error string and context name.
+
+6. **ErrorHandler:**
+   - **Methods:**
+     - `handle_unittest_error(error_string)`: Handles errors in unittest and prepares a new request.
+     - `handle_application_code_error(error_string)`: Handles errors in application code and prepares a new request.
+
+**Verbal Implementation:**
+
+1. **UnittestFormatter:** This class will format the unittest request string based on the provided user story, class name, class script path, and unittest script path. It will ensure the format aligns with the context expectations.
+
+2. **ResponseProcessor:** This class will process the API response, extracting the response string and filtering out Python code. It will ensure that only valid Python code is saved.
+
+3. **UnittestSaver:** This class will save the generated unittest code to the specified directory, ensuring the code is properly formatted and saved.
+
+4. **ApplicationCodeRequestFormatter:** This class will format the application code request string based on the unittest code and class details. It will prepare the request for generating application code from the unittest.
+
+5. **ErrorContextLoader:** This class will load the error context based on the error string and context name. It will ensure the context for handling errors is properly loaded.
+
+6. **ErrorHandler:** This class will handle errors in both unittest and application code. It will prepare new requests to fix the errors and ensure the code meets the unittest requirements.
+
+By implementing these classes and methods, we can create an automated code writing agent that generates code based on TDD principles, ensuring the code meets the requirements specified by the user and passes all unittests.  
