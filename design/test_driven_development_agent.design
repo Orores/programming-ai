@@ -1,0 +1,56 @@
+## Test Driven Development Agent
+
+### 1. Overview
+
+The NLP agent will be responsible for generating both application code and unit tests by interfacing with an external API. It will leverage the `make_api_request` function from `AutoChatBot/ChatApiHandler.py`. The design will adhere to functional programming principles and the single responsibility paradigm.
+
+### 2. What Goes In / What Goes Out
+
+**Input:**
+- API parameters (e.g., API name, model, temperature, max tokens, etc.)
+- Conversation context for the API request
+
+**Output:**
+- Generated application code
+- Generated unit test code
+
+### 3. Design Principles
+
+1. **Functional Design:** The agent will be designed using pure functions.
+2. **Single Responsibility:** Each function will have a single, well-defined responsibility.
+3. **Comprehensive Documentation:** All functions will have clear and concise docstrings.
+
+### 4. Step-by-Step Description
+
+1. **Setup API Parameters:** A function will prepare the parameters required for the API requests.
+2. **Generate Application Code:** A function will call `make_api_request` to generate the application code.
+3. **Generate Unit Test Code:** A function will call `make_api_request` again to generate the unit test code.
+4. **Compile Results:** A function will compile and return the generated application and unit test code.
+
+### 5. Methods to Repurpose from Other Modules
+
+**Function Header:**
+def make_api_request(
+    api: str,
+    model: str,
+    temperature: float,
+    max_tokens: int,
+    top_p: float,
+    conversation: list,
+    frequency_penalty: float = 0.0,
+    presence_penalty: float = 0.0,
+    stop_sequences: list = None,
+    top_k: int = 50,
+    repetition_penalty: float = 1.0
+) -> dict:
+
+**Location:**
+- `from AutoChatBot.ChatApiHandler import make_api_request`
+
+### 6. Testing Strategy
+
+The testing strategy will involve calling the `make_api_request` function twice:
+1. Once to generate application code.
+2. Once to generate unit test code.
+
+The outputs of both requests will be verified to ensure they are not empty.

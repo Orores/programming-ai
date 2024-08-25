@@ -82,29 +82,3 @@ class CodeExecutor:
         else:
             return False
 
-    @staticmethod
-    def run_code_with_unittest(api, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, stop_sequences, top_k, repetition_penalty, save_path, code_save_path, run_code, response_content, max_attempts=3):
-        """
-        Runs the code with unit tests and retries API requests if needed.
-
-        Args:
-            api (str): The API endpoint.
-            model (str): The model to use for the API request.
-            temperature (float): Sampling temperature.
-            max_tokens (int): Maximum number of tokens.
-            top_p (float): Nucleus sampling probability.
-            frequency_penalty (float): Frequency penalty.
-            presence_penalty (float): Presence penalty.
-            stop_sequences (list): Stop sequences for the API.
-            top_k (int): Top-K sampling.
-            repetition_penalty (float): Repetition penalty.
-            save_path (str): Path to save the API response.
-            code_save_path (str): Path to save the code file.
-            run_code (bool): Flag indicating whether to execute the code.
-            response_content (str): The initial code/content to execute.
-            max_attempts (int): Maximum number of retry attempts.
-
-        Returns:
-            bool: True if execution completed successfully, False otherwise.
-        """
-        pass
