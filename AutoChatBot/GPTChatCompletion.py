@@ -57,6 +57,65 @@ class GPT3ChatCompletion:
         return current_values
 
     @staticmethod
+    def extract_text_from_response(response):
+        """
+        Short Description:
+        Extracts the text content from the OpenAI API response object.
+
+        Parameters:
+        response (dict): The response object returned by the OpenAI API.
+            Example:
+            {
+                'id': 'chatcmpl-939gfxWbMKlqGh8hkPG5IvEO6SYDq',
+                'object': 'chat.completion',
+                'created': 1710539249,
+                'model': 'gpt-3.5-turbo-0125',
+                'choices': [{
+                    'index': 0,
+                    'message': {'role': 'assistant', 'content': 'The Los Angeles Dodgers won the 2020 World Series'},
+                    'logprobs': None,
+                    'finish_reason': 'stop'
+                }],
+                'usage': {'prompt_tokens': 19, 'completion_tokens': 9, 'total_tokens': 28},
+                'system_fingerprint': 'fp_4f2ebda25a'
+            }
+
+        Returns:
+        str: The content of the response message.
+            Example: "The Los Angeles Dodgers won the 2020 World Series"
+
+        Raises:
+        ValueError: If the response format is invalid or does not contain the expected keys.
+            Example: ValueError("Invalid response format")
+
+        How to Use:
+        This method can be used to extract only the text content from the response object returned by the OpenAI API.
+
+        Usage Example:
+        >>> response = {
+        >>>     'id': 'chatcmpl-939gfxWbMKlqGh8hkPG5IvEO6SYDq',
+        >>>     'object': 'chat.completion',
+        >>>     'created': 1710539249,
+        >>>     'model': 'gpt-3.5-turbo-0125',
+        >>>     'choices': [{
+        >>>         'index': 0,
+        >>>         'message': {'role': 'assistant', 'content': 'The Los Angeles Dodgers won the 2020 World Series'},
+        >>>         'logprobs': None,
+        >>>         'finish_reason': 'stop'
+        >>>     }],
+        >>>     'usage': {'prompt_tokens': 19, 'completion_tokens': 9, 'total_tokens': 28},
+        >>>     'system_fingerprint': 'fp_4f2ebda25a'
+        >>> }
+        >>> text = GPT3ChatCompletion.extract_text_from_response(response)
+        >>> print(text)
+        "The Los Angeles Dodgers won the 2020 World Series"
+        """
+        try:
+            return response['choices'][0]['message']['content']
+        except (KeyError, IndexError):
+            raise ValueError("Invalid response format")
+
+    @staticmethod
     def make_api_request(
             api_key,
             conversation,

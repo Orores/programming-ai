@@ -1,56 +1,89 @@
-## Test Driven Development Agent
+#### Title
+Automated Code Generation and Testing Agent Using Unittest and NLP Bot
 
-### 1. Overview
+#### Description
+This agent automates the process of generating unittests for a given class based on user requests, generating the class implementation to satisfy the unittests, and iteratively fixing any errors that arise from running the unittests. It leverages context management, an NLP bot for code generation, and a looped error-fixing mechanism to ensure that the final code meets the specifications outlined in the user story.
 
-The NLP agent will be responsible for generating both application code and unit tests by interfacing with an external API. It will leverage the `make_api_request` function from `AutoChatBot/ChatApiHandler.py`. The design will adhere to functional programming principles and the single responsibility paradigm.
+#### Input/Output Definitions
+**Inputs:**
+- `request`: User's request or user story.
+- `class_name`: Name of the class to be generated.
+- `class_script_path`: File path where the class script will be saved.
+- `unittest_script_path`: File path where the unittest script will be saved.
+- `context_name`: Name of the context to load for generating unittests or code.
+- `json_path`: Path to the JSON file containing context data.
 
-### 2. What Goes In / What Goes Out
+**Outputs:**
+- Generated unittest script saved to `unittest_script_path`.
+- Generated class script saved to `class_script_path`.
+- Success or failure notification based on whether the code passes all unittests.
 
-**Input:**
-- API parameters (e.g., API name, model, temperature, max tokens, etc.)
-- Conversation context for the API request
+#### Step-by-Step Description
 
-**Output:**
-- Generated application code
-- Generated unit test code
+1. **Load Context:**
+   - Load context using `context_name` and `json_path` through the context manager.
+   - If no context is provided, use default context names:
+     - For unittests: `generate_unittest_using_form`
+     - For class implementation: `generate_class_from_unittest`
 
-### 3. Design Principles
+2. **Create User Story Dictionary:**
+   - Create a dictionary with the following entries:
+     - `user_story`: User's request.
+     - `class_name`: Name of the class.
+     - `class_script_path`: Path where the class script will be saved.
+     - `unittest_script_path`: Path where the unittest script will be saved.
 
-1. **Functional Design:** The agent will be designed using pure functions.
-2. **Single Responsibility:** Each function will have a single, well-defined responsibility.
-3. **Comprehensive Documentation:** All functions will have clear and concise docstrings.
+3. **Format User Story String:**
+   - Convert the dictionary to a formatted string using a dedicated method.
+   - The method reads formatting rules from the context dictionary.
 
-### 4. Step-by-Step Description
+4. **Extend Message History:**
+   - Extend the context's message history with the new formatted user story string.
 
-1. **Setup API Parameters:** A function will prepare the parameters required for the API requests.
-2. **Generate Application Code:** A function will call `make_api_request` to generate the application code.
-3. **Generate Unit Test Code:** A function will call `make_api_request` again to generate the unit test code.
-4. **Compile Results:** A function will compile and return the generated application and unit test code.
+5. **Generate Unittest Script:**
+   - Make an API request to the NLP bot with the extended message history.
+   - Process the response to extract the unittest code.
+   - Save the unittest script to the specified directory.
 
-### 5. Methods to Repurpose from Other Modules
+6. **Generate Class Implementation:**
+   - Extend the message history with the bot's unittest response and additional placeholders for the class implementation.
+   - Load the context for generating class implementation.
+   - Make an API request to the NLP bot.
+   - Process the response to extract the class code.
+   - Save the class script to the specified directory.
 
-**Function Header:**
-def make_api_request(
-    api: str,
-    model: str,
-    temperature: float,
-    max_tokens: int,
-    top_p: float,
-    conversation: list,
-    frequency_penalty: float = 0.0,
-    presence_penalty: float = 0.0,
-    stop_sequences: list = None,
-    top_k: int = 50,
-    repetition_penalty: float = 1.0
-) -> dict:
+7. **Run Unittests:**
+   - Execute the unittest using a `PyFileExecutor` class.
+   - If errors occur, extend the message history with the error information.
 
-**Location:**
-- `from AutoChatBot.ChatApiHandler import make_api_request`
+8. **Iterative Error Fixing:**
+   - If unittests fail, use the following loops to fix errors:
+     - For `x` (default = 5) times:
+       - Rewrite the unittest and retry running it (except for the first run).
+       - For `y` (default = 5) times:
+         - Rewrite the application code and retry running it.
+   - Use appropriate contexts:
+     - For fixing class from unittest errors: `fix_class_from_unittest_error`
+     - For fixing unittest from errors: `fix_unittest_from_unittest_error`
 
-### 6. Testing Strategy
+9. **Notification:**
+   - Notify the user whether the agent succeeded or failed after `x * y` attempts.
 
-The testing strategy will involve calling the `make_api_request` function twice:
-1. Once to generate application code.
-2. Once to generate unit test code.
+#### Coding Paradigm
+- **Modular Design:** Each step is encapsulated in dedicated methods to ensure reusability and maintainability.
+- **Context Management:** Utilizes context management to dynamically load past conversation data and format requests.
+- **API Integration:** Makes use of NLP bot API for generating code based on natural language processing.
+- **Error Handling:** Implements a robust error-handling mechanism with iterative loops for fixing errors.
 
-The outputs of both requests will be verified to ensure they are not empty.
+#### Debug Info
+- **Logging:** Implement logging for each major step to trace the flow of execution and capture any errors.
+- **Error Messages:** Detailed error messages for each stage to identify where the process failed.
+- **Contextual Debugging:** Use context history to debug issues related to API responses and formatting.
+
+#### Testing Strategy
+- **Unit Tests:** Write unit tests for each method to ensure individual components work as expected.
+- **Integration Tests:** Test the entire workflow from user input to final notification to ensure all parts work together.
+- **Mocking API Calls:** Use mock API responses to test NLP bot interactions without relying on the actual API.
+- **Edge Cases:** Test with various user stories, class names, and script paths to ensure the system handles all scenarios gracefully.
+
+

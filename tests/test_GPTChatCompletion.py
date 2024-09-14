@@ -45,5 +45,17 @@ class TestGPT3ChatCompletion(unittest.TestCase):
             self.assertIn('role', message, f"'message' does not contain 'role'. Full response: {self.response}")
             self.assertIn('content', message, f"'message' does not contain 'content'. Full response: {self.response}")
 
+    def test_extract_text_from_response(self):
+        # Test the extract_text_from_response method with a valid response
+        text = GPT3ChatCompletion.extract_text_from_response(self.response)
+        self.assertIsInstance(text, str, "The extracted text should be a string.")
+        self.assertGreater(len(text), 0, "The extracted text should not be empty.")
+
+    def test_extract_text_from_response_invalid_response(self):
+        # Test the extract_text_from_response method with an invalid response
+        invalid_response = {}
+        with self.assertRaises(ValueError, msg="Invalid response format"):
+            GPT3ChatCompletion.extract_text_from_response(invalid_response)
+
 if __name__ == '__main__':
     unittest.main()
