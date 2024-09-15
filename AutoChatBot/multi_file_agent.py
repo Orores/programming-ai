@@ -203,9 +203,9 @@ class MultiFileAgent:
 
 # Example usage:
 if __name__ == "__main__":
-    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py", "reference_code/test_workout_tracker.py"]
-    rewrite_files = ["generated_code/wikipedia_scrapper.design", "generated_code/wikipedia_scraper.py", "generated_code/test_wikipedia_scraper.py"]
-    question = "Please write code that scrapes the wikipedia page for ww2."
+    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py", "reference_code/test_workout_tracker.py", "AutoChatBot/multi_file_agent.design", "AutoChatBot/multi_file_agent.py"]
+    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py", "AutoChatBot/ParseCreator.design", "AutoChatBot/ParserCreator.py", "tests/test_ParserCreator.py"]
+    question = "Make the multi file agent part of the autochat, add the new parser argument for calling the multifile agent and expand on the tests."
     
     result = MultiFileAgent.execute(reference_files, rewrite_files, question, debug=True)
     for file_path, content in result.items():

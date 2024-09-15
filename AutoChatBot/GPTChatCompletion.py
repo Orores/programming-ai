@@ -44,8 +44,10 @@ class GPT3ChatCompletion:
 
     @staticmethod
     def load_api_key():
+        current_directory = os.getcwd()
         load_dotenv()
-        return os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("OPENAI_API_KEY")
+        return api_key 
 
     @staticmethod
     def update_attributes(current_values, **kwargs):

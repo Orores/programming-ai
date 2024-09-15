@@ -7,6 +7,7 @@ from .TogetherAIModelRetriever import TogetherAIModelRetriever
 from .ConversationPreparer import ConversationPreparer
 from .ChatAPIHandler import ChatAPIHandler
 from .CodeExecutor import CodeExecutor
+from .multi_file_agent import MultiFileAgent
 
 class ChatBot:
     """
@@ -29,12 +30,30 @@ class ChatBot:
     -------
     main():
         The main method to run the chatbot.
+    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str, debug: bool = False) -> dict:
+        Executes the multi-file agent to generate and update multiple files.
     """
     FAIL = '\33[91m'
     OKGREEN = '\33[92m'
     OKCYAN = '\33[96m'
     ORANGE = '\33[93m'
     BOLD = '\33[1m'
+
+    @staticmethod
+    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str, debug: bool = False) -> dict:
+        """
+        Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
+
+        Parameters:
+        reference_files (list): List of paths to the reference files.
+        rewrite_files (list): List of paths to the rewrite files.
+        question (str): The question to be included in the task string.
+        debug (bool): Debug flag.
+
+        Returns:
+        dict: Dictionary with file paths as keys and generated content as values.
+        """
+        return MultiFileAgent.execute(reference_files, rewrite_files, question, debug)
 
     @staticmethod
     def main():
@@ -111,6 +130,11 @@ class ChatBot:
                 response_content=response_content
             )
 
+        if args.multi_file_agent:
+            result = ChatBot.execute_multifile_agent(args.reference_files, args.rewrite_files, args.question, args.debug)
+            for file_path, content in result.items():
+                with open(file_path, 'w') as file:
+                    file.write(content)
 
 if __name__ == '__main__':
     ChatBot.main()

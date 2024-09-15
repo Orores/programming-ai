@@ -23,6 +23,10 @@ class ParserCreator:
         parser.add_argument("--run_code", action='store_true', help="Run the generated code if any.")
         parser.add_argument("--run_code_with_unittest", action='store_true', help="Generate a unittest, then a code, then run the code against the unittest.")
         parser.add_argument("--code_save_path", type=str, default='sandbox_scripts/myscript.py', help="Path to save the generated code.")
+        parser.add_argument("--multi_file_agent", action='store_true', help="Execute the multi-file agent.")
+        parser.add_argument("--reference_files", nargs='*', help="List of reference file paths.")
+        parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
+        parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
         return parser
 
 if __name__ == "__main__":
@@ -52,3 +56,11 @@ if __name__ == "__main__":
         print("Show available context option is enabled.")
     else:
         print("Show available context option is not enabled.")
+        
+    if args.multi_file_agent:
+        print("Multi-file agent option is enabled.")
+        print(f"Reference Files: {args.reference_files}")
+        print(f"Rewrite Files: {args.rewrite_files}")
+        print(f"Debug mode: {args.debug}")
+    else:
+        print("Multi-file agent option is not enabled.")

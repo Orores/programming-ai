@@ -1,0 +1,81 @@
+```markdown
+# AutoChatBot Design
+
+## Abstract
+The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy.
+
+## Class Design
+
+### Methods
+
+1. **main**
+   - **Description**: The main method to run the chatbot. It parses arguments and executes the chatbot logic.
+   - **Arguments**: None.
+   - **Returns**: None.
+
+2. **execute_multifile_agent**
+   - **Description**: Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
+   - **Arguments**:
+     - `reference_files` (`list`): List of paths to the reference files.
+     - `rewrite_files` (`list`): List of paths to the rewrite files.
+     - `question` (`str`): The question to be included in the task string.
+     - `debug` (`bool`): Debug flag.
+   - **Returns**: `dict` - Dictionary with file paths as keys and generated content as values.
+
+### Error Handling
+
+- **execute_multifile_agent**
+  - **FileNotFoundError**: Raised if any reference file does not exist.
+  - **IOError**: Raised if there is an issue reading the files.
+  - **ValueError**: Raised if the question is not provided.
+
+### How it Works
+
+1. **main**:
+   - Step 1: Parse command-line arguments using `argparse`.
+   - Step 2: Depending on the parsed arguments, execute the appropriate functionality such as showing available contexts, showing models, running code, or executing the multi-file agent.
+
+2. **execute_multifile_agent**:
+   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, and debug flag.
+   - Step 2: Return the dictionary with the generated content for each rewrite file.
+
+### Class Paradigm
+
+- The class follows a procedural paradigm with static methods.
+- Uses modular design to separate different functionalities.
+
+### Testing Strategy
+
+- **Test `main`**:
+  - Verify that the method correctly parses arguments and executes the corresponding functionalities.
+  - Mock external dependencies such as file I/O and API requests.
+
+- **Test `execute_multifile_agent`**:
+  - Verify that the method correctly integrates with `MultiFileAgent`.
+  - Include tests that mock file I/O and API requests to ensure the method's robustness.
+
+### Integration
+
+- **MultiFileAgent**: Integrated as a static method call within `AutoChatBot`.
+- **Parser Argument**: Added a new argument `--multi_file_agent` to trigger the multi-file agent functionality.
+
+### Example Usage
+
+```python
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Command Line Interface for Chat Bot")
+    parser.add_argument("--multi_file_agent", action='store_true', help="Execute the multi-file agent.")
+    parser.add_argument("--reference_files", nargs='*', help="List of reference file paths.")
+    parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
+    parser.add_argument("--question", type=str, help="The question to be included in the task string.")
+    parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
+    
+    args = parser.parse_args()
+    
+    if args.multi_file_agent:
+        result = AutoChatBot.execute_multifile_agent(args.reference_files, args.rewrite_files, args.question, args.debug)
+        for file_path, content in result.items():
+            with open(file_path, 'w') as file:
+                file.write(content)
+```
+```
