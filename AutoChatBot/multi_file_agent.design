@@ -2,7 +2,7 @@
 # MultiFileAgent Design
 
 ## Abstract
-The `MultiFileAgent` class is designed to facilitate the generation of multiple files using the AutoChatbot. It leverages reference files and rewrite files to create a comprehensive prompt, generate content for the rewrite files, and return a dictionary with the new content for each rewrite file. It also supports reading the question from a file to handle long questions conveniently.
+The `MultiFileAgent` class is designed to facilitate the generation and execution of multiple files using the AutoChatBot. It leverages reference files and rewrite files to create a comprehensive prompt, generate content for the rewrite files, and return a dictionary with the new content for each rewrite file. Additionally, it supports reading the question from a file to handle long questions conveniently and executing a list of files, returning their stdout and stderr outputs.
 
 ## Class Design
 
@@ -27,23 +27,34 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
      - `str`: The base prompt string.
 
 3. **generate_content_for_rewrite_files**
-   - **Description**: Iteratively generates content for each rewrite file using the AutoChatbot.
+   - **Description**: Iteratively generates content for each rewrite file using the AutoChatBot.
    - **Arguments**:
      - `base_prompt_string` (`str`): The base prompt string.
      - `rewrite_files` (`list`): List of paths to the rewrite files.
    - **Returns**:
      - `dict`: Dictionary with file paths as keys and generated content as values.
 
-4. **execute**
-   - **Description**: Orchestrates the entire process of generating content for rewrite files and returns the final dictionary.
+4. **execute_files**
+   - **Description**: Executes a list of files using the PyFileExecutor and returns their stdout and stderr outputs.
+   - **Arguments**:
+     - `file_paths` (`list`): List of file paths to be executed.
+   - **Returns**:
+     - `dict`: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
+
+5. **execute**
+   - **Description**: Orchestrates the entire process of generating content for rewrite files, executing files, and returns the final dictionary.
    - **Arguments**:
      - `reference_files` (`list`): List of paths to the reference files.
      - `rewrite_files` (`list`): List of paths to the rewrite files.
      - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
      - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
+     - `execute_files` (`list`, optional): List of file paths to be executed. Default is `None`.
      - `debug` (`bool`): Debug flag.
+     - `output_dir` (`str`, optional): Directory where the plots will be saved. Default is `None`.
    - **Returns**:
      - `dict`: Dictionary with file paths as keys and generated content as values.
+     - `dict`: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
+     - `str`: "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
 
 ### Error Handling
 
@@ -53,6 +64,10 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
 
 - **create_base_prompt**
   - **ValueError**: Raised if the question is not provided.
+
+- **execute_files**
+  - **FileNotFoundError**: Raised if any file to be executed does not exist.
+  - **ExecutionError**: Raised if there is an error during file execution.
 
 ### How it Works
 
@@ -73,11 +88,18 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
    - Step 4: Filter the content if the file is a Python file.
    - Step 5: Store the generated content in a dictionary and append it to the prompt string.
 
-4. **execute**:
+4. **execute_files**:
+   - Step 1: Iterate over each file in the execute file list.
+   - Step 2: Use the PyFileExecutor to execute each file and capture stdout and stderr.
+   - Step 3: Store the outputs in a dictionary.
+
+5. **execute**:
    - Step 1: Call `ConversationPreparer.decide_conversation` to determine the question from the provided question file path or question string.
    - Step 2: Call `create_base_prompt` to generate the base prompt string.
    - Step 3: Call `generate_content_for_rewrite_files` to generate the content for each rewrite file.
-   - Step 4: Return the final dictionary with the generated content.
+   - Step 4: Call `execute_files` to execute the files and capture their outputs.
+   - Step 5: Check if any executed file has stderr output. If so, report failure along with the file that had the error; otherwise, report success.
+   - Step 6: Return the final dictionary with the generated content, the execution outputs, and the success/failure status.
 
 ### Class Paradigm
 
@@ -99,10 +121,15 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
   - Verify that the method correctly generates content for each rewrite file.
   - Verify that the method handles Python file content filtering correctly.
 
+- **Test `execute_files`**:
+  - Verify that the method correctly executes the files and captures their stdout and stderr outputs.
+  - Verify that the method handles file execution errors correctly.
+
 - **Test `execute`**:
-  - Verify that the method orchestrates the steps correctly and returns the expected dictionary.
+  - Verify that the method orchestrates the steps correctly and returns the expected dictionaries and status.
   - Include tests that mock the API as well as tests that make actual API calls to ensure the system's integrity.
   - Verify that the method correctly handles reading the question from a file if provided.
+  - Verify that the method correctly reports success or failure based on the execution outputs.
 
 ### Example Usage
 
@@ -110,12 +137,14 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
 if __name__ == "__main__":
     reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
     rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
+    execute_files = ["AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py"]
     question_file_path = "path/to/question.txt"
     
-    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, debug=True)
+    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True, output_dir="path/to/output")
     for file_path, content in result.items():
         with open(file_path, 'w') as file:
             file.write(content)
-```
+    print("Execution Outputs:", exec_outputs)
+    print("Status:", status)
 ```
 ```

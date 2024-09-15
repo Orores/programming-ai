@@ -27,6 +27,7 @@ class TestParserCreator(unittest.TestCase):
             "--reference_files", "ref_file_1.txt", "ref_file_2.txt",
             "--rewrite_files", "rewrite_file_1.txt", "rewrite_file_2.txt",
             "--question_file_path", "/path/to/question_file.txt",
+            "--execute_files", "execute_file_1.py", "execute_file_2.py",
             "--debug"
         ]
         with patch("sys.argv", ["ParserCreator.py"] + test_args):
@@ -55,6 +56,7 @@ class TestParserCreator(unittest.TestCase):
             self.assertEqual(args.reference_files, ["ref_file_1.txt", "ref_file_2.txt"])
             self.assertEqual(args.rewrite_files, ["rewrite_file_1.txt", "rewrite_file_2.txt"])
             self.assertEqual(args.question_file_path, "/path/to/question_file.txt")
+            self.assertEqual(args.execute_files, ["execute_file_1.py", "execute_file_2.py"])
             self.assertTrue(args.debug)
 
 if __name__ == "__main__":

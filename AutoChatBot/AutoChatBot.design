@@ -2,7 +2,7 @@
 # AutoChatBot Design
 
 ## Abstract
-The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy. Additionally, it supports reading the question from a file to handle long questions conveniently.
+The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy. Additionally, it supports reading the question from a file to handle long questions conveniently and executing a list of files, returning their stdout and stderr outputs.
 
 ## Class Design
 
@@ -14,21 +14,26 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
    - **Returns**: None.
 
 2. **execute_multifile_agent**
-   - **Description**: Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
+   - **Description**: Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions, and to execute a list of files, returning their stdout and stderr outputs.
    - **Arguments**:
      - `reference_files` (`list`): List of paths to the reference files.
      - `rewrite_files` (`list`): List of paths to the rewrite files.
      - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
      - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
+     - `execute_files` (`list`, optional): List of file paths to be executed. Default is `None`.
      - `debug` (`bool`): Debug flag.
-   - **Returns**: `dict` - Dictionary with file paths as keys and generated content as values.
+     - `output_dir` (`str`, optional): Directory where the plots will be saved. Default is `None`.
+   - **Returns**: 
+     - `dict`: Dictionary with file paths as keys and generated content as values.
+     - `dict`: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
+     - `str`: "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
 
 ### Error Handling
 
 - **execute_multifile_agent**
   - **FileNotFoundError**: Raised if any reference file does not exist.
   - **IOError**: Raised if there is an issue reading the files.
-  - **ValueError**: Raised if the question is not provided.
+  - **ExecutionError**: Raised if there is an error during file execution.
 
 ### How it Works
 
@@ -37,8 +42,8 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
    - Step 2: Depending on the parsed arguments, execute the appropriate functionality such as showing available contexts, showing models, running code, or executing the multi-file agent.
 
 2. **execute_multifile_agent**:
-   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, question file path, and debug flag.
-   - Step 2: Return the dictionary with the generated content for each rewrite file.
+   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, question file path, execute files, debug flag, and output directory.
+   - Step 2: Return the dictionaries with the generated content and execution outputs, and the success/failure status.
 
 ### Class Paradigm
 
@@ -54,12 +59,14 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
 - **Test `execute_multifile_agent`**:
   - Verify that the method correctly integrates with `MultiFileAgent`.
   - Include tests that mock file I/O and API requests to ensure the method's robustness.
+  - Verify that the method correctly reports success or failure based on the execution outputs.
 
 ### Integration
 
 - **MultiFileAgent**: Integrated as a static method call within `AutoChatBot`.
-- **Parser Argument**: Added a new argument `--multi_file_agent` to trigger the multi-file agent functionality.
+- **Parser Argument**: Added new arguments `--multi_file_agent` and `--execute_files` to trigger the multi-file agent functionality and specify files to execute.
 - **Question File Path**: Added a new argument `--question_file_path` to specify a file containing the question.
+- **Output Directory**: Added a new argument `--output_dir` to specify the directory where plots will be saved.
 
 ### Example Usage
 
@@ -71,14 +78,19 @@ if __name__ == '__main__':
     parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
     parser.add_argument("--question", type=str, help="The question to be included in the task string.")
     parser.add_argument("--question_file_path", type=str, help="Path to the file containing the question.")
+    parser.add_argument("--execute_files", nargs='*', help="List of file paths to be executed.")
     parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
+    parser.add_argument("--output_dir", type=str, help="Directory where plots will be saved.")
     
     args = parser.parse_args()
     
     if args.multi_file_agent:
-        result = AutoChatBot.execute_multifile_agent(args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.debug)
+        result, exec_outputs, status = AutoChatBot.execute_multifile_agent(
+            args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.execute_files, args.debug, args.output_dir)
         for file_path, content in result.items():
             with open(file_path, 'w') as file:
                 file.write(content)
+        print("Execution Outputs:", exec_outputs)
+        print("Status:", status)
 ```
 ```

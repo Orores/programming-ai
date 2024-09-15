@@ -30,8 +30,8 @@ class ChatBot:
     -------
     main():
         The main method to run the chatbot.
-    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, debug: bool = False) -> dict:
-        Executes the multi-file agent to generate and update multiple files.
+    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, execute_files: list = None, debug: bool = False, output_dir: str = None) -> tuple:
+        Executes the multi-file agent to generate and update multiple files and execute a list of files.
     """
     FAIL = '\33[91m'
     OKGREEN = '\33[92m'
@@ -40,21 +40,23 @@ class ChatBot:
     BOLD = '\33[1m'
 
     @staticmethod
-    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, debug: bool = False) -> dict:
+    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, execute_files: list = None, debug: bool = False, output_dir: str = None) -> tuple:
         """
-        Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
+        Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions, and to execute a list of files, returning their stdout and stderr outputs.
 
         Parameters:
         reference_files (list): List of paths to the reference files.
         rewrite_files (list): List of paths to the rewrite files.
         question (str, optional): The question to be included in the task string. Default is `None`.
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
+        execute_files (list, optional): List of file paths to be executed. Default is `None`.
         debug (bool): Debug flag.
+        output_dir (str, optional): Directory where the plots will be saved. Default is `None`.
 
         Returns:
-        dict: Dictionary with file paths as keys and generated content as values.
+        tuple: Dictionary with file paths as keys and generated content as values, dictionary with file paths as keys and tuples of (stdout, stderr) as values, and "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
         """
-        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, debug)
+        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, execute_files, debug, output_dir)
 
     @staticmethod
     def main():
@@ -132,10 +134,13 @@ class ChatBot:
             )
 
         if args.multi_file_agent:
-            result = ChatBot.execute_multifile_agent(args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.debug)
+            result, exec_outputs, status = ChatBot.execute_multifile_agent(
+                args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.execute_files, args.debug, args.output_dir)
             for file_path, content in result.items():
                 with open(file_path, 'w') as file:
                     file.write(content)
+            print("Execution Outputs:", exec_outputs)
+            print("Status:", status)
 
 if __name__ == '__main__':
     ChatBot.main()

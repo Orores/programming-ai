@@ -1,9 +1,12 @@
 import os
 import json
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from AutoChatBot.ChatAPIHandler import ChatAPIHandler
 from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
 from AutoChatBot.ConversationPreparer import ConversationPreparer
+from AutoChatBot.PyFileExecutor import PyFileExecutor
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 class MultiFileAgent:
     """
@@ -24,8 +27,10 @@ class MultiFileAgent:
         Filters out Python code from a response.
     - generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
         Generates content for a file using AutoChatBot.
-    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
-        Orchestrates the multi-file generation and update process.
+    - execute_files(file_paths: List[str]) -> Dict[str, Tuple[str, str]]:
+        Executes a list of files using PyFileExecutor and returns their stdout and stderr outputs.
+    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False, output_dir: str = None) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
+        Orchestrates the multi-file generation, execution, and update process.
     """
 
     @staticmethod
@@ -160,19 +165,80 @@ class MultiFileAgent:
         return content
 
     @staticmethod
-    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
+    def execute_files(file_paths: List[str]) -> Dict[str, Tuple[str, str]]:
         """
-        Orchestrates the multi-file generation and update process.
+        Executes a list of files using PyFileExecutor and returns their stdout and stderr outputs.
+        
+        Parameters:
+        file_paths (List[str]): List of file paths to be executed.
+        
+        Returns:
+        Dict[str, Tuple[str, str]]: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
+        
+        Raises:
+        FileNotFoundError: If any file to be executed does not exist.
+        """
+        result = {}
+        for file_path in file_paths:
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"File not found: {file_path}")
+            stdout, stderr = PyFileExecutor.execute_code(file_path)
+            result[file_path] = (stdout, stderr)
+        return result
+
+    @staticmethod
+    def generate_and_save_plots(output_dir: str):
+        """
+        Generates and saves different types of plots using Matplotlib.
+        
+        Parameters:
+        output_dir (str): Directory where the plots will be saved.
+        
+        Returns:
+        None
+        """
+        os.makedirs(output_dir, exist_ok=True)
+
+        def save_plot(file_name):
+            file_path = os.path.join(output_dir, file_name)
+            plt.savefig(file_path)
+            plt.close()
+            return file_path
+
+        # Generate and save scatter plot
+        plt.figure()
+        plt.scatter([1, 2, 3], [4, 5, 6])
+        scatter_plot_path = save_plot("scatter_plot.png")
+
+        # Generate and save bar plot
+        plt.figure()
+        plt.bar([1, 2, 3], [4, 5, 6])
+        bar_plot_path = save_plot("bar_plot.png")
+
+        # Generate and save 3D plot
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter([1, 2, 3], [4, 5, 6], [7, 8, 9])
+        three_d_plot_path = save_plot("3d_plot.png")
+
+        return scatter_plot_path, bar_plot_path, three_d_plot_path
+
+    @staticmethod
+    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False, output_dir: str = None) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
+        """
+        Orchestrates the multi-file generation, execution, and update process.
         
         Parameters:
         reference_files (List[str]): List of reference file paths.
         rewrite_files (List[str]): List of rewrite file paths.
         question (str, optional): The question to be included in the task string. Default is `None`.
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
+        execute_files (List[str], optional): List of file paths to be executed. Default is `None`.
         debug (bool): Debug flag.
+        output_dir (str, optional): Directory where the plots will be saved. Default is `None`.
         
         Returns:
-        Dict[str, str]: Dictionary with file paths as keys and generated contents as values.
+        Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]: Dictionary with file paths as keys and generated contents as values, dictionary with file paths as keys and tuples of (stdout, stderr) as values, and "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
         """
         # Step 1: Decide conversation from question or question_file_path
         question = ConversationPreparer.decide_conversation(file_path=question_file_path, question=question)
@@ -204,15 +270,36 @@ class MultiFileAgent:
         if debug:
             print(json.dumps(result, indent=4))
         
-        return result
+        # Step 8: Execute files and capture their outputs
+        exec_outputs = {}
+        status = "Success"
+        if execute_files:
+            exec_outputs = MultiFileAgent.execute_files(execute_files)
+            for file_path, (stdout, stderr) in exec_outputs.items():
+                if stderr:
+                    status = f"Failure: {file_path} had an error."
+                    break
+        
+        # Step 9: Generate and save plots
+        if output_dir:
+            scatter_plot_path, bar_plot_path, three_d_plot_path = MultiFileAgent.generate_and_save_plots(output_dir)
+            if debug:
+                print(f"Scatter plot saved at: {scatter_plot_path}")
+                print(f"Bar plot saved at: {bar_plot_path}")
+                print(f"3D plot saved at: {three_d_plot_path}")
+
+        return result, exec_outputs, status
 
 # Example usage:
 if __name__ == "__main__":
-    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py", "reference_code/test_workout_tracker.py", "AutoChatBot/multi_file_agent.design", "AutoChatBot/multi_file_agent.py"]
-    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py", "AutoChatBot/ParseCreator.design", "AutoChatBot/ParserCreator.py", "tests/test_ParserCreator.py"]
+    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
+    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
+    execute_files = ["AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py"]
     question_file_path = "path/to/question.txt"
     
-    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, debug=True)
+    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True, output_dir="path/to/output")
     for file_path, content in result.items():
         with open(file_path, 'w') as file:
             file.write(content)
+    print("Execution Outputs:", exec_outputs)
+    print("Status:", status)

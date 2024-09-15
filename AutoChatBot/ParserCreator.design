@@ -2,7 +2,7 @@
 # ParserCreator Design
 
 ## Abstract
-The `ParserCreator` class is designed to create and manage argument parsers for the chatbot. This design document outlines the integration of new arguments, including support for the multi-file agent and the ability to read the question from a file.
+The `ParserCreator` class is designed to create and manage argument parsers for the chatbot. This design document outlines the integration of new arguments, including support for the multi-file agent, the ability to read the question from a file, and the execution of a list of files using the `PyFileExecutor`.
 
 ## Class Design
 
@@ -24,7 +24,7 @@ The `ParserCreator` class is designed to create and manage argument parsers for 
 1. **create_parser**:
    - Step 1: Initialize an `ArgumentParser` object.
    - Step 2: Add arguments to the parser for various functionalities, including API selection, model configuration, and other chatbot options.
-   - Step 3: Add arguments for the multi-file agent, including `reference_files`, `rewrite_files`, `question`, and `question_file_path`.
+   - Step 3: Add arguments for the multi-file agent, including `reference_files`, `rewrite_files`, `question`, `question_file_path`, and `execute_files`.
    - Step 4: Return the configured parser.
 
 ### Class Paradigm
@@ -56,139 +56,7 @@ print("Question:", args.question)
 print("Question file path:", args.question_file_path)
 print("Reference files:", args.reference_files)
 print("Rewrite files:", args.rewrite_files)
+print("Execute files:", args.execute_files)
 ```
 ```
-
-import argparse
-
-class ParserCreator:
-    @staticmethod
-    def create_parser():
-        parser = argparse.ArgumentParser(description="Command Line Interface for Chat Bot")
-        parser.add_argument("--api", type=str, choices=["openai", "togetherai"], required=True, help="Select the API to use: 'openai' or 'togetherai'")
-        parser.add_argument("--model", type=str, default="gpt-3.5-turbo", help="Model name for the completion request like gpt-3.5-turbo or cognitivecomputations/dolphin-2.5-mixtral-8x7b")
-        parser.add_argument("--max_tokens", type=int, default=100, help="Maximum number of tokens to generate in the completion.")
-        parser.add_argument("--temperature", type=float, default=1, help="Controls randomness: lower values make completions more deterministic.")
-        parser.add_argument("--frequency_penalty", type=float, default=0, help="Penalty for frequent tokens, increasing this value produces more varied results.")
-        parser.add_argument("--presence_penalty", type=float, default=0, help="Penalty for new tokens, increasing this value encourages new tokens in the completion.")
-        parser.add_argument("--top_p", type=float, default=1, help="Nucleus sampling: top p of the probability mass is considered for sampling.")
-        parser.add_argument("--top_k", type=int, default=50, help="Top-k sampling: The number of highest probability vocabulary tokens to keep for sampling.")
-        parser.add_argument("--repetition_penalty", type=float, default=1, help="Penalty for repetition of tokens, values > 1 decrease repetition.")
-        parser.add_argument("--stop_sequences", nargs='*', help="Sequences where the API should stop generating further tokens.")
-        parser.add_argument("--question", type=str, help="The question or prompt to ask the model.")
-        parser.add_argument("--file_path", type=str, help="Path to the file containing conversation or question.")
-        parser.add_argument("--context", type=str, help="Context to use for the conversation.")
-        parser.add_argument("--show_available_context", action='store_true', help="Show available contexts.")
-        parser.add_argument("--show_models", action='store_true', help="Show available models for TogetherAI.")
-        parser.add_argument("--save_path", type=str, default='response.tmp', help="Path to save the chat completion response.")
-        parser.add_argument("--run_code", action='store_true', help="Run the generated code if any.")
-        parser.add_argument("--run_code_with_unittest", action='store_true', help="Generate a unittest, then a code, then run the code against the unittest.")
-        parser.add_argument("--code_save_path", type=str, default='sandbox_scripts/myscript.py', help="Path to save the generated code.")
-        parser.add_argument("--multi_file_agent", action='store_true', help="Execute the multi-file agent.")
-        parser.add_argument("--reference_files", nargs='*', help="List of reference file paths.")
-        parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
-        parser.add_argument("--question_file_path", type=str, help="Path to the file containing the question.")
-        parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
-        return parser
-
-if __name__ == "__main__":
-    parser = ParserCreator.create_parser()  # Use the static method to create the parser
-    args = parser.parse_args()  # Parse arguments
-    print("Arguments provided:")
-    print(f"Model: {args.model}")
-    print(f"Max tokens: {args.max_tokens}")
-    print(f"Temperature: {args.temperature}")
-    print(f"Frequency penalty: {args.frequency_penalty}")
-    print(f"Presence penalty: {args.presence_penalty}")
-    print(f"Top p: {args.top_p}")
-    print(f"Top k: {args.top_k}")
-    print(f"Repetition penalty: {args.repetition_penalty}")
-    print(f"Stop sequences: {args.stop_sequences}")
-    print(f"Question: {args.question}")
-    print(f"File Path: {args.file_path}")
-    print(f"Save Path: {args.save_path}")
-    print(f"Context: {args.context}")
-    print(f"Code Save Path: {args.code_save_path}")
-    if args.run_code:
-        print("Run code option is enabled.")
-    else:
-        print("Run code option is not enabled.")
-        
-    if args.show_available_context:
-        print("Show available context option is enabled.")
-    else:
-        print("Show available context option is not enabled.")
-        
-    if args.multi_file_agent:
-        print("Multi-file agent option is enabled.")
-        print(f"Reference Files: {args.reference_files}")
-        print(f"Rewrite Files: {args.rewrite_files}")
-        print(f"Question File Path: {args.question_file_path}")
-        print(f"Debug mode: {args.debug}")
-    else:
-        print("Multi-file agent option is not enabled.")
-
-import unittest
-import sys
-from unittest.mock import patch
-from AutoChatBot.ParserCreator import ParserCreator  # Assuming your script file is named ParserCreator.py
-
-class TestParserCreator(unittest.TestCase):
-    def test_parse_args(self):
-        test_args = [
-            "--api", "openai", 
-            "--model", "gpt-3.5-turbo", 
-            "--max_tokens", "200", 
-            "--temperature", "0.7", 
-            "--frequency_penalty", "0.5",
-            "--presence_penalty", "0.3", 
-            "--top_p", "0.8", 
-            "--top_k", "60", 
-            "--repetition_penalty", "1.2", 
-            "--stop_sequences", "bye", 
-            "--question", "How are you?",
-            "--file_path", "/path/to/file", 
-            "--save_path", "result.txt", 
-            "--context", "/path/to/context", 
-            "--run_code", 
-            "--show_available_context", 
-            "--code_save_path", "scripts/generated_code.py",
-            "--multi_file_agent",
-            "--reference_files", "ref_file_1.txt", "ref_file_2.txt",
-            "--rewrite_files", "rewrite_file_1.txt", "rewrite_file_2.txt",
-            "--question_file_path", "/path/to/question_file.txt",
-            "--debug"
-        ]
-        with patch("sys.argv", ["ParserCreator.py"] + test_args):
-            parser = ParserCreator.create_parser()
-            args = parser.parse_args()
-
-            # Check if arguments are parsed correctly
-            self.assertEqual(args.api, "openai")
-            self.assertEqual(args.model, "gpt-3.5-turbo")
-            self.assertEqual(args.max_tokens, 200)
-            self.assertEqual(args.temperature, 0.7)
-            self.assertEqual(args.frequency_penalty, 0.5)
-            self.assertEqual(args.presence_penalty, 0.3)
-            self.assertEqual(args.top_p, 0.8)
-            self.assertEqual(args.top_k, 60)
-            self.assertEqual(args.repetition_penalty, 1.2)
-            self.assertEqual(args.stop_sequences, ["bye"])
-            self.assertEqual(args.question, "How are you?")
-            self.assertEqual(args.file_path, "/path/to/file")
-            self.assertEqual(args.save_path, "result.txt")
-            self.assertEqual(args.context, "/path/to/context")
-            self.assertTrue(args.run_code)
-            self.assertTrue(args.show_available_context)
-            self.assertEqual(args.code_save_path, "scripts/generated_code.py")
-            self.assertTrue(args.multi_file_agent)
-            self.assertEqual(args.reference_files, ["ref_file_1.txt", "ref_file_2.txt"])
-            self.assertEqual(args.rewrite_files, ["rewrite_file_1.txt", "rewrite_file_2.txt"])
-            self.assertEqual(args.question_file_path, "/path/to/question_file.txt")
-            self.assertTrue(args.debug)
-
-if __name__ == "__main__":
-    unittest.main()
 ```
-
-The `ParserCreator` class has been updated to include the new argument `--question_file_path`. This allows the user to specify a file containing the question, which is particularly useful for long questions. The `MultiFileAgent` class has been updated to read the question from the specified file if provided. The tests have also been updated to cover the new functionality.
