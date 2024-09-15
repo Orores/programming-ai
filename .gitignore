@@ -176,5 +176,6 @@ cython_debug/
 *.swp
 
 # Ignore test output locations
+generated_code/
 sandbox_scripts/
 sandbox_tests/
