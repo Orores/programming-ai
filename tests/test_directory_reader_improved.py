@@ -180,7 +180,7 @@ print('Hello from file2')
 """.strip()
 
             # Run the CLI command and capture the output
-            result = subprocess.run(['python', 'AutoChatBot/directory_reader.py', tempdir], capture_output=True, text=True)
+            result = subprocess.run(['python', 'AutoChatBot/directory_reader.py', '--directory', tempdir], capture_output=True, text=True)
             actual_output = result.stdout.strip()
             self.assertEqual(actual_output, expected_output)
 

@@ -1,1 +1,84 @@
+Sure, here is the `AutoChatBot/directory_reader.design`:
 
+```markdown
+AutoChatBot/directory_reader.design:
+
+# Design for DirectoryReader
+
+## Abstract
+The `DirectoryReader` class provides functionalities to read and format the contents of `.py` files within a specified directory, including subdirectories, and return them as a neatly formatted string.
+
+## Class Design
+
+### Methods
+
+1. **read_and_format_py_files**
+   - **Description**: Reads the contents of all `.py` files in the given directory and returns a formatted string with each file's path and contents.
+   - **Arguments**:
+     - `directory` (`str`): The directory to search for `.py` files. Example: `"/path/to/directory"`
+   - **Returns**: `str` - A formatted string with paths and contents of all `.py` files. Example:
+     ```plaintext
+     File: /path/to/directory/file1.py
+     --------------------
+     <content of file1.py>
+     
+     File: /path/to/directory/subdir/file2.py
+     --------------------
+     <content of file2.py>
+     ```
+   - **Example**:
+     ```python
+     formatted_content = DirectoryReader.read_and_format_py_files("/path/to/directory")
+     print(formatted_content)
+     ```
+
+### How it Works
+
+1. **read_and_format_py_files**:
+   - Step 1: Traverse the specified directory and its subdirectories using `os.walk`.
+   - Step 2: For each file ending with `.py`, read its content.
+   - Step 3: Format the content by adding the file path and a separator.
+   - Step 4: Concatenate all formatted contents and return as a single string.
+
+### Class Paradigm
+
+- The class uses static methods only.
+- Each method has a single responsibility.
+- Includes comprehensive docstrings.
+
+### Testing Strategy
+
+- **Test `read_and_format_py_files`**:
+  - Verify that the method correctly reads and formats the contents of multiple `.py` files.
+  - Verify that the method handles directories with no `.py` files.
+  - Verify that the method handles nested directories with `.py` files.
+  - Verify that the method handles an empty directory.
+
+### Example Usage
+
+```python
+if __name__ == "__main__":
+    formatted_content = DirectoryReader.read_and_format_py_files("/path/to/directory")
+    print(formatted_content)
+```
+
+### Error Handling
+
+- **FileNotFoundError**: Raised if the specified directory does not exist.
+- **IsADirectoryError**: Raised if a path is expected to be a file but is a directory.
+
+### CLI Functionality
+
+- **Main Function**: 
+  - Parses command line arguments using `argparse`.
+  - Calls `DirectoryReader.read_and_format_py_files` method to read and format the contents of `.py` files in the specified directory.
+  - Prints the formatted contents.
+- **Arguments**:
+  - `--directory` (`str`): The directory to search for `.py` files. Example: `"/path/to/directory"`
+
+### Example CLI Usage
+
+```sh
+$ python script_name.py --directory /path/to/directory
+```
+```

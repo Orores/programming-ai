@@ -67,10 +67,10 @@ def main():
 
     Usage Example:
     Run the script from the command line as follows:
-    $ python script_name.py /path/to/directory
+    $ python script_name.py --directory /path/to/directory
     """
     parser = argparse.ArgumentParser(description="Read and format .py files in a directory")
-    parser.add_argument("--directory", help="The directory to search for .py files")
+    parser.add_argument("--directory", help="The directory to search for .py files", required=True)
     args = parser.parse_args()
 
     directory = args.directory
