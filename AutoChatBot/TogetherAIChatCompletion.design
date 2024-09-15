@@ -1,0 +1,87 @@
+Sure, here is the design document for `AutoChatBot/TogetherAIChatCompletion`:
+
+---
+
+# TogetherAIChatCompletion Design
+
+## Abstract
+The `TogetherAIChatCompletion` class is responsible for handling chat completion requests to the TogetherAI API. It includes methods to load the API key, make a request to the TogetherAI API, and process the response.
+
+## Class Design
+
+### Methods
+
+1. **load_api_key**
+   - **Description**: Loads the TogetherAI API key from environment variables.
+   - **Arguments**: None.
+   - **Returns**: `str` - The API key.
+   - **Example**:
+     ```python
+     api_key = TogetherAIChatCompletion.load_api_key()
+     ```
+
+2. **make_api_request**
+   - **Description**: Makes a chat completion request to the TogetherAI API.
+   - **Arguments**:
+     - `conversation` (`list`): A list of messages in the conversation. Example:
+       ```python
+       [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
+       ```
+     - `api_key` (`str`, optional): The API key. If not provided, it will be loaded using `load_api_key`. Default is `None`.
+     - `model` (`str`, optional): The model to use for the chat completion. Default is `"cognitivecomputations/dolphin-2.5-mixtral-8x7b"`.
+     - `max_tokens` (`int`, optional): The maximum number of tokens to generate. Default is `4000`.
+     - `temperature` (`float`, optional): Sampling temperature. Default is `1.0`.
+     - `top_p` (`float`, optional): Nucleus sampling probability. Default is `0.7`.
+     - `top_k` (`int`, optional): Top-k sampling. Default is `50`.
+     - `repetition_penalty` (`float`, optional): Repetition penalty. Default is `1`.
+   - **Returns**: `dict` - The response from the TogetherAI API.
+   - **Example**:
+     ```python
+     conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
+     response = TogetherAIChatCompletion.make_api_request(conversation)
+     ```
+
+### Error Handling
+
+- **make_api_request**
+  - **requests.exceptions.RequestException**: Raised if there is an error making the HTTP request.
+  - **KeyError**: Raised if the response does not contain expected keys (`choices`).
+
+### How it Works
+
+1. **load_api_key**:
+   - Step 1: Load environment variables using `load_dotenv`.
+   - Step 2: Retrieve the API key from the environment variables.
+
+2. **make_api_request**:
+   - Step 1: Load the API key if it is not provided.
+   - Step 2: Create the payload with the conversation and other parameters.
+   - Step 3: Set the headers including the authorization header with the API key.
+   - Step 4: Make a POST request to the TogetherAI API endpoint.
+   - Step 5: Return the JSON response.
+
+### Class Paradigm
+
+- The class follows a functional paradigm with static methods only.
+- Each method has a single responsibility.
+- Includes comprehensive docstrings.
+
+### Testing Strategy
+
+- **Test `load_api_key`**:
+  - Verify that the method correctly loads the API key from environment variables.
+  
+- **Test `make_api_request`**:
+  - Verify that the method correctly makes a request to the TogetherAI API and returns a valid response.
+  - Verify that the method handles cases where the response does not contain expected keys.
+
+### Example Usage
+
+```python
+if __name__ == "__main__":
+    conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
+    response = TogetherAIChatCompletion.make_api_request(conversation)
+    print(response)
+```
+
+---

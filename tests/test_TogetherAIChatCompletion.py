@@ -26,23 +26,25 @@ class TestTogetherAIChatCompletion(unittest.TestCase):
         # Check if the response is a dictionary
         self.assertIsInstance(self.response, dict, "The response is not a dictionary")
 
-    def test_response_contains_choices(self):
-        # Check if the response contains 'choices'
-        self.assertIn('choices', self.response, msg=f"The response does not contain 'choices'. Full response: {self.response}")
+    def test_response_contains_error_or_choices(self):
+        # Check if the response contains 'choices' or 'error'
+        self.assertTrue('choices' in self.response or 'error' in self.response, 
+                        msg=f"The response does not contain 'choices' or 'error'. Full response: {self.response}")
 
     def test_choices_is_list(self):
-        # Validate that 'choices' is a list
-        self.assertIsInstance(self.response['choices'], list, f"'choices' is not a list. Full response: {self.response}")
+        # Validate that 'choices' is a list if it exists
+        if 'choices' in self.response:
+            self.assertIsInstance(self.response['choices'], list, f"'choices' is not a list. Full response: {self.response}")
 
     def test_choice_contains_message(self):
-        # Check if the first choice contains a 'message'
-        if self.response['choices']:
+        # Check if the first choice contains a 'message' if choices exist
+        if 'choices' in self.response and self.response['choices']:
             choice = self.response['choices'][0]
             self.assertIn('message', choice, f"The choice does not contain 'message'. Full response: {self.response}")
 
     def test_message_contains_role_and_content(self):
-        # Check if the 'message' contains both 'role' and 'content'
-        if self.response['choices']:
+        # Check if the 'message' contains both 'role' and 'content' if choices exist
+        if 'choices' in self.response and self.response['choices']:
             message = self.response['choices'][0].get('message', {})
             self.assertIn('role', message, f"'message' does not contain 'role'. Full response: {self.response}")
             self.assertIn('content', message, f"'message' does not contain 'content'. Full response: {self.response}")

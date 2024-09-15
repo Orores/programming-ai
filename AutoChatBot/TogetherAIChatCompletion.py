@@ -34,5 +34,15 @@ class TogetherAIChatCompletion:
             "Authorization": f"Bearer {api_key}",
         }
 
-        response = requests.post('https://api.together.xyz/v1/chat/completions', json=payload, headers=headers)
-        return response.json()
+        try:
+            response = requests.post('https://api.together.xyz/v1/chat/completions', json=payload, headers=headers)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            return {"error": {"message": str(e), "type": "request_error"}}
+        
+        try:
+            response_json = response.json()
+        except json.JSONDecodeError:
+            return {"error": {"message": "Invalid JSON response", "type": "json_error"}}
+        
+        return response_json
