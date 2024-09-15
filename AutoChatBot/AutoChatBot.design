@@ -2,7 +2,7 @@
 # AutoChatBot Design
 
 ## Abstract
-The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy.
+The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy. Additionally, it supports reading the question from a file to handle long questions conveniently.
 
 ## Class Design
 
@@ -18,7 +18,8 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
    - **Arguments**:
      - `reference_files` (`list`): List of paths to the reference files.
      - `rewrite_files` (`list`): List of paths to the rewrite files.
-     - `question` (`str`): The question to be included in the task string.
+     - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
+     - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
      - `debug` (`bool`): Debug flag.
    - **Returns**: `dict` - Dictionary with file paths as keys and generated content as values.
 
@@ -36,7 +37,7 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
    - Step 2: Depending on the parsed arguments, execute the appropriate functionality such as showing available contexts, showing models, running code, or executing the multi-file agent.
 
 2. **execute_multifile_agent**:
-   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, and debug flag.
+   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, question file path, and debug flag.
    - Step 2: Return the dictionary with the generated content for each rewrite file.
 
 ### Class Paradigm
@@ -58,6 +59,7 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
 
 - **MultiFileAgent**: Integrated as a static method call within `AutoChatBot`.
 - **Parser Argument**: Added a new argument `--multi_file_agent` to trigger the multi-file agent functionality.
+- **Question File Path**: Added a new argument `--question_file_path` to specify a file containing the question.
 
 ### Example Usage
 
@@ -68,12 +70,13 @@ if __name__ == '__main__':
     parser.add_argument("--reference_files", nargs='*', help="List of reference file paths.")
     parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
     parser.add_argument("--question", type=str, help="The question to be included in the task string.")
+    parser.add_argument("--question_file_path", type=str, help="Path to the file containing the question.")
     parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
     
     args = parser.parse_args()
     
     if args.multi_file_agent:
-        result = AutoChatBot.execute_multifile_agent(args.reference_files, args.rewrite_files, args.question, args.debug)
+        result = AutoChatBot.execute_multifile_agent(args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.debug)
         for file_path, content in result.items():
             with open(file_path, 'w') as file:
                 file.write(content)

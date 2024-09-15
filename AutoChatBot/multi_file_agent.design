@@ -1,7 +1,8 @@
+```markdown
 # MultiFileAgent Design
 
 ## Abstract
-The `MultiFileAgent` class is designed to facilitate the generation of multiple files using the AutoChatbot. It leverages reference files and rewrite files to create a comprehensive prompt, generate content for the rewrite files, and return a dictionary with the new content for each rewrite file.
+The `MultiFileAgent` class is designed to facilitate the generation of multiple files using the AutoChatbot. It leverages reference files and rewrite files to create a comprehensive prompt, generate content for the rewrite files, and return a dictionary with the new content for each rewrite file. It also supports reading the question from a file to handle long questions conveniently.
 
 ## Class Design
 
@@ -38,7 +39,9 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
    - **Arguments**:
      - `reference_files` (`list`): List of paths to the reference files.
      - `rewrite_files` (`list`): List of paths to the rewrite files.
-     - `question` (`str`): The question to be included in the task string.
+     - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
+     - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
+     - `debug` (`bool`): Debug flag.
    - **Returns**:
      - `dict`: Dictionary with file paths as keys and generated content as values.
 
@@ -71,9 +74,10 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
    - Step 5: Store the generated content in a dictionary and append it to the prompt string.
 
 4. **execute**:
-   - Step 1: Call `create_base_prompt` to generate the base prompt string.
-   - Step 2: Call `generate_content_for_rewrite_files` to generate the content for each rewrite file.
-   - Step 3: Return the final dictionary with the generated content.
+   - Step 1: Call `ConversationPreparer.decide_conversation` to determine the question from the provided question file path or question string.
+   - Step 2: Call `create_base_prompt` to generate the base prompt string.
+   - Step 3: Call `generate_content_for_rewrite_files` to generate the content for each rewrite file.
+   - Step 4: Return the final dictionary with the generated content.
 
 ### Class Paradigm
 
@@ -98,3 +102,20 @@ The `MultiFileAgent` class is designed to facilitate the generation of multiple 
 - **Test `execute`**:
   - Verify that the method orchestrates the steps correctly and returns the expected dictionary.
   - Include tests that mock the API as well as tests that make actual API calls to ensure the system's integrity.
+  - Verify that the method correctly handles reading the question from a file if provided.
+
+### Example Usage
+
+```python
+if __name__ == "__main__":
+    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
+    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
+    question_file_path = "path/to/question.txt"
+    
+    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, debug=True)
+    for file_path, content in result.items():
+        with open(file_path, 'w') as file:
+            file.write(content)
+```
+```
+```

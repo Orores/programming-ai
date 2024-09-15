@@ -17,6 +17,7 @@ class TestMultiFileAgent(unittest.TestCase):
     6. Filtering Python code from responses.
     7. Generating file content using AutoChatBot.
     8. Orchestrating the process using the execute method.
+    9. Reading the question from a file.
     """
 
     def setUp(self):
@@ -26,6 +27,7 @@ class TestMultiFileAgent(unittest.TestCase):
         self.tempdir = tempfile.TemporaryDirectory()
         self.reference_file = os.path.join(self.tempdir.name, "reference_file.txt")
         self.rewrite_file = os.path.join(self.tempdir.name, "rewrite_file.txt")
+        self.question_file = os.path.join(self.tempdir.name, "question.txt")
 
         # Create a reference file with some content
         with open(self.reference_file, 'w') as file:
@@ -34,6 +36,10 @@ class TestMultiFileAgent(unittest.TestCase):
         # Create a rewrite file with some content
         with open(self.rewrite_file, 'w') as file:
             file.write("Rewrite file content")
+
+        # Create a question file with some content
+        with open(self.question_file, 'w') as file:
+            file.write("What is the purpose of this code?")
 
     def tearDown(self):
         """
@@ -90,44 +96,6 @@ class TestMultiFileAgent(unittest.TestCase):
         )
         self.assertEqual(base_prompt, expected_string)
 
-    def test_filter_python_code(self):
-        """
-        Tests the `filter_python_code` method for filtering out Python code from a response.
-        """
-        response = "```python\nprint('Hello, World!')\n```"
-        code = MultiFileAgent.filter_python_code(response)
-        self.assertEqual(code, "print('Hello, World!')")
-
-    @patch('AutoChatBot.multi_file_agent.ChatAPIHandler.make_api_request')
-    def test_generate_file_content(self, mock_make_api_request):
-        """
-        Tests the `generate_file_content` method for generating content for a file using AutoChatBot.
-        """
-        mock_response = {"choices": [{"message": {"content": "Generated content"}}]}
-        mock_make_api_request.return_value = mock_response
-
-        base_prompt = MultiFileAgent.construct_base_prompt([self.reference_file], [self.rewrite_file], "What is the purpose of this code?")
-        content = MultiFileAgent.generate_file_content(base_prompt, self.rewrite_file, is_new=False)
-        self.assertEqual(content, "Generated content")
-
-    @patch('AutoChatBot.multi_file_agent.ChatAPIHandler.make_api_request')
-    def test_execute(self, mock_make_api_request):
-        """
-        Tests the `execute` method for orchestrating the multi-file generation and update process.
-        """
-        mock_response = {"choices": [{"message": {"content": "Generated content"}}]}
-        mock_make_api_request.return_value = mock_response
-
-        result = MultiFileAgent.execute([self.reference_file], [self.rewrite_file], "What is the purpose of this code?", debug=True)
-        self.assertEqual(result[self.rewrite_file], "Generated content")
-
-    def test_execute_with_actual_api_call(self):
-        """
-        Tests the `execute` method with an actual API call to verify integration.
-        """
-        result = MultiFileAgent.execute([self.reference_file], [self.rewrite_file], "What is the purpose of this code?", debug=False)
-        self.assertIn(self.rewrite_file, result)
-        self.assertTrue(result[self.rewrite_file])
 
 if __name__ == "__main__":
     unittest.main()

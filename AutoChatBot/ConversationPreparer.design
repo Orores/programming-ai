@@ -1,0 +1,105 @@
+```markdown
+# ConversationPreparer Design
+
+## Abstract
+The `ConversationPreparer` class is designed to prepare conversation data for the chatbot. It can read the conversation data from a file or directly from a provided question. This class facilitates the conversion of string conversations into structured data and extends the conversation with additional context if necessary. Additionally, it supports reading the question from a file for scenarios where the question is long.
+
+## Class Design
+
+### Methods
+
+1. **decide_conversation**
+   - **Description**: Decides and retrieves the conversation data based on the provided file path, question, or question file path.
+   - **Arguments**:
+     - `file_path` (`str`, optional): The path to the file containing the conversation data. Default is `None`.
+     - `question` (`str`, optional): The question to be used as conversation data. Default is `None`.
+     - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
+   - **Returns**: 
+     - `str` or `list`: The retrieved conversation data.
+
+2. **str_to_dict_list**
+   - **Description**: Converts a string conversation into a list of dictionaries with role and content.
+   - **Arguments**:
+     - `conversation` (`str` or `list`): The conversation data as a string or a list of dictionaries.
+   - **Returns**: 
+     - `list`: The conversation data as a list of dictionaries.
+
+3. **extend_context**
+   - **Description**: Extends the given conversation with additional context data if available.
+   - **Arguments**:
+     - `context_name` (`str`, optional): The name of the context to be appended. Default is `None`.
+     - `conversation` (`list`): The conversation data as a list of dictionaries.
+   - **Returns**: 
+     - `list`: The extended conversation data with additional context.
+
+### Error Handling
+
+- **decide_conversation**
+  - **FileNotFoundError**: Raised if the specified file path or question file path does not exist.
+
+- **str_to_dict_list**
+  - **TypeError**: Raised if the conversation data is not of type `str` or `list`.
+
+### How it Works
+
+1. **decide_conversation**:
+   - Step 1: If a file path is provided, attempt to read the conversation data from the file using `ConversationJsonReader` or `StringFileReader`.
+   - Step 2: If a question file path is provided, read the question from the file.
+   - Step 3: If a question is provided, use it as the conversation data.
+   - Step 4: If neither is provided, raise an error or prompt the user for input.
+   - Step 5: Return the conversation data.
+
+2. **str_to_dict_list**:
+   - Step 1: Check if the conversation data is of type `str`. If so, convert it into a list of dictionaries with role and content.
+   - Step 2: If the conversation data is already a list, return it as is.
+
+3. **extend_context**:
+   - Step 1: If a context name is provided, load the context data using `ContextManager`.
+   - Step 2: Append the loaded context data to the existing conversation data.
+   - Step 3: Return the extended conversation data.
+
+### Class Paradigm
+
+- The class follows a utility pattern with static methods.
+- Each method has a single responsibility.
+- Includes comprehensive docstrings.
+
+### Testing Strategy
+
+- **Test `decide_conversation`**:
+  - Verify that conversation data is correctly read from a file.
+  - Verify that conversation data is correctly set from the provided question.
+  - Verify that conversation data is correctly set from the provided question file path.
+  - Verify that an error is raised if neither file path nor question nor question file path is provided.
+
+- **Test `str_to_dict_list`**:
+  - Verify that a string conversation is correctly converted into a list of dictionaries.
+  - Verify that a list conversation is returned as is.
+  - Verify that an error is raised if the conversation data is not of type `str` or `list`.
+
+- **Test `extend_context`**:
+  - Verify that the conversation data is correctly extended with additional context data.
+  - Verify that the method handles cases where no context name is provided.
+  - Verify that an error is raised if the context data cannot be loaded.
+
+### Example Usage
+
+```python
+from AutoChatBot.ConversationPreparer import ConversationPreparer
+
+# Example 1: Decide conversation from a file
+conversation = ConversationPreparer.decide_conversation(file_path="path/to/conversation.json")
+
+# Example 2: Decide conversation from a question
+conversation = ConversationPreparer.decide_conversation(question="What is the purpose of this code?")
+
+# Example 3: Decide conversation from a question file
+conversation = ConversationPreparer.decide_conversation(question_file_path="path/to/question.txt")
+
+# Example 4: Convert string conversation to list of dictionaries
+conversation_list = ConversationPreparer.str_to_dict_list("What is the purpose of this code?")
+
+# Example 5: Extend conversation with additional context
+extended_conversation = ConversationPreparer.extend_context("context_name", conversation_list)
+```
+```

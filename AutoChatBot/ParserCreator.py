@@ -26,6 +26,7 @@ class ParserCreator:
         parser.add_argument("--multi_file_agent", action='store_true', help="Execute the multi-file agent.")
         parser.add_argument("--reference_files", nargs='*', help="List of reference file paths.")
         parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
+        parser.add_argument("--question_file_path", type=str, help="Path to the file containing the question.")
         parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
         return parser
 
@@ -61,6 +62,7 @@ if __name__ == "__main__":
         print("Multi-file agent option is enabled.")
         print(f"Reference Files: {args.reference_files}")
         print(f"Rewrite Files: {args.rewrite_files}")
+        print(f"Question File Path: {args.question_file_path}")
         print(f"Debug mode: {args.debug}")
     else:
         print("Multi-file agent option is not enabled.")

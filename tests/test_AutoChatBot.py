@@ -24,12 +24,16 @@ class TestAutoChatBot(unittest.TestCase):
         self.tempdir = tempfile.TemporaryDirectory()
         self.reference_files = [os.path.join(self.tempdir.name, "ref_file_1.txt"), os.path.join(self.tempdir.name, "ref_file_2.txt")]
         self.rewrite_files = [os.path.join(self.tempdir.name, "rewrite_file_1.txt"), os.path.join(self.tempdir.name, "rewrite_file_2.txt")]
+        self.question_file = os.path.join(self.tempdir.name, "question.txt")
         self.question = "What is the purpose of this test?"
         self.debug = True
 
         for file_path in self.reference_files + self.rewrite_files:
             with open(file_path, 'w') as file:
                 file.write("Sample content")
+
+        with open(self.question_file, 'w') as file:
+            file.write(self.question)
 
     def tearDown(self):
         """
@@ -42,9 +46,18 @@ class TestAutoChatBot(unittest.TestCase):
         """
         Tests the `execute_multifile_agent` method for integrating with `MultiFileAgent`.
         """
-        result = ChatBot.execute_multifile_agent(self.reference_files, self.rewrite_files, self.question, self.debug)
+        result = ChatBot.execute_multifile_agent(self.reference_files, self.rewrite_files, self.question, None, self.debug)
         self.assertEqual(result, {"rewrite_file_1.txt": "Updated content 1", "rewrite_file_2.txt": "Updated content 2"})
-        mock_execute.assert_called_once_with(self.reference_files, self.rewrite_files, self.question, self.debug)
+        mock_execute.assert_called_once_with(self.reference_files, self.rewrite_files, self.question, None, self.debug)
+
+    @patch.object(MultiFileAgent, 'execute', return_value={"rewrite_file_1.txt": "Updated content 1", "rewrite_file_2.txt": "Updated content 2"})
+    def test_execute_multifile_agent_with_question_file(self, mock_execute):
+        """
+        Tests the `execute_multifile_agent` method with a question file for integrating with `MultiFileAgent`.
+        """
+        result = ChatBot.execute_multifile_agent(self.reference_files, self.rewrite_files, None, self.question_file, self.debug)
+        self.assertEqual(result, {"rewrite_file_1.txt": "Updated content 1", "rewrite_file_2.txt": "Updated content 2"})
+        mock_execute.assert_called_once_with(self.reference_files, self.rewrite_files, None, self.question_file, self.debug)
 
     @patch('argparse.ArgumentParser.parse_args')
     @patch.object(ChatBot, 'execute_multifile_agent', return_value={"rewrite_file_1.txt": "Updated content 1", "rewrite_file_2.txt": "Updated content 2"})
@@ -56,7 +69,8 @@ class TestAutoChatBot(unittest.TestCase):
             multi_file_agent=True,
             reference_files=self.reference_files,
             rewrite_files=self.rewrite_files,
-            question=self.question,
+            question=None,
+            question_file_path=self.question_file,
             debug=self.debug,
             show_available_context=False,
             show_models=False,
@@ -79,7 +93,7 @@ class TestAutoChatBot(unittest.TestCase):
 
         with patch('builtins.open', unittest.mock.mock_open()) as mock_file:
             ChatBot.main()
-            mock_execute_multifile_agent.assert_called_once_with(self.reference_files, self.rewrite_files, self.question, self.debug)
+            mock_execute_multifile_agent.assert_called_once_with(self.reference_files, self.rewrite_files, None, self.question_file, self.debug)
             mock_file.assert_any_call('rewrite_file_1.txt', 'w')
             mock_file.assert_any_call('rewrite_file_2.txt', 'w')
 

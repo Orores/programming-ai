@@ -3,6 +3,7 @@ import json
 from typing import List, Dict
 from AutoChatBot.ChatAPIHandler import ChatAPIHandler
 from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
+from AutoChatBot.ConversationPreparer import ConversationPreparer
 
 class MultiFileAgent:
     """
@@ -23,7 +24,7 @@ class MultiFileAgent:
         Filters out Python code from a response.
     - generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
         Generates content for a file using AutoChatBot.
-    - execute(reference_files: List[str], rewrite_files: List[str], question: str, debug: bool = False) -> Dict[str, str]:
+    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
         Orchestrates the multi-file generation and update process.
     """
 
@@ -159,36 +160,40 @@ class MultiFileAgent:
         return content
 
     @staticmethod
-    def execute(reference_files: List[str], rewrite_files: List[str], question: str, debug: bool = False) -> Dict[str, str]:
+    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
         """
         Orchestrates the multi-file generation and update process.
         
         Parameters:
         reference_files (List[str]): List of reference file paths.
         rewrite_files (List[str]): List of rewrite file paths.
-        question (str): User-provided question.
+        question (str, optional): The question to be included in the task string. Default is `None`.
+        question_file_path (str, optional): The path to the file containing the question. Default is `None`.
         debug (bool): Debug flag.
         
         Returns:
         Dict[str, str]: Dictionary with file paths as keys and generated contents as values.
         """
-        # Step 1: Read reference files
+        # Step 1: Decide conversation from question or question_file_path
+        question = ConversationPreparer.decide_conversation(file_path=question_file_path, question=question)
+        
+        # Step 2: Read reference files
         reference_files_string = MultiFileAgent.construct_file_string(reference_files)
         
-        # Step 2: Create rewrite files if they do not exist
+        # Step 3: Create rewrite files if they do not exist
         for file_path in rewrite_files:
             MultiFileAgent.create_file_if_not_exists(file_path)
         
-        # Step 3: Read rewrite files
+        # Step 4: Read rewrite files
         rewrite_files_string = MultiFileAgent.construct_file_string(rewrite_files)
         
-        # Step 4: Construct task string
+        # Step 5: Construct task string
         task_string = MultiFileAgent.construct_task_string(question)
         
-        # Step 5: Construct base prompt
+        # Step 6: Construct base prompt
         base_prompt = reference_files_string + rewrite_files_string + task_string
         
-        # Step 6: Generate and update content for each rewrite file
+        # Step 7: Generate and update content for each rewrite file
         result = {}
         for file_path in rewrite_files:
             is_new = not os.path.getsize(file_path) > 1
@@ -205,9 +210,9 @@ class MultiFileAgent:
 if __name__ == "__main__":
     reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py", "reference_code/test_workout_tracker.py", "AutoChatBot/multi_file_agent.design", "AutoChatBot/multi_file_agent.py"]
     rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py", "AutoChatBot/ParseCreator.design", "AutoChatBot/ParserCreator.py", "tests/test_ParserCreator.py"]
-    question = "Make the multi file agent part of the autochat, add the new parser argument for calling the multifile agent and expand on the tests."
+    question_file_path = "path/to/question.txt"
     
-    result = MultiFileAgent.execute(reference_files, rewrite_files, question, debug=True)
+    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, debug=True)
     for file_path, content in result.items():
         with open(file_path, 'w') as file:
             file.write(content)
