@@ -1,0 +1,161 @@
+# Design for WorkoutTracker
+
+## Abstract
+The `WorkoutTracker` class provides functionalities to track and plot workout progress using JSON files for data storage. The class includes methods for adding workout data, saving and loading from files, and generating plots to visualize workout progress.
+
+## Class Design
+
+### Methods
+
+1. **add_workout_data**
+   - **Description**: Adds workout data to the specified file.
+   - **Arguments**:
+     - `file_path` (`str`): Path to the file where workout data is stored. Example: `"workout_data.json"`
+     - `workout_data` (`dict`): Dictionary containing workout data. Example:
+       ```python
+       {
+           "date": "2023-10-01",
+           "exercise": "bench_press",
+           "sets": 3,
+           "reps": [10, 8, 6],
+           "weight": [100, 110, 120]
+       }
+       ```
+   - **Returns**: None.
+   - **Example**:
+     ```python
+     WorkoutTracker.add_workout_data("workout_data.json", workout_data)
+     ```
+
+2. **save_to_file**
+   - **Description**: Method to ensure data is saved to the file (kept for compatibility with unittests).
+   - **Arguments**:
+     - `file_path` (`str`): Path to the file where workout data is stored. Example: `"workout_data.json"`
+   - **Returns**: None.
+   - **Example**:
+     ```python
+     WorkoutTracker.save_to_file("workout_data.json")
+     ```
+
+3. **load_from_file**
+   - **Description**: Loads workout data from the specified file.
+   - **Arguments**:
+     - `file_path` (`str`): Path to the file where workout data is stored. Example: `"workout_data.json"`
+   - **Returns**: `dict` - Dictionary containing the loaded workout data. Example:
+     ```python
+     {
+         "2023-10-01": {
+             "bench_press": {
+                 "sets": 3,
+                 "reps": [10, 8, 6],
+                 "weight": [100, 110, 120]
+             }
+         }
+     }
+     ```
+   - **Example**:
+     ```python
+     data = WorkoutTracker.load_from_file("workout_data.json")
+     print(data)
+     ```
+
+4. **plot_workout_progress**
+   - **Description**: Plots workout progress for the specified exercise and saves the plot to a file.
+   - **Arguments**:
+     - `file_path` (`str`): Path to the file where workout data is stored. Example: `"workout_data.json"`
+     - `exercise` (`str`): The exercise to plot progress for. Example: `"bench_press"`
+     - `plot_file` (`str`): Path to the file where the plot should be saved. Example: `"workout_plot.png"`
+   - **Returns**: None.
+   - **Example**:
+     ```python
+     WorkoutTracker.plot_workout_progress("workout_data.json", "bench_press", "workout_plot.png")
+     ```
+
+5. **execute**
+   - **Description**: Orchestrates the other methods to add workout data, save it to a file, and plot workout progress.
+   - **Arguments**:
+     - `file_path` (`str`): Path to the file where workout data is stored. Example: `"workout_data.json"`
+     - `workout_data` (`dict`): Dictionary containing workout data. Example:
+       ```python
+       {
+           "date": "2023-10-01",
+           "exercise": "bench_press",
+           "sets": 3,
+           "reps": [10, 8, 6],
+           "weight": [100, 110, 120]
+       }
+       ```
+     - `exercise` (`str`): The exercise to plot progress for. Example: `"bench_press"`
+     - `plot_file` (`str`): Path to the file where the plot should be saved. Example: `"workout_plot.png"`
+   - **Returns**: None.
+   - **Example**:
+     ```python
+     WorkoutTracker.execute("workout_data.json", workout_data, "bench_press", "workout_plot.png")
+     ```
+
+### Error Handling
+
+- **add_workout_data**
+  - **FileNotFoundError**: Raised if the specified file path does not exist.
+  - **ValueError**: Raised if the workout data dictionary does not contain required keys (`date`, `exercise`, etc.).
+
+- **load_from_file**
+  - **FileNotFoundError**: Raised if the specified file path does not exist.
+
+- **plot_workout_progress**
+  - **FileNotFoundError**: Raised if the specified file path does not exist.
+  - **ValueError**: Raised if there is no data for the specified exercise.
+
+### How it Works
+
+1. **add_workout_data**:
+   - Step 1: Check if the file exists. If it does, load the data. Otherwise, create an empty dictionary.
+   - Step 2: Extract the `date` and `exercise` from the workout data.
+   - Step 3: Add the workout data to the dictionary.
+   - Step 4: Save the updated dictionary back to the file.
+
+2. **save_to_file**:
+   - This method is kept for compatibility with unittests but does not perform any action.
+
+3. **load_from_file**:
+   - Step 1: Check if the file exists.
+   - Step 2: Load and return the data from the file. If the file does not exist, return an empty dictionary.
+
+4. **plot_workout_progress**:
+   - Step 1: Load the workout data from the file.
+   - Step 2: Extract the dates and weights for the specified exercise.
+   - Step 3: Generate a plot using Matplotlib.
+   - Step 4: Save the plot to the specified file.
+
+5. **execute**:
+   - Step 1: Call `add_workout_data` to add the workout data to the file.
+   - Step 2: Call `save_to_file` to save the data to the file.
+   - Step 3: Call `plot_workout_progress` to generate and save the plot.
+
+### Class Paradigm
+
+- The class follows a functional paradigm with static methods only.
+- Each method has a single responsibility.
+- Includes comprehensive docstrings.
+- The class has an `execute` method that orchestrates all other methods.
+
+### Testing Strategy
+
+- **Test `add_workout_data`**:
+  - Verify that workout data is correctly added to the file.
+  - Verify that the method handles missing keys in the workout data dictionary.
+
+- **Test `save_to_file`**:
+  - Verify that the method does not raise any exceptions (kept for compatibility with unittests).
+
+- **Test `load_from_file`**:
+  - Verify that workout data is correctly loaded from the file.
+  - Verify that an empty dictionary is returned if the file does not exist.
+
+- **Test `plot_workout_progress`**:
+  - Verify that a plot is correctly generated and saved for the specified exercise.
+  - Verify that the method handles cases where there is no data for the specified exercise.
+
+- **Test `execute`**:
+  - Verify that the method orchestrates the steps correctly and results in the expected outcome.
+  - Verify that debug statements are printed when `debug` is `True`.
