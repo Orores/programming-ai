@@ -3,7 +3,6 @@ import tempfile
 import os
 from unittest.mock import patch, MagicMock
 from AutoChatBot.multi_file_agent import MultiFileAgent
-from AutoChatBot.PyFileExecutor import PyFileExecutor
 
 class TestMultiFileAgent(unittest.TestCase):
     """
@@ -18,9 +17,8 @@ class TestMultiFileAgent(unittest.TestCase):
     6. Filtering Python code from responses.
     7. Filtering Markdown content from responses.
     8. Generating file content using AutoChatBot.
-    9. Executing files and capturing stdout and stderr.
-    10. Orchestrating the process using the execute method.
-    11. Reading the question from a file.
+    9. Orchestrating the process using the execute method.
+    10. Reading the question from a file.
     """
 
     def setUp(self):
@@ -31,14 +29,13 @@ class TestMultiFileAgent(unittest.TestCase):
         self.reference_files = [os.path.join(self.tempdir.name, "reference_file.txt")]
         self.rewrite_files = [os.path.join(self.tempdir.name, "rewrite_file.txt")]
         self.question_file = os.path.join(self.tempdir.name, "question.txt")
-        self.execute_files = [os.path.join(self.tempdir.name, "execute_file.py")]
         self.question = "What is the purpose of this code?"
         self.debug = True
 
         # Create reference, rewrite, and question files with some content
-        for file_path in self.reference_files + self.rewrite_files + self.execute_files:
+        for file_path in self.reference_files + self.rewrite_files:
             with open(file_path, 'w') as file:
-                file.write("print('Hello, world!')" if file_path.endswith('.py') else "Sample content")
+                file.write("Sample content")
 
         with open(self.question_file, 'w') as file:
             file.write(self.question)
@@ -113,49 +110,18 @@ class TestMultiFileAgent(unittest.TestCase):
         content = MultiFileAgent.generate_file_content(base_prompt, file_path, is_new)
         self.assertEqual(content, "Updated content")
 
-    @patch('AutoChatBot.PyFileExecutor.PyFileExecutor.execute_code', return_value=("Output", ""))
-    def test_execute_files(self, mock_execute_code):
-        """
-        Tests the `execute_files` method for executing files and capturing stdout and stderr.
-        """
-        exec_outputs = MultiFileAgent.execute_files(self.execute_files)
-        expected_outputs = {self.execute_files[0]: ("Output", "")}
-        self.assertEqual(exec_outputs, expected_outputs)
-        mock_execute_code.assert_called_once_with(self.execute_files[0])
-
-    @patch('AutoChatBot.PyFileExecutor.PyFileExecutor.execute_code', return_value=("Output", ""))
     @patch('AutoChatBot.ChatAPIHandler.ChatAPIHandler.make_api_request', return_value={
         "choices": [{"message": {"content": "Updated content"}}]
     })
-    def test_execute(self, mock_make_api_request, mock_execute_code):
+    def test_execute(self, mock_make_api_request):
         """
-        Tests the `execute` method for orchestrating the multi-file generation, execution, and update process.
+        Tests the `execute` method for orchestrating the multi-file generation and update process.
         """
-        result, exec_outputs, status = MultiFileAgent.execute(
-            self.reference_files, self.rewrite_files, question=self.question, execute_files=self.execute_files, debug=self.debug
+        result = MultiFileAgent.execute(
+            self.reference_files, self.rewrite_files, question=self.question, debug=self.debug
         )
         self.assertEqual(result[self.rewrite_files[0]], "Updated content")
-        self.assertEqual(exec_outputs[self.execute_files[0]], ("Output", ""))
-        self.assertEqual(status, "Success")
         mock_make_api_request.assert_called()
-        mock_execute_code.assert_called_once_with(self.execute_files[0])
-
-    @patch('AutoChatBot.PyFileExecutor.PyFileExecutor.execute_code', return_value=("Output", "Error"))
-    @patch('AutoChatBot.ChatAPIHandler.ChatAPIHandler.make_api_request', return_value={
-        "choices": [{"message": {"content": "Updated content"}}]
-    })
-    def test_execute_with_failure(self, mock_make_api_request, mock_execute_code):
-        """
-        Tests the `execute` method for handling execution failures.
-        """
-        result, exec_outputs, status = MultiFileAgent.execute(
-            self.reference_files, self.rewrite_files, question=self.question, execute_files=self.execute_files, debug=self.debug
-        )
-        self.assertEqual(result[self.rewrite_files[0]], "Updated content")
-        self.assertEqual(exec_outputs[self.execute_files[0]], ("Output", "Error"))
-        self.assertEqual(status, f"Failure: {self.execute_files[0]} had an error.")
-        mock_make_api_request.assert_called()
-        mock_execute_code.assert_called_once_with(self.execute_files[0])
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,6 @@ from typing import List, Dict, Tuple
 from AutoChatBot.ChatAPIHandler import ChatAPIHandler
 from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
 from AutoChatBot.ConversationPreparer import ConversationPreparer
-from AutoChatBot.PyFileExecutor import PyFileExecutor
 
 class MultiFileAgent:
     """
@@ -27,10 +26,8 @@ class MultiFileAgent:
         Filters out Markdown content from a response.
     - generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
         Generates content for a file using AutoChatBot.
-    - execute_files(file_paths: List[str]) -> Dict[str, Tuple[str, str]]:
-        Executes a list of files using PyFileExecutor and returns their stdout and stderr outputs.
-    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
-        Orchestrates the multi-file generation, execution, and update process.
+    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
+        Orchestrates the multi-file generation and update process.
     """
 
     @staticmethod
@@ -180,42 +177,19 @@ class MultiFileAgent:
         return content
 
     @staticmethod
-    def execute_files(file_paths: List[str]) -> Dict[str, Tuple[str, str]]:
+    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
         """
-        Executes a list of files using PyFileExecutor and returns their stdout and stderr outputs.
-        
-        Parameters:
-        file_paths (List[str]): List of file paths to be executed.
-        
-        Returns:
-        Dict[str, Tuple[str, str]]: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
-        
-        Raises:
-        FileNotFoundError: If any file to be executed does not exist.
-        """
-        result = {}
-        for file_path in file_paths:
-            if not os.path.exists(file_path):
-                raise FileNotFoundError(f"File not found: {file_path}")
-            stdout, stderr = PyFileExecutor.execute_code(file_path)
-            result[file_path] = (stdout, stderr)
-        return result
-
-    @staticmethod
-    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
-        """
-        Orchestrates the multi-file generation, execution, and update process.
+        Orchestrates the multi-file generation and update process.
         
         Parameters:
         reference_files (List[str]): List of reference file paths.
         rewrite_files (List[str]): List of rewrite file paths.
         question (str, optional): The question to be included in the task string. Default is `None`.
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
-        execute_files (List[str], optional): List of file paths to be executed. Default is `None`.
         debug (bool): Debug flag.
         
         Returns:
-        Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]: Dictionary with file paths as keys and generated contents as values, dictionary with file paths as keys and tuples of (stdout, stderr) as values, and "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
+        Dict[str, str]: Dictionary with file paths as keys and generated content as values.
         """
         # Step 1: Decide conversation from question or question_file_path
         question = ConversationPreparer.decide_conversation(file_path=question_file_path, question=question)
@@ -247,28 +221,16 @@ class MultiFileAgent:
         if debug:
             print(json.dumps(result, indent=4))
         
-        # Step 8: Execute files and capture their outputs
-        exec_outputs = {}
-        status = "Success"
-        if execute_files:
-            exec_outputs = MultiFileAgent.execute_files(execute_files)
-            for file_path, (stdout, stderr) in exec_outputs.items():
-                if stderr:
-                    status = f"Failure: {file_path} had an error."
-                    break
-
-        return result, exec_outputs, status
+        return result
 
 # Example usage:
 if __name__ == "__main__":
     reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
     rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
-    execute_files = ["AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py"]
     question_file_path = "path/to/question.txt"
     
-    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True)
+    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, debug=True)
     for file_path, content in result.items():
         with open(file_path, 'w') as file:
             file.write(content)
-    print("Execution Outputs:", exec_outputs)
-    print("Status:", status)
+    print("Generated Content:", result)
