@@ -46,7 +46,7 @@ class ConversationPreparer:
             conversation = question
         else:
             parser = ParserCreator.create_parser()
-            parser.error(ChatBot.FAIL + ChatBot.BOLD + 'Please enter the word you want the machine to say. Enter -h for help')
+            parser.error('Please enter the word you want the machine to say. Enter -h for help')
         return conversation
 
     @staticmethod

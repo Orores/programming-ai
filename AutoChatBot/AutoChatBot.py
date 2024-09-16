@@ -30,7 +30,7 @@ class ChatBot:
     -------
     main():
         The main method to run the chatbot.
-    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, execute_files: list = None, debug: bool = False, output_dir: str = None) -> tuple:
+    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, execute_files: list = None, debug: bool = False) -> tuple:
         Executes the multi-file agent to generate and update multiple files and execute a list of files.
     """
     FAIL = '\33[91m'
@@ -40,7 +40,7 @@ class ChatBot:
     BOLD = '\33[1m'
 
     @staticmethod
-    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, execute_files: list = None, debug: bool = False, output_dir: str = None) -> tuple:
+    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, execute_files: list = None, debug: bool = False) -> tuple:
         """
         Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions, and to execute a list of files, returning their stdout and stderr outputs.
 
@@ -51,12 +51,11 @@ class ChatBot:
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
         execute_files (list, optional): List of file paths to be executed. Default is `None`.
         debug (bool): Debug flag.
-        output_dir (str, optional): Directory where the plots will be saved. Default is `None`.
 
         Returns:
         tuple: Dictionary with file paths as keys and generated content as values, dictionary with file paths as keys and tuples of (stdout, stderr) as values, and "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
         """
-        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, execute_files, debug, output_dir)
+        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, execute_files, debug)
 
     @staticmethod
     def main():
