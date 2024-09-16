@@ -1,0 +1,150 @@
+# MultiFileAgent Design
+
+## Abstract
+The `MultiFileAgent` class is responsible for generating and updating multiple files based on reference files and user-provided questions. It integrates with the AutoChatBot system to leverage API calls for content generation. This design document outlines the modification to allow the `MultiFileAgent` to use CLI arguments from `ParserCreator` for making API calls, passed from `AutoChatBot`.
+
+## Class Design
+
+### Methods
+
+1. **read_file_content**
+   - **Description**: Reads the content of a file.
+   - **Arguments**:
+     - `file_path` (`str`): Path to the file to read.
+   - **Returns**: `str` - Content of the file.
+   - **Raises**: `FileNotFoundError` if the specified file path does not exist.
+
+2. **construct_conversation**
+   - **Description**: Constructs the conversation history based on reference and rewrite files.
+   - **Arguments**:
+     - `reference_files` (`list`): List of reference file paths.
+     - `rewrite_files` (`list`): List of rewrite file paths.
+   - **Returns**: `list` - The constructed conversation history.
+
+3. **construct_task_string**
+   - **Description**: Constructs the task string for the prompt.
+   - **Arguments**:
+     - `question` (`str`): User-provided question.
+   - **Returns**: `str` - Task string for the prompt.
+
+4. **generate_file_content**
+   - **Description**: Generates content for a file using AutoChatBot.
+   - **Arguments**:
+     - `conversation` (`list`): The conversation history.
+     - `file_path` (`str`): Path to the file to update.
+     - `task` (`str`): The task string.
+     - `args` (`Namespace`): Parsed CLI arguments for API call.
+   - **Returns**: `str` - Generated content for the file.
+   - **Raises**: `ValueError` if the response format is invalid or does not contain the expected keys.
+
+5. **filter_python_code**
+   - **Description**: Filters out Python code from a response.
+   - **Arguments**:
+     - `response` (`str`): The response string containing code.
+   - **Returns**: `str` - Filtered Python code.
+
+6. **filter_markdown_content**
+   - **Description**: Filters out Markdown content from a response.
+   - **Arguments**:
+     - `response` (`str`): The response string containing Markdown content.
+   - **Returns**: `str` - Filtered Markdown content.
+
+7. **execute**
+   - **Description**: Orchestrates the multi-file generation and update process.
+   - **Arguments**:
+     - `reference_files` (`list`): List of reference file paths.
+     - `rewrite_files` (`list`): List of rewrite file paths.
+     - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
+     - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
+     - `args` (`Namespace`): Parsed CLI arguments for API call.
+     - `debug` (`bool`): Debug flag.
+   - **Returns**: `dict` - Dictionary with file paths as keys and generated content as values.
+
+### Error Handling
+
+- **read_file_content**
+  - **FileNotFoundError**: Raised if the specified file path does not exist.
+
+- **generate_file_content**
+  - **ValueError**: Raised if the response format is invalid or does not contain the expected keys.
+
+### How it Works
+
+1. **read_file_content**:
+   - Reads the content of the specified file.
+   - Raises `FileNotFoundError` if the file does not exist.
+
+2. **construct_conversation**:
+   - Constructs conversation history by including the content of reference and rewrite files.
+
+3. **construct_task_string**:
+   - Constructs a task string based on the user-provided question.
+
+4. **generate_file_content**:
+   - Uses the provided CLI arguments to make API requests via `ChatAPIHandler`.
+   - Filters the response to extract relevant content based on the file type (Python or Markdown).
+
+5. **filter_python_code**:
+   - Extracts Python code from the response.
+
+6. **filter_markdown_content**:
+   - Extracts Markdown content from the response.
+
+7. **execute**:
+   - Orchestrates the process by calling the above methods.
+   - Uses CLI arguments for API requests.
+   - Updates and saves the generated content for each rewrite file.
+
+### Class Paradigm
+
+- The class follows a procedural paradigm with static methods.
+- Uses modular design to separate different functionalities.
+
+### Integration
+
+- **ParserCreator**: The `MultiFileAgent` now accepts parsed CLI arguments for making API calls.
+- **ChatAPIHandler**: Utilized for making API requests using the provided arguments.
+
+### Testing Strategy
+
+- **Test `read_file_content`**:
+  - Verify that the method correctly reads the content of a file.
+  - Test with non-existent files to ensure `FileNotFoundError` is raised.
+
+- **Test `construct_conversation`**:
+  - Verify that the conversation history is correctly constructed from reference and rewrite files.
+
+- **Test `construct_task_string`**:
+  - Verify that the task string is correctly constructed based on the provided question.
+
+- **Test `generate_file_content`**:
+  - Verify that the method correctly generates content using API calls.
+  - Mock API responses to ensure robustness.
+
+- **Test `filter_python_code`**:
+  - Verify that Python code is correctly extracted from the response.
+
+- **Test `filter_markdown_content`**:
+  - Verify that Markdown content is correctly extracted from the response.
+
+- **Test `execute`**:
+  - Verify that the method orchestrates the process correctly.
+  - Mock file I/O and API requests to ensure robustness.
+
+### Example Usage
+
+```python
+if __name__ == "__main__":
+    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
+    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
+    question_file_path = "path/to/question.txt"
+    
+    parser = ParserCreator.create_parser()
+    args = parser.parse_args()
+    
+    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, args=args, debug=True)
+    for file_path, content in result.items():
+        with open(file_path, 'w') as file:
+            file.write(content)
+    print("Generated Content:", result)
+```

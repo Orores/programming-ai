@@ -32,7 +32,7 @@ class ChatBot:
     -------
     main():
         The main method to run the chatbot.
-    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, debug: bool = False) -> dict:
+    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, args = None, debug: bool = False) -> dict:
         Executes the multi-file agent to generate and update multiple files.
     execute_files(file_paths: list) -> dict:
         Executes a list of Python files and captures their stdout and stderr outputs.
@@ -44,7 +44,7 @@ class ChatBot:
     BOLD = '\33[1m'
 
     @staticmethod
-    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, debug: bool = False) -> dict:
+    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, args = None, debug: bool = False) -> dict:
         """
         Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
 
@@ -53,12 +53,13 @@ class ChatBot:
         rewrite_files (list): List of paths to the rewrite files.
         question (str, optional): The question to be included in the task string. Default is `None`.
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
+        args (Namespace): Parsed CLI arguments for API call.
         debug (bool): Debug flag.
 
         Returns:
         dict: Dictionary with file paths as keys and generated content as values.
         """
-        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, debug)
+        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, args, debug)
 
     @staticmethod
     def execute_files(file_paths: list) -> dict:
@@ -150,9 +151,10 @@ class ChatBot:
 
         if args.multi_file_agent:
             result = ChatBot.execute_multifile_agent(
-                args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.debug)
+                args.reference_files, args.rewrite_files, args.question, args.question_file_path, args, args.debug)
             for file_path, content in result.items():
                 # Get the directory name from the file path
+                
                 directory = os.path.dirname(file_path)
                 
                 # If the directory does not exist, create it

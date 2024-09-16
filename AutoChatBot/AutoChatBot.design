@@ -1,7 +1,7 @@
 # AutoChatBot Design
 
 ## Abstract
-The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy. Additionally, it supports reading the question from a file to handle long questions conveniently and executing a list of files, returning their stdout and stderr outputs.
+The `AutoChatBot` class is the main orchestrator for the chatbot functionalities. It incorporates various components such as context management, API handling, and code execution. This design document outlines the integration of the `MultiFileAgent` into the `AutoChatBot`, adds a new parser argument for calling the multi-file agent, and expands on the testing strategy. Additionally, it supports reading the question from a file to handle long questions conveniently and executing a list of files, returning their stdout and stderr outputs. The design ensures that CLI arguments are used for making API calls, and these arguments are passed from `AutoChatBot` to `MultiFileAgent`.
 
 ## Class Design
 
@@ -19,6 +19,7 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
      - `rewrite_files` (`list`): List of paths to the rewrite files.
      - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
      - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
+     - `args` (`Namespace`): Parsed CLI arguments for API call.
      - `debug` (`bool`): Debug flag.
    - **Returns**: `dict`: Dictionary with file paths as keys and generated content as values.
 
@@ -45,7 +46,7 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
    - Step 2: Depending on the parsed arguments, execute the appropriate functionality such as showing available contexts, showing models, running code, executing the multi-file agent, or executing files.
 
 2. **execute_multifile_agent**:
-   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, and question file path.
+   - Step 1: Call `MultiFileAgent.execute` with the provided reference files, rewrite files, question, question file path, and CLI arguments.
    - Step 2: Return the dictionary with the generated content.
 
 3. **execute_files**:
@@ -78,5 +79,23 @@ The `AutoChatBot` class is the main orchestrator for the chatbot functionalities
 - **Parser Argument**: Added new arguments `--multi_file_agent` and `--execute_files` to trigger the multi-file agent functionality and specify files to execute.
 - **Question File Path**: Added a new argument `--question_file_path` to specify a file containing the question.
 - **Output Directory**: Added a new argument `--output_dir` to specify the directory where plots will be saved.
+- **CLI Arguments for API Calls**: The CLI arguments parsed in `AutoChatBot` are passed to `MultiFileAgent` for making API calls, ensuring flexibility and consistency.
 
 ### Example Usage
+
+```python
+if __name__ == "__main__":
+    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
+    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
+    question_file_path = "path/to/question.txt"
+    
+    parser = ParserCreator.create_parser()
+    args = parser.parse_args()
+    
+    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, args=args, debug=True)
+    for file_path, content in result.items():
+        with open(file_path, 'w') as file:
+            file.write(content)
+    print("Generated Content:", result)
+```
+

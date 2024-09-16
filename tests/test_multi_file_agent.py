@@ -3,11 +3,12 @@ import tempfile
 import os
 from unittest.mock import patch, MagicMock
 from AutoChatBot.multi_file_agent import MultiFileAgent
+from AutoChatBot.ParserCreator import ParserCreator
 
 class TestMultiFileAgent(unittest.TestCase):
     """
     Unit tests for the MultiFileAgent class, which uses AutoChatBot to generate and update multiple files.
-    
+
     The testing strategy covers the following cases:
     1. Reading file content.
     2. Creating files if they do not exist.
@@ -39,6 +40,21 @@ class TestMultiFileAgent(unittest.TestCase):
 
         with open(self.question_file, 'w') as file:
             file.write(self.question)
+
+        # Create a parser and arguments for testing
+        self.parser = ParserCreator.create_parser()
+        self.args = self.parser.parse_args([
+            "--api", "openai",
+            "--model", "gpt-3.5-turbo",
+            "--max_tokens", "100",
+            "--temperature", "0.7",
+            "--frequency_penalty", "0.5",
+            "--presence_penalty", "0.6",
+            "--top_p", "0.9",
+            "--top_k", "40",
+            "--repetition_penalty", "1.2",
+            "--stop_sequences", "\n"
+        ])
 
     def tearDown(self):
         """
@@ -92,7 +108,7 @@ class TestMultiFileAgent(unittest.TestCase):
         file_path = self.rewrite_files[0]
         task = "TASK:\n\nWhat is the purpose of this code?\n\n"
 
-        content = MultiFileAgent.generate_file_content(conversation, file_path, task)
+        content = MultiFileAgent.generate_file_content(conversation, file_path, task, self.args)
         self.assertEqual(content, "Updated content")
 
     @patch('AutoChatBot.ChatAPIHandler.ChatAPIHandler.make_api_request', return_value={
@@ -103,10 +119,11 @@ class TestMultiFileAgent(unittest.TestCase):
         Tests the `execute` method for orchestrating the multi-file generation and update process.
         """
         result = MultiFileAgent.execute(
-            self.reference_files, self.rewrite_files, question=self.question, debug=self.debug
+            self.reference_files, self.rewrite_files, question=self.question, args=self.args, debug=self.debug
         )
         self.assertEqual(result[self.rewrite_files[0]], "Updated content")
         mock_make_api_request.assert_called()
 
 if __name__ == "__main__":
     unittest.main()
+
