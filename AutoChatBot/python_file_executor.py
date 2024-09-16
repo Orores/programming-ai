@@ -32,8 +32,18 @@ class PythonFileExecutor:
             raise FileNotFoundError(f"File not found: {file_path}")
 
         try:
+            # Convert file path to module path using dot notation
+            module_path = file_path.replace('/', '.').replace('\\', '.').rstrip('.py')
+
+            # Prepare the command for executing the module using the -m flag
+            command = ["python", "-m", module_path]
+
+            # Execute the module using a subprocess
+            process = subprocess.run(command, capture_output=True)
+
+
             result = subprocess.run(
-                ["python", file_path],
+                command,
                 capture_output=True,
                 text=True,
                 check=True
@@ -53,6 +63,7 @@ class PythonFileExecutor:
         Returns:
         Dict[str, Tuple[str, str]]: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
         """
+        print(os.getcwd())
         results = {}
         for file_path in file_paths:
             stdout, stderr = PythonFileExecutor.execute_code(file_path)
