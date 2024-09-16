@@ -135,7 +135,7 @@ class ChatBot:
 
         if args.multi_file_agent:
             result, exec_outputs, status = ChatBot.execute_multifile_agent(
-                args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.execute_files, args.debug, args.output_dir)
+                args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.execute_files, args.debug)
             for file_path, content in result.items():
                 with open(file_path, 'w') as file:
                     file.write(content)

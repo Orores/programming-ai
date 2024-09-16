@@ -50,7 +50,6 @@ The `MultiFileAgent` class is designed to facilitate the generation and executio
      - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
      - `execute_files` (`list`, optional): List of file paths to be executed. Default is `None`.
      - `debug` (`bool`): Debug flag.
-     - `output_dir` (`str`, optional): Directory where the plots will be saved. Default is `None`.
    - **Returns**:
      - `dict`: Dictionary with file paths as keys and generated content as values.
      - `dict`: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
@@ -140,11 +139,10 @@ if __name__ == "__main__":
     execute_files = ["AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py"]
     question_file_path = "path/to/question.txt"
     
-    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True, output_dir="path/to/output")
+    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True)
     for file_path, content in result.items():
         with open(file_path, 'w') as file:
             file.write(content)
     print("Execution Outputs:", exec_outputs)
     print("Status:", status)
-```
 ```

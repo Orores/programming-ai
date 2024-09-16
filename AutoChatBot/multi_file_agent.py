@@ -5,8 +5,6 @@ from AutoChatBot.ChatAPIHandler import ChatAPIHandler
 from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
 from AutoChatBot.ConversationPreparer import ConversationPreparer
 from AutoChatBot.PyFileExecutor import PyFileExecutor
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 class MultiFileAgent:
     """
@@ -29,7 +27,7 @@ class MultiFileAgent:
         Generates content for a file using AutoChatBot.
     - execute_files(file_paths: List[str]) -> Dict[str, Tuple[str, str]]:
         Executes a list of files using PyFileExecutor and returns their stdout and stderr outputs.
-    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False, output_dir: str = None) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
+    - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
         Orchestrates the multi-file generation, execution, and update process.
     """
 
@@ -187,44 +185,7 @@ class MultiFileAgent:
         return result
 
     @staticmethod
-    def generate_and_save_plots(output_dir: str):
-        """
-        Generates and saves different types of plots using Matplotlib.
-        
-        Parameters:
-        output_dir (str): Directory where the plots will be saved.
-        
-        Returns:
-        None
-        """
-        os.makedirs(output_dir, exist_ok=True)
-
-        def save_plot(file_name):
-            file_path = os.path.join(output_dir, file_name)
-            plt.savefig(file_path)
-            plt.close()
-            return file_path
-
-        # Generate and save scatter plot
-        plt.figure()
-        plt.scatter([1, 2, 3], [4, 5, 6])
-        scatter_plot_path = save_plot("scatter_plot.png")
-
-        # Generate and save bar plot
-        plt.figure()
-        plt.bar([1, 2, 3], [4, 5, 6])
-        bar_plot_path = save_plot("bar_plot.png")
-
-        # Generate and save 3D plot
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter([1, 2, 3], [4, 5, 6], [7, 8, 9])
-        three_d_plot_path = save_plot("3d_plot.png")
-
-        return scatter_plot_path, bar_plot_path, three_d_plot_path
-
-    @staticmethod
-    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False, output_dir: str = None) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
+    def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, execute_files: List[str] = None, debug: bool = False) -> Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]:
         """
         Orchestrates the multi-file generation, execution, and update process.
         
@@ -235,7 +196,6 @@ class MultiFileAgent:
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
         execute_files (List[str], optional): List of file paths to be executed. Default is `None`.
         debug (bool): Debug flag.
-        output_dir (str, optional): Directory where the plots will be saved. Default is `None`.
         
         Returns:
         Tuple[Dict[str, str], Dict[str, Tuple[str, str]], str]: Dictionary with file paths as keys and generated contents as values, dictionary with file paths as keys and tuples of (stdout, stderr) as values, and "Success" if all executed files have no errors, otherwise "Failure" along with the file that had the error.
@@ -279,14 +239,6 @@ class MultiFileAgent:
                 if stderr:
                     status = f"Failure: {file_path} had an error."
                     break
-        
-        # Step 9: Generate and save plots
-        if output_dir:
-            scatter_plot_path, bar_plot_path, three_d_plot_path = MultiFileAgent.generate_and_save_plots(output_dir)
-            if debug:
-                print(f"Scatter plot saved at: {scatter_plot_path}")
-                print(f"Bar plot saved at: {bar_plot_path}")
-                print(f"3D plot saved at: {three_d_plot_path}")
 
         return result, exec_outputs, status
 
@@ -297,7 +249,7 @@ if __name__ == "__main__":
     execute_files = ["AutoChatBot/AutoChatBot.py", "tests/test_AutoChatBot.py"]
     question_file_path = "path/to/question.txt"
     
-    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True, output_dir="path/to/output")
+    result, exec_outputs, status = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, execute_files=execute_files, debug=True)
     for file_path, content in result.items():
         with open(file_path, 'w') as file:
             file.write(content)

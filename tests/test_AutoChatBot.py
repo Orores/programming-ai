@@ -102,7 +102,7 @@ class TestAutoChatBot(unittest.TestCase):
 
         with patch('builtins.open', unittest.mock.mock_open()) as mock_file:
             ChatBot.main()
-            mock_execute_multifile_agent.assert_called_once_with(self.reference_files, self.rewrite_files, None, self.question_file, self.execute_files, self.debug, self.output_dir)
+            mock_execute_multifile_agent.assert_called_once_with(self.reference_files, self.rewrite_files, None, self.question_file, self.execute_files, self.debug)
             mock_file.assert_any_call('rewrite_file_1.txt', 'w')
             mock_file.assert_any_call('rewrite_file_2.txt', 'w')
 
