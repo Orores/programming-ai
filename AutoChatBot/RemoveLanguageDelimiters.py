@@ -48,7 +48,8 @@ class CodeExtractor:
                 # match.group(1) is the language (if present)
                 # match.group(2) is the code block
                 return match.group(2).strip()
-        return ""
+        else:
+            return input_string
 
 # Usage example:
 if __name__ == "__main__":

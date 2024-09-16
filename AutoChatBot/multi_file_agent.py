@@ -1,9 +1,9 @@
 import os
 import json
-from typing import List, Dict, Tuple
+from typing import List, Dict
 from AutoChatBot.ChatAPIHandler import ChatAPIHandler
-from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
 from AutoChatBot.ConversationPreparer import ConversationPreparer
+from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
 
 class MultiFileAgent:
     """
@@ -12,19 +12,11 @@ class MultiFileAgent:
     Methods:
     - read_file_content(file_path: str) -> str:
         Reads the content of a file.
-    - create_file_if_not_exists(file_path: str):
-        Creates a file if it does not exist and ensures the directory structure.
-    - construct_file_string(file_paths: List[str]) -> str:
-        Constructs a string representation of files and their contents.
+    - construct_conversation(reference_files: List[str], rewrite_files: List[str]) -> List[Dict[str, str]]:
+        Constructs the conversation history based on reference and rewrite files.
     - construct_task_string(question: str) -> str:
         Constructs the task string for the prompt.
-    - construct_base_prompt(reference_files: List[str], rewrite_files: List[str], question: str) -> str:
-        Constructs the base prompt string.
-    - filter_python_code(response: str) -> str:
-        Filters out Python code from a response.
-    - filter_markdown_content(response: str) -> str:
-        Filters out Markdown content from a response.
-    - generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
+    - generate_file_content(conversation: List[Dict[str, str]], file_path: str, task: str) -> str:
         Generates content for a file using AutoChatBot.
     - execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
         Orchestrates the multi-file generation and update process.
@@ -50,43 +42,43 @@ class MultiFileAgent:
             return file.read()
 
     @staticmethod
-    def create_file_if_not_exists(file_path: str):
+    def construct_conversation(reference_files: List[str], rewrite_files: List[str]) -> List[Dict[str, str]]:
         """
-        Creates a file if it does not exist and ensures the directory structure.
+        Constructs the conversation history based on reference and rewrite files.
         
         Parameters:
-        file_path (str): Path to the file to create.
+        reference_files (List[str]): List of reference file paths.
+        rewrite_files (List[str]): List of rewrite file paths.
         
         Returns:
-        None
-        
-        Raises:
-        OSError: If there is an issue creating the file or directory.
+        List[Dict[str, str]]: The constructed conversation history.
         """
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        if not os.path.exists(file_path):
-            with open(file_path, 'w') as file:
-                file.write("\n")
+        conversation = []
 
-    @staticmethod
-    def construct_file_string(file_paths: List[str]) -> str:
-        """
-        Constructs a string representation of files and their contents.
-        
-        Parameters:
-        file_paths (List[str]): List of file paths.
-        
-        Returns:
-        str: String representation of files and their contents.
-        
-        Raises:
-        FileNotFoundError: If any of the specified file paths do not exist.
-        """
-        file_string = ""
-        for file_path in file_paths:
-            content = MultiFileAgent.read_file_content(file_path)
-            file_string += f"{file_path}:\n{content}\n\n"
-        return file_string
+        # Add reference files to the conversation
+        for file_path in reference_files:
+            user_message = {"role": "user", "content": f"The file {file_path} shall be used as a reference for similar files in the future. Now show me only the current {file_path} content:\n\n"}
+            conversation.append(user_message)
+            assistant_message = {"role": "assistant", "content": MultiFileAgent.read_file_content(file_path) + "\n\n"}
+            conversation.append(assistant_message)
+
+        # Separate rewrite files into existing and non-existing
+        existing_files = [file_path for file_path in rewrite_files if os.path.exists(file_path)]
+        non_existing_files = [file_path for file_path in rewrite_files if not os.path.exists(file_path)]
+
+        # Add existing rewrite files to the conversation
+        for file_path in existing_files:
+            user_message = {"role": "user", "content": f"We will be working on {file_path} in the future. Now show me only the current {file_path} content:\n\n"}
+            conversation.append(user_message)
+            assistant_message = {"role": "assistant", "content": MultiFileAgent.read_file_content(file_path) + "\n\n"}
+            conversation.append(assistant_message)
+
+        # Add non-existing rewrite files to the conversation
+        if non_existing_files:
+            user_message = {"role": "user", "content": f"The following files will be created in the project: {', '.join(non_existing_files)}.\n\n"}
+            conversation.append(user_message)
+
+        return conversation
 
     @staticmethod
     def construct_task_string(question: str) -> str:
@@ -102,22 +94,42 @@ class MultiFileAgent:
         return f"TASK:\n\n{question}\n\n"
 
     @staticmethod
-    def construct_base_prompt(reference_files: List[str], rewrite_files: List[str], question: str) -> str:
+    def generate_file_content(conversation: List[Dict[str, str]], file_path: str, task: str) -> str:
         """
-        Constructs the base prompt string.
+        Generates content for a file using AutoChatBot.
         
         Parameters:
-        reference_files (List[str]): List of reference file paths.
-        rewrite_files (List[str]): List of rewrite file paths.
-        question (str): User-provided question.
+        conversation (List[Dict[str, str]]): The conversation history.
+        file_path (str): Path to the file to update.
+        task (str): The task string.
         
         Returns:
-        str: Base prompt string.
+        str: Generated content for the file.
+        
+        Raises:
+        ValueError: If the response format is invalid or does not contain the expected keys.
         """
-        reference_files_string = MultiFileAgent.construct_file_string(reference_files)
-        rewrite_files_string = MultiFileAgent.construct_file_string(rewrite_files)
-        task_string = MultiFileAgent.construct_task_string(question)
-        return reference_files_string + rewrite_files_string + task_string
+        task_modified = task + f"Now show me only the rewritten {file_path}:\n\n"
+        conversation.append({"role": "user", "content": task_modified})
+        
+        response = ChatAPIHandler.make_api_request(
+            api="openai",
+            model="gpt-4o",
+            temperature=0.7,
+            max_tokens=4000,
+            conversation=conversation,
+        )
+        content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
+        print('CONTENT')
+        print(content)
+
+        if file_path.endswith(".py"):
+            content = MultiFileAgent.filter_python_code(content)
+        elif file_path.endswith(".design"):
+            pass
+            #content = MultiFileAgent.filter_markdown_content(content)
+        
+        return content
 
     @staticmethod
     def filter_python_code(response: str) -> str:
@@ -146,37 +158,6 @@ class MultiFileAgent:
         return CodeExtractor.extract_code(response, language="markdown")
 
     @staticmethod
-    def generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
-        """
-        Generates content for a file using AutoChatBot.
-        
-        Parameters:
-        base_prompt (str): The base prompt string.
-        file_path (str): Path to the file to update.
-        is_new (bool): Flag indicating if the file is new.
-        
-        Returns:
-        str: Generated content for the file.
-        
-        Raises:
-        ValueError: If the response format is invalid or does not contain the expected keys.
-        """
-        prompt = base_prompt + f"Now only show me the {'updated ' if not is_new else ''}{file_path}\n\n"
-        response = ChatAPIHandler.make_api_request(
-            api="openai",
-            model="gpt-4o",
-            temperature=0.7,
-            max_tokens=4000,
-            conversation=[{"role": "user", "content": prompt}],
-        )
-        content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
-        if file_path.endswith(".py"):
-            content = MultiFileAgent.filter_python_code(content)
-        elif file_path.endswith(".design"):
-            content = MultiFileAgent.filter_markdown_content(content)
-        return content
-
-    @staticmethod
     def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, debug: bool = False) -> Dict[str, str]:
         """
         Orchestrates the multi-file generation and update process.
@@ -193,34 +174,24 @@ class MultiFileAgent:
         """
         # Step 1: Decide conversation from question or question_file_path
         question = ConversationPreparer.decide_conversation(file_path=question_file_path, question=question)
-        
-        # Step 2: Read reference files
-        reference_files_string = MultiFileAgent.construct_file_string(reference_files)
-        
-        # Step 3: Create rewrite files if they do not exist
-        for file_path in rewrite_files:
-            MultiFileAgent.create_file_if_not_exists(file_path)
-        
-        # Step 4: Read rewrite files
-        rewrite_files_string = MultiFileAgent.construct_file_string(rewrite_files)
-        
-        # Step 5: Construct task string
+
+        # Step 2: Construct conversation history
+        conversation = MultiFileAgent.construct_conversation(reference_files, rewrite_files)
+
+        # Step 3: Construct task string
         task_string = MultiFileAgent.construct_task_string(question)
-        
-        # Step 6: Construct base prompt
-        base_prompt = reference_files_string + rewrite_files_string + task_string
-        
-        # Step 7: Generate and update content for each rewrite file
+
+        # Step 4: Generate and update content for each rewrite file
         result = {}
         for file_path in rewrite_files:
-            is_new = not os.path.getsize(file_path) > 1
-            content = MultiFileAgent.generate_file_content(base_prompt, file_path, is_new)
+            print(conversation)
+            content = MultiFileAgent.generate_file_content(conversation, file_path, task_string)
             result[file_path] = content
-            base_prompt += content + "\n\n"
-        
+            conversation.append({"role": "assistant", "content": content + "\n\n"})
+
         if debug:
             print(json.dumps(result, indent=4))
-        
+
         return result
 
 # Example usage:

@@ -56,24 +56,18 @@ class TestMultiFileAgent(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             MultiFileAgent.read_file_content("non_existent_file.txt")
 
-    def test_create_file_if_not_exists(self):
+    def test_construct_conversation(self):
         """
-        Tests the `create_file_if_not_exists` method for creating files if they do not exist.
+        Tests the `construct_conversation` method for constructing the conversation history.
         """
-        new_file_path = os.path.join(self.tempdir.name, "new_file.txt")
-        MultiFileAgent.create_file_if_not_exists(new_file_path)
-        self.assertTrue(os.path.exists(new_file_path))
-
-    def test_construct_file_string(self):
-        """
-        Tests the `construct_file_string` method for constructing a string representation of files and their contents.
-        """
-        file_string = MultiFileAgent.construct_file_string(self.reference_files + self.rewrite_files)
-        expected_string = f"{self.reference_files[0]}:\nSample content\n\n{self.rewrite_files[0]}:\nSample content\n\n"
-        self.assertEqual(file_string, expected_string)
-
-        with self.assertRaises(FileNotFoundError):
-            MultiFileAgent.construct_file_string([self.reference_files[0], "non_existent_file.txt"])
+        conversation = MultiFileAgent.construct_conversation(self.reference_files, self.rewrite_files)
+        expected_conversation = [
+            {"role": "user", "content": f"The file {self.reference_files[0]} shall be used as a reference for similar files in the future. Now show me only the current {self.reference_files[0]} content:\n\n"},
+            {"role": "assistant", "content": "Sample content\n\n"},
+            {"role": "user", "content": f"We will be working on {self.rewrite_files[0]} in the future. Now show me only the current {self.rewrite_files[0]} content:\n\n"},
+            {"role": "assistant", "content": "Sample content\n\n"},
+        ]
+        self.assertEqual(conversation, expected_conversation)
 
     def test_construct_task_string(self):
         """
@@ -83,18 +77,6 @@ class TestMultiFileAgent(unittest.TestCase):
         expected_string = "TASK:\n\nWhat is the purpose of this code?\n\n"
         self.assertEqual(task_string, expected_string)
 
-    def test_construct_base_prompt(self):
-        """
-        Tests the `construct_base_prompt` method for constructing the base prompt string.
-        """
-        base_prompt = MultiFileAgent.construct_base_prompt(self.reference_files, self.rewrite_files, "What is the purpose of this code?")
-        expected_string = (
-            f"{self.reference_files[0]}:\nSample content\n\n"
-            f"{self.rewrite_files[0]}:\nSample content\n\n"
-            "TASK:\n\nWhat is the purpose of this code?\n\n"
-        )
-        self.assertEqual(base_prompt, expected_string)
-
     @patch('AutoChatBot.ChatAPIHandler.ChatAPIHandler.make_api_request')
     def test_generate_file_content(self, mock_make_api_request):
         """
@@ -103,11 +85,14 @@ class TestMultiFileAgent(unittest.TestCase):
         mock_make_api_request.return_value = {
             "choices": [{"message": {"content": "Updated content"}}]
         }
-        base_prompt = "Base prompt content"
+        conversation = [
+            {"role": "user", "content": "Base prompt content"},
+            {"role": "assistant", "content": "Sample content"}
+        ]
         file_path = self.rewrite_files[0]
-        is_new = False
+        task = "TASK:\n\nWhat is the purpose of this code?\n\n"
 
-        content = MultiFileAgent.generate_file_content(base_prompt, file_path, is_new)
+        content = MultiFileAgent.generate_file_content(conversation, file_path, task)
         self.assertEqual(content, "Updated content")
 
     @patch('AutoChatBot.ChatAPIHandler.ChatAPIHandler.make_api_request', return_value={

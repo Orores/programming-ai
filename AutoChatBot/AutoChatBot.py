@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from .ContextManager import ContextManager
 from .ParserCreator import ParserCreator
@@ -151,8 +152,17 @@ class ChatBot:
             result = ChatBot.execute_multifile_agent(
                 args.reference_files, args.rewrite_files, args.question, args.question_file_path, args.debug)
             for file_path, content in result.items():
+                # Get the directory name from the file path
+                directory = os.path.dirname(file_path)
+                
+                # If the directory does not exist, create it
+                if directory and not os.path.exists(directory):
+                    os.makedirs(directory)
+                
+                # Write the content to the file
                 with open(file_path, 'w') as file:
                     file.write(content)
+
             print("Generated Content:", result)
 
         if args.execute_files:
