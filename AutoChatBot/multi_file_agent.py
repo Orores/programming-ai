@@ -23,6 +23,8 @@ class MultiFileAgent:
         Constructs the base prompt string.
     - filter_python_code(response: str) -> str:
         Filters out Python code from a response.
+    - filter_markdown_content(response: str) -> str:
+        Filters out Markdown content from a response.
     - generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
         Generates content for a file using AutoChatBot.
     - execute_files(file_paths: List[str]) -> Dict[str, Tuple[str, str]]:
@@ -134,6 +136,19 @@ class MultiFileAgent:
         return CodeExtractor.extract_code(response, language="python")
 
     @staticmethod
+    def filter_markdown_content(response: str) -> str:
+        """
+        Filters out Markdown content from a response.
+        
+        Parameters:
+        response (str): The response string containing Markdown content.
+        
+        Returns:
+        str: Filtered Markdown content.
+        """
+        return CodeExtractor.extract_code(response, language="markdown")
+
+    @staticmethod
     def generate_file_content(base_prompt: str, file_path: str, is_new: bool) -> str:
         """
         Generates content for a file using AutoChatBot.
@@ -160,6 +175,8 @@ class MultiFileAgent:
         content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
         if file_path.endswith(".py"):
             content = MultiFileAgent.filter_python_code(content)
+        elif file_path.endswith(".design"):
+            content = MultiFileAgent.filter_markdown_content(content)
         return content
 
     @staticmethod

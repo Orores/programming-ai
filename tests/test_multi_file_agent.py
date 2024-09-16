@@ -16,10 +16,11 @@ class TestMultiFileAgent(unittest.TestCase):
     4. Constructing the task string.
     5. Constructing the base prompt.
     6. Filtering Python code from responses.
-    7. Generating file content using AutoChatBot.
-    8. Executing files and capturing stdout and stderr.
-    9. Orchestrating the process using the execute method.
-    10. Reading the question from a file.
+    7. Filtering Markdown content from responses.
+    8. Generating file content using AutoChatBot.
+    9. Executing files and capturing stdout and stderr.
+    10. Orchestrating the process using the execute method.
+    11. Reading the question from a file.
     """
 
     def setUp(self):

@@ -84,7 +84,7 @@ The `MultiFileAgent` class is designed to facilitate the generation and executio
    - Step 1: Iterate over each file in the rewrite file list.
    - Step 2: Append the appropriate prompt to the base prompt string for each file.
    - Step 3: Use the ChatAPIHandler to generate content for each file.
-   - Step 4: Filter the content if the file is a Python file.
+   - Step 4: Filter the content if the file is a Python file or a Markdown file.
    - Step 5: Store the generated content in a dictionary and append it to the prompt string.
 
 4. **execute_files**:
@@ -118,7 +118,7 @@ The `MultiFileAgent` class is designed to facilitate the generation and executio
 
 - **Test `generate_content_for_rewrite_files`**:
   - Verify that the method correctly generates content for each rewrite file.
-  - Verify that the method handles Python file content filtering correctly.
+  - Verify that the method handles Python and Markdown file content filtering correctly.
 
 - **Test `execute_files`**:
   - Verify that the method correctly executes the files and captures their stdout and stderr outputs.
@@ -145,4 +145,5 @@ if __name__ == "__main__":
             file.write(content)
     print("Execution Outputs:", exec_outputs)
     print("Status:", status)
+```
 ```
