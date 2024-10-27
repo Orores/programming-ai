@@ -29,7 +29,10 @@ class TestCodeExtractor(unittest.TestCase):
         Here is some text.
         More text.
         '''
-        expected_output = ''
+        expected_output = '''
+        Here is some text.
+        More text.
+        '''
         extracted_code = CodeExtractor.extract_code(input_string, 'python')
         self.assertEqual(extracted_code, expected_output)
 
@@ -43,7 +46,15 @@ class TestCodeExtractor(unittest.TestCase):
 
         More text.
         '''
-        expected_output = ''
+        expected_output = '''
+        Here is some text.
+
+        ```javascript
+        console.log("Hello, World!");
+        ```
+
+        More text.
+        '''
         extracted_code = CodeExtractor.extract_code(input_string, 'python')
         self.assertEqual(extracted_code, expected_output)
 

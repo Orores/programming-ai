@@ -1,0 +1,74 @@
+# Design for CodeExtractor
+
+## Abstract
+The `CodeExtractor` class is designed to extract code blocks from a given string based on specified programming languages. If the specified language is not found, the class returns the original text.
+
+## Class Design
+
+### Methods
+
+1. **extract_code**
+   - **Description**: Extracts the code block for the specified language from the input string. If the language is not found, it returns the entire input string.
+   - **Arguments**:
+     - `input_string` (`str`): The input string containing the code block.
+     - `language` (`str`, optional): The programming language of the code block to extract.
+   - **Returns**: 
+     - `str`: The extracted code block if found, or the original input string if the language is not found.
+   - **Example**:
+     ```python
+     input_string = '''
+     Here is some text.
+
+     ```python
+     print("Hello, World!")
+     ```
+
+     More text.
+     '''
+     extracted_code = CodeExtractor.extract_code(input_string, 'python')
+     print(extracted_code)  # Output: print("Hello, World!")
+     ```
+
+### Error Handling
+
+- **extract_code**
+  - If the specified language is not found, the method returns the original input string without raising an error.
+
+### How it Works
+
+1. **extract_code**:
+   - Step 1: If a language is specified, create a regex pattern to match the code block for that language.
+   - Step 2: If no language is specified, create a regex pattern that matches any code block.
+   - Step 3: Use the regex pattern to search for a code block in the input string.
+   - Step 4: If a match is found, return the code block. If not, return the original input string.
+
+### Class Paradigm
+
+- The class follows a functional paradigm with a static method only.
+- The method has a single responsibility: to extract code based on the provided language or return the original text.
+
+### Testing Strategy
+
+- **Test `extract_code`**:
+  - Verify that the method correctly extracts code blocks when the specified language is present.
+  - Verify that the method returns the original text when no code block is found.
+  - Verify that the method returns the original text when the specified language does not match any code blocks in the input string.
+  - Ensure that the method handles multiple code blocks and special characters correctly.
+
+### Usage Example
+```python
+input_string = '''
+Here is some text.
+
+```python
+print("Hello, World!")
+```
+
+More text.
+'''
+extracted_code = CodeExtractor.extract_code(input_string, 'python')
+print(extracted_code)  # Output: print("Hello, World!")
+```
+
+### Summary
+The `CodeExtractor` class provides a simple yet effective way to extract code from text based on specified programming languages, handling cases where the language may not be present by returning the original text.
