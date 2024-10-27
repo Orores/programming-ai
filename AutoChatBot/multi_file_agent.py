@@ -131,25 +131,18 @@ class MultiFileAgent:
         print(content)
 
         if file_path.endswith(".py"):
-            content = MultiFileAgent.filter_python_code(content)
+            content = CodeExtractor.extract_code(response, language="python")
+        if file_path.endswith(".cpp"):
+            content = CodeExtractor.extract_code(response, language="cpp")
+        if file_path.endswith(".h"):
+            content = CodeExtractor.extract_code(response, language="cpp")
+        if file_path.endswith("MakeLists.txt"):
+            content = CodeExtractor.extract_code(response, language="cpp")
         elif file_path.endswith(".design"):
             pass
             #content = MultiFileAgent.filter_markdown_content(content)
 
         return content
-
-    @staticmethod
-    def filter_python_code(response: str) -> str:
-        """
-        Filters out Python code from a response.
-
-        Parameters:
-        response (str): The response string containing code.
-
-        Returns:
-        str: Filtered Python code.
-        """
-        return CodeExtractor.extract_code(response, language="python")
 
     @staticmethod
     def filter_markdown_content(response: str) -> str:
