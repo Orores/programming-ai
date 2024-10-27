@@ -137,7 +137,7 @@ class MultiFileAgent:
         if file_path.endswith(".h"):
             content = CodeExtractor.extract_code(response, language="cpp")
         if file_path.endswith("MakeLists.txt"):
-            content = CodeExtractor.extract_code(response, language="cpp")
+            content = CodeExtractor.extract_code(response, language="cmake")
         elif file_path.endswith(".design"):
             pass
             #content = MultiFileAgent.filter_markdown_content(content)
