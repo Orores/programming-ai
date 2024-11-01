@@ -131,31 +131,17 @@ class MultiFileAgent:
         print(content)
 
         if file_path.endswith(".py"):
-            content = CodeExtractor.extract_code(response, language="python")
-        if file_path.endswith(".cpp"):
-            content = CodeExtractor.extract_code(response, language="cpp")
-        if file_path.endswith(".h"):
-            content = CodeExtractor.extract_code(response, language="cpp")
-        if file_path.endswith("MakeLists.txt"):
-            content = CodeExtractor.extract_code(response, language="cmake")
-        elif file_path.endswith(".design"):
-            pass
-            #content = MultiFileAgent.filter_markdown_content(content)
+            content = CodeExtractor.extract_code(content, language="python")
+        elif file_path.endswith(".cpp"):
+            content = CodeExtractor.extract_code(content, language="cpp")
+        elif file_path.endswith(".h"):
+            content = CodeExtractor.extract_code(content, language="cpp")
+        elif file_path.endswith("MakeLists.txt"):
+            content = CodeExtractor.extract_code(content, language="cmake")
+        elif file_path.endswith(".design") or file_path.endswith(".md"):
+            content = MultiFileAgent.extract_code(content, language"markdown")
 
         return content
-
-    @staticmethod
-    def filter_markdown_content(response: str) -> str:
-        """
-        Filters out Markdown content from a response.
-
-        Parameters:
-        response (str): The response string containing Markdown content.
-
-        Returns:
-        str: Filtered Markdown content.
-        """
-        return CodeExtractor.extract_code(response, language="markdown")
 
     @staticmethod
     def execute(reference_files: List[str], rewrite_files: List[str], question: str = None, question_file_path: str = None, args = None, debug: bool = False) -> Dict[str, str]:
