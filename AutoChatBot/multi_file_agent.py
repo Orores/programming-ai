@@ -134,12 +134,14 @@ class MultiFileAgent:
             content = CodeExtractor.extract_code(content, language="python")
         elif file_path.endswith(".cpp"):
             content = CodeExtractor.extract_code(content, language="cpp")
+        elif file_path.endswith(".rs"):
+            content = CodeExtractor.extract_code(content, language="rust")
         elif file_path.endswith(".h"):
             content = CodeExtractor.extract_code(content, language="cpp")
         elif file_path.endswith("MakeLists.txt"):
             content = CodeExtractor.extract_code(content, language="cmake")
         elif file_path.endswith(".design") or file_path.endswith(".md"):
-            content = MultiFileAgent.extract_code(content, language"markdown")
+            content = CodeExtractor.extract_code(content, language="markdown")
 
         return content
 
