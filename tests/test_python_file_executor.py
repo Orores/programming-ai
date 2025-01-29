@@ -1,81 +1,78 @@
 import unittest
 import tempfile
 import os
+import sys
 from AutoChatBot.python_file_executor import PythonFileExecutor
 
 class TestPythonFileExecutor(unittest.TestCase):
     """
-    Unit tests for the PythonFileExecutor class, which executes Python files and captures their stdout and stderr.
-    
-    The testing strategy covers the following cases:
-    1. Executing a Python file and capturing stdout and stderr.
-    2. Handling file not found errors.
-    3. Handling execution errors.
-    4. Orchestrating the execution of multiple Python files.
+    Unit tests for the PythonFileExecutor class with overhauled error handling.
     """
 
     def setUp(self):
-        """
-        Initializes the settings for the tests, including the temporary file path.
-        """
         self.tempdir = tempfile.TemporaryDirectory()
-        self.python_file = os.path.join(self.tempdir.name, "test_file.py")
-        self.python_file_with_error = os.path.join(self.tempdir.name, "test_file_with_error.py")
+        
+        # Create package structure
+        self.package_dir = os.path.join(self.tempdir.name, "temp_package")
+        os.makedirs(self.package_dir)
+        
+        # Create __init__.py files
+        with open(os.path.join(self.tempdir.name, "__init__.py"), 'w') as f:
+            pass
+        with open(os.path.join(self.package_dir, "__init__.py"), 'w') as f:
+            pass
 
-        # Create a Python file with some content
-        with open(self.python_file, 'w') as file:
-            file.write("print('Hello, world!')")
+        # Create test files inside package
+        self.test_file = os.path.join(self.package_dir, "test_file.py")
+        self.error_file = os.path.join(self.package_dir, "test_file_with_error.py")
 
-        # Create a Python file that will raise an error
-        with open(self.python_file_with_error, 'w') as file:
-            file.write("raise ValueError('This is an intentional error.')")
+        with open(self.test_file, 'w') as f:
+            f.write("print('Hello, world!')")
+
+        with open(self.error_file, 'w') as f:
+            f.write("raise ValueError('This is an intentional error.')")
+
+        # Add tempdir to Python path
+        sys.path.insert(0, self.tempdir.name)
 
     def tearDown(self):
-        """
-        Cleans up the temporary directory after tests.
-        """
+        sys.path.remove(self.tempdir.name)
         self.tempdir.cleanup()
 
     def test_execute_code(self):
-        """
-        Tests the `execute_code` method for executing a Python file and capturing stdout and stderr.
-        """
-        stdout, stderr = PythonFileExecutor.execute_code(self.python_file)
+        """Test normal execution with proper module handling."""
+        module_name = "temp_package/test_file.py"
+        stdout, stderr = PythonFileExecutor.execute_code(module_name)
         self.assertEqual(stdout.strip(), "Hello, world!")
         self.assertEqual(stderr, "")
 
     def test_execute_code_with_error(self):
-        """
-        Tests the `execute_code` method for handling execution errors.
-        """
-        stdout, stderr = PythonFileExecutor.execute_code(self.python_file_with_error)
+        """Test proper error capture with full traceback."""
+        module_name = "temp_package/test_file_with_error.py"
+        stdout, stderr = PythonFileExecutor.execute_code(module_name)
+        self.assertEqual(stdout, "")
+        self.assertIn("ValueError: This is an intentional error.", stderr)
+
+    def test_execute(self):
+        """Test orchestrating execution of multiple modules."""
+        modules = ["temp_package/test_file.py", "temp_package/test_file_with_error.py"]
+        exec_outputs = PythonFileExecutor.execute(modules)
+        
+        self.assertIn("temp_package/test_file.py", exec_outputs)
+        self.assertIn("temp_package/test_file_with_error.py", exec_outputs)
+
+        stdout, stderr = exec_outputs["temp_package/test_file.py"]
+        self.assertEqual(stdout.strip(), "Hello, world!")
+        self.assertEqual(stderr, "")
+
+        stdout, stderr = exec_outputs["temp_package/test_file_with_error.py"]
         self.assertEqual(stdout, "")
         self.assertIn("ValueError: This is an intentional error.", stderr)
 
     def test_execute_code_file_not_found(self):
-        """
-        Tests the `execute_code` method for handling file not found errors.
-        """
+        """Verify proper handling of invalid module paths."""
         with self.assertRaises(FileNotFoundError):
-            PythonFileExecutor.execute_code("non_existent_file.py")
-
-    def test_execute(self):
-        """
-        Tests the `execute` method for orchestrating the execution of multiple Python files.
-        """
-        file_paths = [self.python_file, self.python_file_with_error]
-        exec_outputs = PythonFileExecutor.execute(file_paths)
-
-        self.assertIn(self.python_file, exec_outputs)
-        self.assertIn(self.python_file_with_error, exec_outputs)
-
-        stdout, stderr = exec_outputs[self.python_file]
-        self.assertEqual(stdout.strip(), "Hello, world!")
-        self.assertEqual(stderr, "")
-
-        stdout, stderr = exec_outputs[self.python_file_with_error]
-        self.assertEqual(stdout, "")
-        self.assertIn("ValueError: This is an intentional error.", stderr)
+            PythonFileExecutor.execute_code("non_existent_module")
 
 if __name__ == "__main__":
     unittest.main()

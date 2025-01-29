@@ -34,7 +34,7 @@ class PythonFileExecutor:
         try:
             # Convert file path to module path using dot notation
             module_path = file_path.replace('/', '.').replace('\\', '.').rstrip('.py')
-
+            print(module_path)
             # Prepare the command for executing the module using the -m flag
             command = ["python", "-m", module_path]
 
