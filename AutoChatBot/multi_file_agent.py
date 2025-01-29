@@ -144,6 +144,8 @@ class MultiFileAgent:
             content = CodeExtractor.extract_code(content, language="javascript")
         elif file_path.endswith(".html"):
             content = CodeExtractor.extract_code(content, language="html")
+        elif file_path.endswith(".css"):
+            content = CodeExtractor.extract_code(content, language="css")
         elif file_path.endswith("MakeLists.txt"):
             content = CodeExtractor.extract_code(content, language="cmake")
         elif file_path.endswith(".design") or file_path.endswith(".md"):
