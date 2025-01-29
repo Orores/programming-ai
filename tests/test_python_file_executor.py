@@ -10,11 +10,12 @@ class TestPythonFileExecutor(unittest.TestCase):
     """
 
     def setUp(self):
-        self.tempdir = tempfile.TemporaryDirectory()
+        # Create a local temporary directory for testing
+        self.tempdir = tempfile.TemporaryDirectory(dir='.')
         
         # Create package structure
         self.package_dir = os.path.join(self.tempdir.name, "temp_package")
-        os.makedirs(self.package_dir)
+        os.makedirs(self.package_dir, exist_ok=True)
         
         # Create __init__.py files
         with open(os.path.join(self.tempdir.name, "__init__.py"), 'w') as f:
@@ -22,7 +23,7 @@ class TestPythonFileExecutor(unittest.TestCase):
         with open(os.path.join(self.package_dir, "__init__.py"), 'w') as f:
             pass
 
-        # Create test files inside package
+        # Create test files inside the package
         self.test_file = os.path.join(self.package_dir, "test_file.py")
         self.error_file = os.path.join(self.package_dir, "test_file_with_error.py")
 
@@ -36,7 +37,9 @@ class TestPythonFileExecutor(unittest.TestCase):
         sys.path.insert(0, self.tempdir.name)
 
     def tearDown(self):
+        # Remove the temporary directory from the Python path
         sys.path.remove(self.tempdir.name)
+        # Cleanup the temporary directory
         self.tempdir.cleanup()
 
     def test_execute_code(self):
