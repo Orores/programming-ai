@@ -24,7 +24,7 @@ class ParserCreator:
         parser.add_argument("--run_code_with_unittest", action='store_true', help="Generate a unittest, then a code, then run the code against the unittest.")
         parser.add_argument("--code_save_path", type=str, default='sandbox_scripts/myscript.py', help="Path to save the generated code.")
         parser.add_argument("--multi_file_agent", action='store_true', help="Execute the multi-file agent.")
-        parser.add_argument("--reference_files", nargs='*', help="List of reference file paths.")
+        parser.add_argument("--reference_files", nargs='*', default=[], help="List of reference file paths. Can be empty.")
         parser.add_argument("--rewrite_files", nargs='*', help="List of rewrite file paths.")
         parser.add_argument("--question_file_path", type=str, help="Path to the file containing the question.")
         parser.add_argument("--execute_files", nargs='*', help="List of file paths to be executed.")

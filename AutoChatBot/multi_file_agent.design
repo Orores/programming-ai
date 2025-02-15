@@ -1,7 +1,7 @@
 # MultiFileAgent Design
 
 ## Abstract
-The `MultiFileAgent` class is responsible for generating and updating multiple files based on reference files and user-provided questions. It integrates with the AutoChatBot system to leverage API calls for content generation. This design document outlines the modification to allow the `MultiFileAgent` to use CLI arguments from `ParserCreator` for making API calls, passed from `AutoChatBot`.
+The `MultiFileAgent` class is responsible for generating and updating multiple files based on reference files and user-provided questions. It integrates with the AutoChatBot system to leverage API calls for content generation. This design document outlines the modifications made to allow the `MultiFileAgent` to handle optional reference files and ensure graceful handling when they are not provided.
 
 ## Class Design
 
@@ -17,7 +17,7 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
 2. **construct_conversation**
    - **Description**: Constructs the conversation history based on reference and rewrite files.
    - **Arguments**:
-     - `reference_files` (`list`): List of reference file paths.
+     - `reference_files` (`list`): List of reference file paths. Can be an empty list.
      - `rewrite_files` (`list`): List of rewrite file paths.
    - **Returns**: `list` - The constructed conversation history.
 
@@ -52,7 +52,7 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
 7. **execute**
    - **Description**: Orchestrates the multi-file generation and update process.
    - **Arguments**:
-     - `reference_files` (`list`): List of reference file paths.
+     - `reference_files` (`list`): List of reference file paths. Can be `None`.
      - `rewrite_files` (`list`): List of rewrite file paths.
      - `question` (`str`, optional): The question to be included in the task string. Default is `None`.
      - `question_file_path` (`str`, optional): The path to the file containing the question. Default is `None`.
@@ -76,6 +76,7 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
 
 2. **construct_conversation**:
    - Constructs conversation history by including the content of reference and rewrite files.
+   - Handles cases where no reference files are provided by skipping their inclusion in the conversation.
 
 3. **construct_task_string**:
    - Constructs a task string based on the user-provided question.
@@ -94,16 +95,12 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
    - Orchestrates the process by calling the above methods.
    - Uses CLI arguments for API requests.
    - Updates and saves the generated content for each rewrite file.
+   - Handles cases where no reference files are provided.
 
 ### Class Paradigm
 
 - The class follows a procedural paradigm with static methods.
 - Uses modular design to separate different functionalities.
-
-### Integration
-
-- **ParserCreator**: The `MultiFileAgent` now accepts parsed CLI arguments for making API calls.
-- **ChatAPIHandler**: Utilized for making API requests using the provided arguments.
 
 ### Testing Strategy
 
@@ -113,6 +110,7 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
 
 - **Test `construct_conversation`**:
   - Verify that the conversation history is correctly constructed from reference and rewrite files.
+  - Ensure it handles cases with no reference files gracefully.
 
 - **Test `construct_task_string`**:
   - Verify that the task string is correctly constructed based on the provided question.
@@ -130,21 +128,5 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
 - **Test `execute`**:
   - Verify that the method orchestrates the process correctly.
   - Mock file I/O and API requests to ensure robustness.
+  - Ensure it handles cases with no reference files gracefully.
 
-### Example Usage
-
-```python
-if __name__ == "__main__":
-    reference_files = ["reference_code/workout_tracker.design", "reference_code/test_workout_tracker.py"]
-    rewrite_files = ["AutoChatBot/AutoChatBot.design", "AutoChatBot/AutoChatBot.py"]
-    question_file_path = "path/to/question.txt"
-    
-    parser = ParserCreator.create_parser()
-    args = parser.parse_args()
-    
-    result = MultiFileAgent.execute(reference_files, rewrite_files, question_file_path=question_file_path, args=args, debug=True)
-    for file_path, content in result.items():
-        with open(file_path, 'w') as file:
-            file.write(content)
-    print("Generated Content:", result)
-```

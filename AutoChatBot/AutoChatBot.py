@@ -49,7 +49,7 @@ class ChatBot:
         Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
 
         Parameters:
-        reference_files (list): List of paths to the reference files.
+        reference_files (list): List of paths to the reference files. Can be an empty list.
         rewrite_files (list): List of paths to the rewrite files.
         question (str, optional): The question to be included in the task string. Default is `None`.
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
@@ -59,7 +59,7 @@ class ChatBot:
         Returns:
         dict: Dictionary with file paths as keys and generated content as values.
         """
-        return MultiFileAgent.execute(reference_files, rewrite_files, question, question_file_path, args, debug)
+        return MultiFileAgent.execute(reference_files or [], rewrite_files, question, question_file_path, args, debug)
 
     @staticmethod
     def execute_files(file_paths: list) -> dict:

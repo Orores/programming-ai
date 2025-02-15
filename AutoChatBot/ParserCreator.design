@@ -1,8 +1,7 @@
-```markdown
 # ParserCreator Design
 
 ## Abstract
-The `ParserCreator` class is designed to create and manage argument parsers for the chatbot. This design document outlines the integration of new arguments, including support for the multi-file agent, the ability to read the question from a file, and the execution of a list of files using the `PyFileExecutor`.
+The `ParserCreator` class is designed to create and manage argument parsers for the chatbot. This design document outlines the integration of new arguments, including support for the multi-file agent, the ability to read the question from a file, and the execution of a list of files using the `PyFileExecutor`. The updates ensure that the parser can handle optional parameters such as reference files, allowing for greater flexibility in the chatbot's operation.
 
 ## Class Design
 
@@ -25,7 +24,8 @@ The `ParserCreator` class is designed to create and manage argument parsers for 
    - Step 1: Initialize an `ArgumentParser` object.
    - Step 2: Add arguments to the parser for various functionalities, including API selection, model configuration, and other chatbot options.
    - Step 3: Add arguments for the multi-file agent, including `reference_files`, `rewrite_files`, `question`, `question_file_path`, and `execute_files`.
-   - Step 4: Return the configured parser.
+   - Step 4: Ensure `reference_files` can be an optional parameter with a default empty list.
+   - Step 5: Return the configured parser.
 
 ### Class Paradigm
 
@@ -37,26 +37,7 @@ The `ParserCreator` class is designed to create and manage argument parsers for 
 
 - **Test `create_parser`**:
   - Verify that the parser correctly handles and parses all expected arguments.
+  - Verify that the parser handles the absence of optional arguments like `reference_files` gracefully.
   - Verify that the parser raises appropriate errors for invalid configurations.
 
 ### Example Usage
-
-```python
-from AutoChatBot.ParserCreator import ParserCreator
-
-# Create the argument parser
-parser = ParserCreator.create_parser()
-
-# Parse command-line arguments
-args = parser.parse_args()
-
-# Access parsed arguments
-print("Model:", args.model)
-print("Question:", args.question)
-print("Question file path:", args.question_file_path)
-print("Reference files:", args.reference_files)
-print("Rewrite files:", args.rewrite_files)
-print("Execute files:", args.execute_files)
-```
-```
-```

@@ -47,7 +47,7 @@ class MultiFileAgent:
         Constructs the conversation history based on reference and rewrite files.
 
         Parameters:
-        reference_files (List[str]): List of reference file paths.
+        reference_files (List[str]): List of reference file paths. Can be an empty list.
         rewrite_files (List[str]): List of rewrite file paths.
 
         Returns:
@@ -56,11 +56,12 @@ class MultiFileAgent:
         conversation = []
 
         # Add reference files to the conversation
-        for file_path in reference_files:
-            user_message = {"role": "user", "content": f"The file {file_path} shall be used as a reference for similar files in the future. Now show me only the current {file_path} content:\n\n"}
-            conversation.append(user_message)
-            assistant_message = {"role": "assistant", "content": MultiFileAgent.read_file_content(file_path) + "\n\n"}
-            conversation.append(assistant_message)
+        if reference_files:
+            for file_path in reference_files:
+                user_message = {"role": "user", "content": f"The file {file_path} shall be used as a reference for similar files in the future. Now show me only the current {file_path} content:\n\n"}
+                conversation.append(user_message)
+                assistant_message = {"role": "assistant", "content": MultiFileAgent.read_file_content(file_path) + "\n\n"}
+                conversation.append(assistant_message)
 
         # Separate rewrite files into existing and non-existing
         existing_files = [file_path for file_path in rewrite_files if os.path.exists(file_path)]
@@ -159,7 +160,7 @@ class MultiFileAgent:
         Orchestrates the multi-file generation and update process.
 
         Parameters:
-        reference_files (List[str]): List of reference file paths.
+        reference_files (List[str]): List of reference file paths. Can be `None`.
         rewrite_files (List[str]): List of rewrite file paths.
         question (str, optional): The question to be included in the task string. Default is `None`.
         question_file_path (str, optional): The path to the file containing the question. Default is `None`.
@@ -173,7 +174,7 @@ class MultiFileAgent:
         question = ConversationPreparer.decide_conversation(file_path=question_file_path, question=question)
 
         # Step 2: Construct conversation history
-        conversation = MultiFileAgent.construct_conversation(reference_files, rewrite_files)
+        conversation = MultiFileAgent.construct_conversation(reference_files or [], rewrite_files)
 
         # Step 3: Construct task string
         task_string = MultiFileAgent.construct_task_string(question)
