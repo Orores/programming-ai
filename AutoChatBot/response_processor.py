@@ -28,8 +28,11 @@ class TextProcessor:
             
         think_pattern = re.compile(r'❬think❭(.*?)❬/think❭', re.DOTALL)
         think_blocks = think_pattern.findall(input_string)
-        think_content = '\n'.join([block.strip() for block in think_blocks])
-        
+        # Process each line within think blocks to strip whitespace
+        think_content = '\n'.join(
+            ['\n'.join(line.strip() for line in block.splitlines()) 
+             for block in think_blocks]
+        )
         message_content = think_pattern.sub('', input_string)
         return (message_content.strip(), think_content)
 
@@ -47,9 +50,7 @@ class TextProcessor:
         """
         if not remove_think:
             return input_string
-        print(input_string) 
         message, think = TextProcessor.filter_think(input_string)
-        print('111111111111111111111111!!',think)
         return message
 
 # Example usage
