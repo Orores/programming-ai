@@ -27,6 +27,22 @@ class TestTextProcessor(unittest.TestCase):
         self.assertEqual(message.strip(), expected_message.strip())
         self.assertEqual(think, expected_think)
 
+    def test_multiline_think_block(self):
+        input_string = '''Start message
+        ❬think❭Line one of thought
+        Line two of thought
+        Line three of thought❬/think❭
+        End message'''
+        
+        message, think = TextProcessor.filter_think(input_string)
+        expected_message = '''Start message
+        
+        End message'''
+        expected_think = 'Line one of thought\nLine two of thought\nLine three of thought'
+        
+        self.assertEqual(message.strip(), expected_message.strip())
+        self.assertEqual(think, expected_think)
+
     def test_missing_closing_tag(self):
         input_string = 'Text ❬think❭Unclosed thought'
         message, think = TextProcessor.filter_think(input_string)

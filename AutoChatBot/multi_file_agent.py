@@ -4,6 +4,7 @@ from typing import List, Dict
 from AutoChatBot.ChatAPIHandler import ChatAPIHandler
 from AutoChatBot.ConversationPreparer import ConversationPreparer
 from AutoChatBot.RemoveLanguageDelimiters import CodeExtractor
+from AutoChatBot.response_processor import TextProcessor
 
 class MultiFileAgent:
     """
@@ -128,8 +129,10 @@ class MultiFileAgent:
             repetition_penalty=args.repetition_penalty
         )
         content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
-        print('CONTENT')
-        print(content)
+
+        # Use the response processor to remove <think> content
+        #content = TextProcessor.execute(content, remove_think=True)
+        print('###############################################HEllo\n\n',content)
 
         if file_path.endswith(".py"):
             content = CodeExtractor.extract_code(content, language="python")
@@ -182,7 +185,6 @@ class MultiFileAgent:
         # Step 4: Generate and update content for each rewrite file
         result = {}
         for file_path in rewrite_files:
-            print(conversation)
             content = MultiFileAgent.generate_file_content(conversation, file_path, task_string, args)
             result[file_path] = content
             conversation.append({"role": "assistant", "content": content + "\n\n"})

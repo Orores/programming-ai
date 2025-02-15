@@ -47,8 +47,9 @@ class TextProcessor:
         """
         if not remove_think:
             return input_string
-            
-        message, _ = TextProcessor.filter_think(input_string)
+        print(input_string) 
+        message, think = TextProcessor.filter_think(input_string)
+        print('111111111111111111111111!!',think)
         return message
 
 # Example usage

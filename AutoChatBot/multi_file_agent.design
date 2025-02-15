@@ -1,7 +1,7 @@
 # MultiFileAgent Design
 
 ## Abstract
-The `MultiFileAgent` class is responsible for generating and updating multiple files based on reference files and user-provided questions. It integrates with the AutoChatBot system to leverage API calls for content generation. This design document outlines the modifications made to allow the `MultiFileAgent` to handle optional reference files and ensure graceful handling when they are not provided.
+The `MultiFileAgent` class is responsible for generating and updating multiple files based on reference files and user-provided questions. It integrates with the AutoChatBot system to leverage API calls for content generation. This design document outlines the modifications made to include a response processor that filters out the `<think>` parts of the response after content extraction but before code extraction.
 
 ## Class Design
 
@@ -37,19 +37,25 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
    - **Returns**: `str` - Generated content for the file.
    - **Raises**: `ValueError` if the response format is invalid or does not contain the expected keys.
 
-5. **filter_python_code**
+5. **filter_think_content**
+   - **Description**: Filters out `<think>` content from the response before code extraction.
+   - **Arguments**:
+     - `content` (`str`): The content string containing potential `<think>` sections.
+   - **Returns**: `str` - Content with `<think>` sections removed.
+
+6. **filter_python_code**
    - **Description**: Filters out Python code from a response.
    - **Arguments**:
      - `response` (`str`): The response string containing code.
    - **Returns**: `str` - Filtered Python code.
 
-6. **filter_markdown_content**
+7. **filter_markdown_content**
    - **Description**: Filters out Markdown content from a response.
    - **Arguments**:
      - `response` (`str`): The response string containing Markdown content.
    - **Returns**: `str` - Filtered Markdown content.
 
-7. **execute**
+8. **execute**
    - **Description**: Orchestrates the multi-file generation and update process.
    - **Arguments**:
      - `reference_files` (`list`): List of reference file paths. Can be `None`.
@@ -85,13 +91,16 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
    - Uses the provided CLI arguments to make API requests via `ChatAPIHandler`.
    - Filters the response to extract relevant content based on the file type (Python or Markdown).
 
-5. **filter_python_code**:
+5. **filter_think_content**:
+   - Removes `<think>` sections from the content to ensure only relevant information is processed further.
+
+6. **filter_python_code**:
    - Extracts Python code from the response.
 
-6. **filter_markdown_content**:
+7. **filter_markdown_content**:
    - Extracts Markdown content from the response.
 
-7. **execute**:
+8. **execute**:
    - Orchestrates the process by calling the above methods.
    - Uses CLI arguments for API requests.
    - Updates and saves the generated content for each rewrite file.
@@ -118,6 +127,9 @@ The `MultiFileAgent` class is responsible for generating and updating multiple f
 - **Test `generate_file_content`**:
   - Verify that the method correctly generates content using API calls.
   - Mock API responses to ensure robustness.
+
+- **Test `filter_think_content`**:
+  - Verify that the method correctly filters out `<think>` sections from the content.
 
 - **Test `filter_python_code`**:
   - Verify that Python code is correctly extracted from the response.
