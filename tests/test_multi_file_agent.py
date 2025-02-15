@@ -20,6 +20,7 @@ class TestMultiFileAgent(unittest.TestCase):
     8. Generating file content using AutoChatBot.
     9. Orchestrating the process using the execute method.
     10. Reading the question from a file.
+    11. Multi file agent should work with no reference files provided.
     """
 
     def setUp(self):
@@ -124,6 +125,22 @@ class TestMultiFileAgent(unittest.TestCase):
         self.assertEqual(result[self.rewrite_files[0]], "Updated content")
         mock_make_api_request.assert_called()
 
+    @patch('AutoChatBot.ChatAPIHandler.ChatAPIHandler.make_api_request', return_value={
+        "choices": [{"message": {"content": "Generated content without reference files"}}]
+    })
+    def test_execute_no_reference_files(self, mock_make_api_request):
+        """
+        Tests the `execute` method to ensure that the MultiFileAgent can function without reference files provided.
+        """
+        result = MultiFileAgent.execute(
+            reference_files=[],  # No reference files provided
+            rewrite_files=self.rewrite_files,
+            question=self.question,
+            args=self.args,
+            debug=self.debug
+        )
+        self.assertEqual(result[self.rewrite_files[0]], "Generated content without reference files")
+        mock_make_api_request.assert_called()
+
 if __name__ == "__main__":
     unittest.main()
-
