@@ -1,0 +1,57 @@
+# Design for TextProcessor
+
+## Abstract
+The `TextProcessor` class provides static methods to separate text content into message (outside think bubbles) and think (inside think bubbles). The `execute` method uses this separation to return either clean message content or the original text based on a removal flag.
+
+## Class Design
+
+### Methods
+
+1. **filter_think**
+   - **Description**: Separates input text into message content (outside ❬think❭ bubbles) and think content (inside bubbles)
+   - **Arguments**:
+     - `input_string` (str): Text potentially containing ❬think❭ blocks
+   - **Returns**:
+     - Tuple[str, str]: (message_content, think_content)
+   - **Behavior**:
+     - Preserves original whitespace outside think bubbles
+     - Concatenates all think block contents with newlines
+
+2. **execute**
+   - **Description**: Public interface that applies think bubble removal based on parameter
+   - **Arguments**:
+     - `input_string` (str): Text to process
+     - `remove_think` (bool, True): Whether to filter think bubbles
+   - **Returns**:
+     - str: Processed text (message only when remove_think=True)
+
+### Error Handling
+- Returns empty strings for both parts if input is empty
+- Handles missing closing tags by ignoring incomplete think blocks
+
+### How it Works
+1. **filter_think**:
+   - Step 1: Use regex pattern `❬think❭(.*?)❬/think❭` with DOTALL flag
+   - Step 2: Extract all think block contents
+   - Step 3: Remove think blocks from original text to get message
+   - Step 4: Join think contents with newlines
+
+2. **execute**:
+   - When remove_think=True: Returns message from filter_think
+   - When remove_think=False: Returns original input unchanged
+
+### Class Paradigm
+- Static methods only
+- Pure functions with no side effects
+- Single responsibility pattern
+
+### Testing Strategy
+1. **Basic think bubble extraction**
+2. **Multiple think bubbles** 
+3. **Missing closing tag handling**
+4. **Empty input** 
+5. **No think blocks present**
+6. **Special characters preservation**
+7. **execute method flag behavior**
+
+### Usage Example
