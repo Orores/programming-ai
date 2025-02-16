@@ -76,5 +76,33 @@ class TestTextProcessor(unittest.TestCase):
         result = TextProcessor.execute(input_string, remove_think=False)
         self.assertEqual(result, input_string)
 
+    def test_large_multiline_think_block(self):
+        input_string = '''hello
+        ❬think❭This is a large multiline think block.
+        It contains many lines of text.
+        It should be entirely removed when processed.
+        Leaving only the non-think block text.❬/think❭'''
+        
+        result = TextProcessor.execute(input_string)
+        self.assertEqual(result.strip(), 'hello')
+
+    def test_very_large_multiline_think_block(self):
+        input_string =''' 
+        <think>
+        Okay, the user is working on a file called temp/hello.tmp. Previously, they asked to see the current content, which was "whatup". Now, they have a task to "say hello" and want to see the rewritten content of the same file.
+
+        I need to confirm that the user wants the file updated to "hello" based on the task. They mentioned "rewritten temp/hello.tmp", which implies overwriting the previous content. Since there's no other instruction, replacing "whatup" with "hello" is the logical step.
+
+        So the correct response is to display the new content as "hello" within the specified code block format.
+        </think>
+
+        hello
+        '''
+        
+        result = TextProcessor.execute(input_string)
+        self.assertEqual(result.strip(), 'hello')
+
+
+
 if __name__ == '__main__':
     unittest.main()
