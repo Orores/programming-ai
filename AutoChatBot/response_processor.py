@@ -18,15 +18,16 @@ class TextProcessor:
         Splits text into message content and think bubble content.
         
         Args:
-            input_string (str): Text containing ❬think❭ blocks
+            input_string (str): Text containing ❬think❭ or <think> blocks
             
         Returns:
             tuple: (message_content, think_content) both as strings
         """
         if not input_string:
             return ('', '')
-            
-        think_pattern = re.compile(r'❬think❭(.*?)❬/think❭', re.DOTALL)
+        
+        # Updated regex pattern to handle both ❬think❭ and <think> tags
+        think_pattern = re.compile(r'(?:❬think❭|<think>)(.*?)(?:❬/think❭|</think>)', re.DOTALL)
         think_blocks = think_pattern.findall(input_string)
         # Process each line within think blocks to strip whitespace
         think_content = '\n'.join(

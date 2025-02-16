@@ -131,8 +131,7 @@ class MultiFileAgent:
         content = response.get("choices", [{}])[0].get("message", {}).get("content", "")
 
         # Use the response processor to remove <think> content
-        #content = TextProcessor.execute(content, remove_think=True)
-        print('###############################################HEllo\n\n',content)
+        content = TextProcessor.execute(content, remove_think=True)
 
         if file_path.endswith(".py"):
             content = CodeExtractor.extract_code(content, language="python")
