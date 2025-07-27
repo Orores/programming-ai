@@ -1,3 +1,8 @@
+#pictures and pdf
+*.png
+*.jpg
+*.pdf
+
 # temporary files folder
 temp/
 
