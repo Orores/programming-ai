@@ -6,7 +6,6 @@ import argparse
 from unittest.mock import patch, MagicMock
 from AutoChatBot.AutoChatBot import ChatBot
 from AutoChatBot.multi_file_agent import MultiFileAgent
-from AutoChatBot.python_file_executor import PythonFileExecutor
 from AutoChatBot.ParserCreator import ParserCreator
 
 class TestAutoChatBot(unittest.TestCase):
@@ -15,10 +14,9 @@ class TestAutoChatBot(unittest.TestCase):
 
     Testing Strategy:
     1. Test the `execute_multifile_agent` method.
-    2. Test the `execute_files` method.
-    3. Test the `main` method for parsing arguments and executing functionalities.
-    4. Mock external dependencies such as file I/O and API requests to ensure robustness.
-    5. Test the execution of files and capture their stdout and stderr.
+    2. Test the `main` method for parsing arguments and executing functionalities.
+    3. Mock external dependencies such as file I/O and API requests to ensure robustness.
+    4. Test the execution of files and capture their stdout and stderr.
     """
 
     def setUp(self):
@@ -70,21 +68,28 @@ class TestAutoChatBot(unittest.TestCase):
         self.assertEqual(result, {"rewrite_file_1.txt": "Updated content 1", "rewrite_file_2.txt": "Updated content 2"})
         mock_execute.assert_called_once_with(self.reference_files, self.rewrite_files, self.question, None, args, self.debug)
 
-    @patch.object(PythonFileExecutor, 'execute', return_value={"execute_file_1.py": ("Output 1", ""), "execute_file_2.py": ("Output 2", "")})
-    def test_execute_files(self, mock_execute):
+    @patch('AutoChatBot.AutoChatBot.PyFileExecutor')
+    def test_pyfileexecutor_execution(self, mock_pyfile_executor):
         """
-        Tests the `execute_files` method for integrating with `PythonFileExecutor`.
+        Tests direct use of PyFileExecutor for executing python files (as now done in main).
         """
-        result = ChatBot.execute_files(self.execute_files)
-        self.assertEqual(result, {"execute_file_1.py": ("Output 1", ""), "execute_file_2.py": ("Output 2", "")})
-        mock_execute.assert_called_once_with(self.execute_files)
+        mock_pyfile_executor.execute_code.side_effect = [("Output 1", ""), ("Output 2", "")]
+        exec_outputs = {}
+        for file_path in self.execute_files:
+            stdout, stderr = mock_pyfile_executor.execute_code(file_path)
+            exec_outputs[file_path] = (stdout, stderr)
+        self.assertEqual(exec_outputs[self.execute_files[0]], ("Output 1", ""))
+        self.assertEqual(exec_outputs[self.execute_files[1]], ("Output 2", ""))
+        self.assertEqual(mock_pyfile_executor.execute_code.call_count, 2)
+        mock_pyfile_executor.execute_code.assert_any_call(self.execute_files[0])
+        mock_pyfile_executor.execute_code.assert_any_call(self.execute_files[1])
 
     @patch('argparse.ArgumentParser.parse_args')
     @patch.object(ChatBot, 'execute_multifile_agent', return_value={"rewrite_file_1.txt": "Updated content 1", "rewrite_file_2.txt": "Updated content 2"})
-    @patch.object(ChatBot, 'execute_files', return_value={"execute_file_1.py": ("Output 1", ""), "execute_file_2.py": ("Output 2", "")})
-    def test_main(self, mock_execute_files, mock_execute_multifile_agent, mock_parse_args):
+    def test_main(self, mock_execute_multifile_agent, mock_parse_args):
         """
-        Tests the `main` method for parsing arguments and executing the multi-file agent and file execution functionalities.
+        Tests the `main` method for parsing arguments and executing the multi-file agent and file execution functionalities,
+        including direct PyFileExecutor usage.
         """
         mock_parse_args.return_value = argparse.Namespace(
             multi_file_agent=True,
@@ -113,13 +118,18 @@ class TestAutoChatBot(unittest.TestCase):
             run_code=False,
         )
 
-        with patch('builtins.open', unittest.mock.mock_open()) as mock_file:
+        # Patch the os.makedirs and open to prevent file system writes during test
+        with patch('builtins.open', unittest.mock.mock_open()) as mock_file, \
+             patch('AutoChatBot.AutoChatBot.PyFileExecutor') as mock_pyfile_executor:
+            # Prepare PyFileExecutor mock
+            mock_pyfile_executor.execute_code.side_effect = [("Output 1", ""), ("Output 2", "")]
             ChatBot.main()
             mock_execute_multifile_agent.assert_called_once_with(self.reference_files, self.rewrite_files, None, self.question_file, mock_parse_args.return_value, self.debug)
-            mock_execute_files.assert_called_once_with(self.execute_files)
+            self.assertEqual(mock_pyfile_executor.execute_code.call_count, 2)
             mock_file.assert_any_call('rewrite_file_1.txt', 'w')
             mock_file.assert_any_call('rewrite_file_2.txt', 'w')
 
 if __name__ == "__main__":
     unittest.main()
+
 

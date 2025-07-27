@@ -9,7 +9,7 @@ from .ConversationPreparer import ConversationPreparer
 from .ChatAPIHandler import ChatAPIHandler
 from .CodeExecutor import CodeExecutor
 from .multi_file_agent import MultiFileAgent
-from .python_file_executor import PythonFileExecutor
+from .PyFileExecutor import PyFileExecutor
 from .default_api_parameters import DEFAULT_CHAT_PARAMETERS
 
 class ChatBot:
@@ -28,8 +28,6 @@ class ChatBot:
         The main method to run the chatbot.
     execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file: str = None, args = None, debug: bool = False) -> dict:
         Executes the multi-file agent to generate and update multiple files.
-    execute_files(file_paths: list) -> dict:
-        Executes a list of Python files and captures their stdout and stderr outputs.
     """
 
     FAIL = '\33[91m'      # red, error
@@ -55,19 +53,6 @@ class ChatBot:
         dict: Dictionary with file paths as keys and generated content as values.
         """
         return MultiFileAgent.execute(reference_files or [], rewrite_files, question, question_file, args, debug)
-
-    @staticmethod
-    def execute_files(file_paths: list) -> dict:
-        """
-        Executes a list of Python files and captures their stdout and stderr outputs.
-
-        Parameters:
-        file_paths (list): List of paths to Python files to be executed.
-
-        Returns:
-        dict: Dictionary with file paths as keys and tuples of (stdout, stderr) as values.
-        """
-        return PythonFileExecutor.execute(file_paths)
 
     @staticmethod
     def gather_chat_parameters_from_args(args) -> dict:
@@ -149,7 +134,10 @@ class ChatBot:
             print("Generated Content:", result)
 
         if getattr(args, "execute_files", None):
-            exec_outputs = ChatBot.execute_files(args.execute_files)
+            exec_outputs = {}
+            for file_path in args.execute_files:
+                stdout, stderr = PyFileExecutor.execute_code(file_path)
+                exec_outputs[file_path] = (stdout, stderr)
             for file_path, (stdout, stderr) in exec_outputs.items():
                 print(f"Output for {file_path}:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}")
 
