@@ -1,7 +1,6 @@
 import unittest
 from dotenv import load_dotenv
 import os
-import sys
 from AutoChatBot.TogetherAIChatCompletion import TogetherAIChatCompletion
 
 class TestTogetherAIChatCompletion(unittest.TestCase):
@@ -10,9 +9,16 @@ class TestTogetherAIChatCompletion(unittest.TestCase):
         # Load environment variables from .env
         load_dotenv()
 
-        # Load the TOGETHERAI_API_KEY from environment variables
-        cls.api_key = os.getenv('TOGETHERAI_API_KEY')
-        assert cls.api_key is not None, "TOGETHERAI_API_KEY environment variable not set."
+        # Prepare chat_parameters dictionary as described in AutoChatBot/default_api_parameters.py
+        cls.chat_parameters = {
+            "model": "cognitivecomputations/dolphin-2.5-mixtral-8x7b",
+            "temperature": 1.0,
+            "max_tokens": 128,
+            "top_p": 0.7,
+            "top_k": 50,
+            "repetition_penalty": 1.0,
+            "stop_sequences": None
+        }
 
         # Define a conversation example to pass
         cls.conversation = [
@@ -20,30 +26,28 @@ class TestTogetherAIChatCompletion(unittest.TestCase):
         ]
 
         # Make the API request
-        cls.response = TogetherAIChatCompletion.make_api_request(cls.conversation, api_key=cls.api_key, model="cognitivecomputations/dolphin-2.5-mixtral-8x7b", max_tokens=2000)
+        cls.response = TogetherAIChatCompletion.make_api_request(
+            cls.chat_parameters,
+            cls.conversation
+        )
 
     def test_response_is_dict(self):
-        # Check if the response is a dictionary
         self.assertIsInstance(self.response, dict, "The response is not a dictionary")
 
     def test_response_contains_error_or_choices(self):
-        # Check if the response contains 'choices' or 'error'
         self.assertTrue('choices' in self.response or 'error' in self.response, 
                         msg=f"The response does not contain 'choices' or 'error'. Full response: {self.response}")
 
     def test_choices_is_list(self):
-        # Validate that 'choices' is a list if it exists
         if 'choices' in self.response:
             self.assertIsInstance(self.response['choices'], list, f"'choices' is not a list. Full response: {self.response}")
 
     def test_choice_contains_message(self):
-        # Check if the first choice contains a 'message' if choices exist
         if 'choices' in self.response and self.response['choices']:
             choice = self.response['choices'][0]
             self.assertIn('message', choice, f"The choice does not contain 'message'. Full response: {self.response}")
 
     def test_message_contains_role_and_content(self):
-        # Check if the 'message' contains both 'role' and 'content' if choices exist
         if 'choices' in self.response and self.response['choices']:
             message = self.response['choices'][0].get('message', {})
             self.assertIn('role', message, f"'message' does not contain 'role'. Full response: {self.response}")
@@ -51,3 +55,4 @@ class TestTogetherAIChatCompletion(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

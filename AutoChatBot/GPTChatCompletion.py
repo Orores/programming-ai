@@ -1,53 +1,30 @@
 import os
 from dotenv import load_dotenv
 import requests
-import argparse
 
 class GPT3ChatCompletion:
     """
-    GPT3ChatCompletion: This class handles OpenAI API chat completion requests using static methods.
-    
-    Static methods:
-    - load_api_key(): Loads the API key from the environment or .env file.
-    - make_api_request(api_key, conversation, model, temperature, max_tokens, stop_sequences, frequency_penalty, presence_penalty, top_p): Sends a request to the OpenAI API with the specified parameters and returns the response.
-    - update_attributes(current_values, **kwargs): Updates a dictionary of current values with provided keyword arguments.
-    
-    Example usage:
-        conversation = [{"role": "user", "content": "Hello, who won the world series in 2020?"}]
-        response = GPT3ChatCompletion.make_api_request(
-            api_key="your_api_key",
-            conversation=conversation,
-            model="gpt-3.5-turbo",
-            max_tokens=100,
-            temperature=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-            top_p=1
-        )
-    
-    Response object example:
-        {
-            'id': 'chatcmpl-939gfxWbMKlqGh8hkPG5IvEO6SYDq',
-            'object': 'chat.completion',
-            'created': 1710539249,
-            'model': 'gpt-3.5-turbo-0125',
-            'choices': [{
-                'index': 0,
-                'message': {'role': 'assistant', 'content': 'The Los Angeles Dodgers won the 2020 World Series'},
-                'logprobs': None,
-                'finish_reason': 'stop'
-            }],
-            'usage': {'prompt_tokens': 19, 'completion_tokens': 9, 'total_tokens': 28},
-            'system_fingerprint': 'fp_4f2ebda25a'
-        }
+    GPT3ChatCompletion: Handles OpenAI API chat completion requests.
+
+    Usage:
+        Pass all relevant parameters in the `chat_parameters` dict (see AutoChatBot/default_api_parameters.py
+        for structure and description), plus the conversation list.
+
+    Parameters accepted in chat_parameters include (see default_api_parameters.py for details):
+        - model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, stop_sequences
+
+    Example:
+        >>> from AutoChatBot.default_api_parameters import DEFAULT_CHAT_PARAMETERS
+        >>> params = DEFAULT_CHAT_PARAMETERS.copy()
+        >>> params["model"] = "gpt-3.5-turbo"
+        >>> out = GPT3ChatCompletion.make_api_request(params, conversation)
+
     """
 
     @staticmethod
     def load_api_key():
-        current_directory = os.getcwd()
         load_dotenv()
-        api_key = os.getenv("OPENAI_API_KEY")
-        return api_key 
+        return os.getenv("OPENAI_API_KEY")
 
     @staticmethod
     def update_attributes(current_values, **kwargs):
@@ -61,95 +38,53 @@ class GPT3ChatCompletion:
     @staticmethod
     def extract_text_from_response(response):
         """
-        Short Description:
         Extracts the text content from the OpenAI API response object.
 
-        Parameters:
-        response (dict): The response object returned by the OpenAI API.
-            Example:
-            {
-                'id': 'chatcmpl-939gfxWbMKlqGh8hkPG5IvEO6SYDq',
-                'object': 'chat.completion',
-                'created': 1710539249,
-                'model': 'gpt-3.5-turbo-0125',
-                'choices': [{
-                    'index': 0,
-                    'message': {'role': 'assistant', 'content': 'The Los Angeles Dodgers won the 2020 World Series'},
-                    'logprobs': None,
-                    'finish_reason': 'stop'
-                }],
-                'usage': {'prompt_tokens': 19, 'completion_tokens': 9, 'total_tokens': 28},
-                'system_fingerprint': 'fp_4f2ebda25a'
-            }
-
         Returns:
-        str: The content of the response message.
-            Example: "The Los Angeles Dodgers won the 2020 World Series"
+            str: The text content, or raises ValueError if missing.
 
-        Raises:
-        ValueError: If the response format is invalid or does not contain the expected keys.
-            Example: ValueError("Invalid response format")
-
-        How to Use:
-        This method can be used to extract only the text content from the response object returned by the OpenAI API.
-
-        Usage Example:
-        >>> response = {
-        >>>     'id': 'chatcmpl-939gfxWbMKlqGh8hkPG5IvEO6SYDq',
-        >>>     'object': 'chat.completion',
-        >>>     'created': 1710539249,
-        >>>     'model': 'gpt-3.5-turbo-0125',
-        >>>     'choices': [{
-        >>>         'index': 0,
-        >>>         'message': {'role': 'assistant', 'content': 'The Los Angeles Dodgers won the 2020 World Series'},
-        >>>         'logprobs': None,
-        >>>         'finish_reason': 'stop'
-        >>>     }],
-        >>>     'usage': {'prompt_tokens': 19, 'completion_tokens': 9, 'total_tokens': 28},
-        >>>     'system_fingerprint': 'fp_4f2ebda25a'
-        >>> }
-        >>> text = GPT3ChatCompletion.extract_text_from_response(response)
-        >>> print(text)
-        "The Los Angeles Dodgers won the 2020 World Series"
+        See the parent class docstring and default_api_parameters.py for example response.
         """
         try:
             return response['choices'][0]['message']['content']
         except (KeyError, IndexError):
             raise ValueError("Invalid response format")
 
-    @staticmethod
-    def make_api_request(
-            api_key,
-            conversation,
-            model="gpt-3.5-turbo",
-            temperature=1,
-            max_tokens=100,
-            stop_sequences=None,
-            frequency_penalty=0,
-            presence_penalty=0,
-            top_p=1
-            ):
 
+    @staticmethod
+    def make_api_request(chat_parameters: dict, conversation: list):
+        """
+        Perform a chat completion request to OpenAI's API.
+
+        Args:
+            chat_parameters (dict): Chat parameters (see AutoChatBot/default_api_parameters.py for description).
+                Must include model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, stop_sequences.
+            conversation (list): The conversation context.
+
+        Returns:
+            dict: The response dictionary from the OpenAI API.
+        """
+        api_key = GPT3ChatCompletion.load_api_key()
         if api_key is None:
             raise ValueError("API key is required")
-        
+
         if conversation is None:
             raise ValueError("No conversation provided")
-        if isinstance(conversation, str): 
+        if isinstance(conversation, str):
             conversation = [
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": conversation}
             ]
 
         data = {
-            "model": model,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "stop": stop_sequences,
-            "frequency_penalty": frequency_penalty,
-            "presence_penalty": presence_penalty,
-            "top_p": top_p,
-            "messages": conversation
+            "model":              chat_parameters.get("model", "gpt-3.5-turbo"),
+            "temperature":        chat_parameters.get("temperature", 1.0),
+            "max_tokens":         chat_parameters.get("max_tokens", 100),
+            "top_p":              chat_parameters.get("top_p", 1.0),
+            "frequency_penalty":  chat_parameters.get("frequency_penalty", 0),
+            "presence_penalty":   chat_parameters.get("presence_penalty", 0),
+            "stop":               chat_parameters.get("stop_sequences", None),
+            "messages":           conversation,
         }
         headers = {
             'Authorization': f'Bearer {api_key}',
@@ -157,4 +92,5 @@ class GPT3ChatCompletion:
         }
         response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
         return response.json()
+
 
