@@ -26,7 +26,7 @@ class TestParserCreator(unittest.TestCase):
             "--multi_file_agent",
             "--reference_files", "ref_file_1.txt", "ref_file_2.txt",
             "--rewrite_files", "rewrite_file_1.txt", "rewrite_file_2.txt",
-            "--question_file_path", "/path/to/question_file.txt",
+            "--question_file", "/path/to/question_file.txt",
             "--execute_files", "execute_file_1.py", "execute_file_2.py",
             "--debug"
         ]
@@ -55,7 +55,7 @@ class TestParserCreator(unittest.TestCase):
             self.assertTrue(args.multi_file_agent)
             self.assertEqual(args.reference_files, ["ref_file_1.txt", "ref_file_2.txt"])
             self.assertEqual(args.rewrite_files, ["rewrite_file_1.txt", "rewrite_file_2.txt"])
-            self.assertEqual(args.question_file_path, "/path/to/question_file.txt")
+            self.assertEqual(args.question_file, "/path/to/question_file.txt")
             self.assertEqual(args.execute_files, ["execute_file_1.py", "execute_file_2.py"])
             self.assertTrue(args.debug)
 
