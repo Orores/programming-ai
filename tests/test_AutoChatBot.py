@@ -111,7 +111,6 @@ class TestAutoChatBot(unittest.TestCase):
             context=None,
             save_path='response.tmp',
             run_code=False,
-            run_code_with_unittest=False
         )
 
         with patch('builtins.open', unittest.mock.mock_open()) as mock_file:

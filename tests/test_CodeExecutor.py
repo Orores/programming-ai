@@ -83,9 +83,5 @@ class TestCodeExecutor(unittest.TestCase):
         mock_conversation_preparer.str_to_dict_list.assert_called()
         mock_conversation_preparer.extend_context.assert_called()
 
-    def test_run_code_with_unittest(self):
-        # Placeholder test case for future implementation of run_code_with_unittest
-        self.assertTrue(True)
-
 if __name__ == '__main__':
     unittest.main()

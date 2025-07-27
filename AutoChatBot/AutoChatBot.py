@@ -132,15 +132,6 @@ class ChatBot:
                 response_content=response_content
             )
             
-        if getattr(args, "run_code_with_unittest", False):
-            CodeExecutor.run_code_with_unittest(
-                chat_parameters=chat_parameters,
-                save_path=getattr(args, "save_path", None),
-                code_save_path=getattr(args, "code_save_path", None),
-                run_code=getattr(args, "run_code_with_unittest", False),
-                response_content=response_content
-            )
-
         if getattr(args, "multi_file_agent", False):
             result = ChatBot.execute_multifile_agent(
                 getattr(args, "reference_files", []),
