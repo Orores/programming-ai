@@ -94,33 +94,3 @@ class PyFileExecutor:
                 return None
         except Exception as e:
             return str(e)
-
-
-
-def main():
-    input_string = '''
-```python
-print('Hello, World!')
-```
-    '''
-    file_path = "sandbox_scripts/script.py"
-    error_output = PyFileExecutor.save_code_to_file(file_path=file_path, code=input_string, language='python')
-    if error_output:
-        print("Error Output:", error_output)
-    else:
-        error_output = PyFileExecutor.execute_code(file_path)
-        if error_output:
-            print("Executed Code:\n", input_string)
-            print("Error Output:", error_output)
-        else:
-            print("Executed Code:\n", input_string)
-            print("Execution completed successfully.")
-
-def main_light():
-    error = PyFileExecutor.execute_code('tests/test_myscript.py')
-    print('ERROR: ')
-    print(error)
-
-# Usage example:
-if __name__ == "__main__":
-    main_light()

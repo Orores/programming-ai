@@ -20,28 +20,29 @@ class CodeExecutor:
             str: Error output if there's any, otherwise None.
         """
         if run_code:
-            error_output = PyFileExecutor.save_code_to_file(code_save_path, response)
+            PyFileExecutor.save_code_to_file(code_save_path, response)
             error_output = PyFileExecutor.execute_code(code_save_path)
             return error_output
         else:
             return None
 
     @staticmethod
-    def retry_api_request(api, model, temperature, max_tokens, top_p, frequency_penalty, presence_penalty, stop_sequences, top_k, repetition_penalty, save_path, code_save_path, run_code, response_content, max_attempts=3, context_name=None):
+    def retry_api_request(
+        chat_parameters: dict,
+        save_path,
+        code_save_path,
+        run_code,
+        response_content,
+        max_attempts=3,
+        context_name=None
+    ):
         """
-        Retries API requests and executes the code if needed.
+        Retries API requests and executes the code if needed, using chat_parameters dict for all API parameters.
+        
+        See AutoChatBot/default_api_parameters.py for the expected structure of chat_parameters.
 
         Args:
-            api (str): The API endpoint.
-            model (str): The model to use for the API request.
-            temperature (float): Sampling temperature.
-            max_tokens (int): Maximum number of tokens.
-            top_p (float): Nucleus sampling probability.
-            frequency_penalty (float): Frequency penalty.
-            presence_penalty (float): Presence penalty.
-            stop_sequences (list): Stop sequences for the API.
-            top_k (int): Top-K sampling.
-            repetition_penalty (float): Repetition penalty.
+            chat_parameters (dict): All chat/API parameters as a dictionary.
             save_path (str): Path to save the API response.
             code_save_path (str): Path to save the code file.
             run_code (bool): Flag indicating whether to execute the code.
@@ -56,12 +57,16 @@ class CodeExecutor:
 
         for attempt in range(max_attempts):
             if conversation is not None:
-                # Make an API request only after the initial attempt
-                response = ChatAPIHandler.make_api_request(api, model, temperature, max_tokens, top_p, conversation, frequency_penalty, presence_penalty, stop_sequences, top_k, repetition_penalty)
+                # Only make additional API call after first execution attempt
+                response = ChatAPIHandler.make_api_request(chat_parameters, conversation)
                 print("Chat Completion Response:", response)
                 ChatCompletionSaver.save_to_file(response, save_path)
-                response_content = response['choices'][0]['message']['content']
-            
+                if 'choices' in response and response['choices']:
+                    response_content = response['choices'][0]['message']['content']
+                else:
+                    print("API response did not contain choices. Aborting.")
+                    return False
+
             error_output = CodeExecutor.execute_code(run_code, response_content, code_save_path=code_save_path)
             extracted_code = CodeExtractor.extract_code(response_content)
             executed_code = extracted_code if extracted_code else response_content
