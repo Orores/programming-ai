@@ -10,23 +10,17 @@ from .ChatAPIHandler import ChatAPIHandler
 from .CodeExecutor import CodeExecutor
 from .multi_file_agent import MultiFileAgent
 from .python_file_executor import PythonFileExecutor
+from .default_api_parameters import DEFAULT_CHAT_PARAMETERS
 
 class ChatBot:
     """
     The main ChatBot class to execute the chatbot functionalities.
 
-    Constants
-    ---------
-    FAIL : str
-        Red color escape code for error messages.
-    OKGREEN : str
-        Green color escape code for success messages.
-    OKCYAN : str
-        Cyan color escape code for informational messages.
-    ORANGE : str
-        Orange color escape code for warning messages.
-    BOLD : str
-        Escape code for bold text.
+    Usage of chat_parameters:
+    -------------------------
+    Wherever chat completions are requested, the parameters are bundled into a single dictionary called `chat_parameters`.
+    The structure of this dict is detailed in AutoChatBot/default_api_parameters.py. Update or extend this dict as needed 
+    for new settings or models.
 
     Methods
     -------
@@ -37,11 +31,12 @@ class ChatBot:
     execute_files(file_paths: list) -> dict:
         Executes a list of Python files and captures their stdout and stderr outputs.
     """
-    FAIL = '\33[91m'
-    OKGREEN = '\33[92m'
-    OKCYAN = '\33[96m'
-    ORANGE = '\33[93m'
-    BOLD = '\33[1m'
+
+    FAIL = '\33[91m'      # red, error
+    OKGREEN = '\33[92m'   # green, success
+    OKCYAN = '\33[96m'    # cyan, info
+    ORANGE = '\33[93m'    # orange, warning
+    BOLD = '\33[1m'       # bold
 
     @staticmethod
     def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, args = None, debug: bool = False) -> dict:
@@ -75,99 +70,94 @@ class ChatBot:
         return PythonFileExecutor.execute(file_paths)
 
     @staticmethod
+    def gather_chat_parameters_from_args(args) -> dict:
+        """
+        Gather chat parameters dictionary from parsed argparse args, using the default parameters as template.
+
+        Returns:
+            dict: Chat parameters, structure as in AutoChatBot/default_api_parameters.py.
+        """
+        chat_parameters = DEFAULT_CHAT_PARAMETERS.copy()
+        arg_fields = [
+            "api", "model", "temperature", "max_tokens", "top_p", "frequency_penalty", "presence_penalty",
+            "stop_sequences", "top_k", "repetition_penalty"
+        ]
+        for field in arg_fields:
+            if hasattr(args, field) and getattr(args, field) is not None:
+                chat_parameters[field] = getattr(args, field)
+        return chat_parameters
+
+    @staticmethod
     def main():
         """
         The main method to run the chatbot. Parses arguments and executes the chatbot logic.
+        All chat/completions API settings are handled through the chat_parameters dictionary, see AutoChatBot/default_api_parameters.py.
         """
         parser = ParserCreator.create_parser()
         args = parser.parse_args()
         
-        if args.show_available_context:
+        if getattr(args, "show_available_context", False):
             context_data = ContextManager.load_context_data(context_folder='context')
             context_names = ContextManager.get_all_context_names(context_data)
             print("Available contexts:", context_names)
         
-        if args.show_models:
+        if getattr(args, "show_models", False):
             models = TogetherAIModelRetriever.get_available_models()
             print("Available Models for TogetherAI:\n")
             TogetherAIModelRetriever.print_models_table(models)
 
-        if args.file_path or args.question:
-            conversation = ConversationPreparer.decide_conversation(file_path=args.file_path, question=args.question)
+        chat_parameters = ChatBot.gather_chat_parameters_from_args(args)
+        response_content = None  # Ensure scope
+        
+        if getattr(args, "file_path", None) or getattr(args, "question", None):
+            conversation = ConversationPreparer.decide_conversation(file_path=getattr(args, "file_path", None), question=getattr(args, "question", None))
             conversation = ConversationPreparer.str_to_dict_list(conversation)
-            conversation = ConversationPreparer.extend_context(context_name=args.context, conversation=conversation)
+            conversation = ConversationPreparer.extend_context(context_name=getattr(args, "context", None), conversation=conversation)
             response = ChatAPIHandler.make_api_request(
-                api=args.api,
-                model=args.model,
-                temperature=args.temperature,
-                max_tokens=args.max_tokens,
-                top_p=args.top_p,
+                chat_parameters=chat_parameters,
                 conversation=conversation,
-                frequency_penalty=args.frequency_penalty,
-                presence_penalty=args.presence_penalty,
-                stop_sequences=args.stop_sequences,
-                top_k=args.top_k,
-                repetition_penalty=args.repetition_penalty
             )
             print("Chat Completion Response:", response)
-            ChatCompletionSaver.save_to_file(response, args.save_path)
-            response_content = response['choices'][0]['message']['content']
+            ChatCompletionSaver.save_to_file(response, getattr(args, "save_path", None))
+            # Only set response_content if response has 'choices'
+            if 'choices' in response and response['choices']:
+                response_content = response['choices'][0]['message']['content']
         
-        if args.run_code:
+        if getattr(args, "run_code", False):
             CodeExecutor.retry_api_request(
-                api=args.api,
-                model=args.model,
-                temperature=args.temperature,
-                max_tokens=args.max_tokens,
-                top_p=args.top_p,
-                frequency_penalty=args.frequency_penalty,
-                presence_penalty=args.presence_penalty,
-                stop_sequences=args.stop_sequences,
-                top_k=args.top_k,
-                repetition_penalty=args.repetition_penalty,
-                save_path=args.save_path,
-                code_save_path=args.code_save_path,
-                run_code=args.run_code,
+                chat_parameters=chat_parameters,
+                save_path=getattr(args, "save_path", None),
+                code_save_path=getattr(args, "code_save_path", None),
+                run_code=getattr(args, "run_code", False),
                 response_content=response_content
             )
             
-        if args.run_code_with_unittest:
+        if getattr(args, "run_code_with_unittest", False):
             CodeExecutor.run_code_with_unittest(
-                api=args.api,
-                model=args.model,
-                temperature=args.temperature,
-                max_tokens=args.max_tokens,
-                top_p=args.top_p,
-                frequency_penalty=args.frequency_penalty,
-                presence_penalty=args.presence_penalty,
-                stop_sequences=args.stop_sequences,
-                top_k=args.top_k,
-                repetition_penalty=args.repetition_penalty,
-                save_path=args.save_path,
-                code_save_path=args.code_save_path,
-                run_code=args.run_code_with_unittest,
+                chat_parameters=chat_parameters,
+                save_path=getattr(args, "save_path", None),
+                code_save_path=getattr(args, "code_save_path", None),
+                run_code=getattr(args, "run_code_with_unittest", False),
                 response_content=response_content
             )
 
-        if args.multi_file_agent:
+        if getattr(args, "multi_file_agent", False):
             result = ChatBot.execute_multifile_agent(
-                args.reference_files, args.rewrite_files, args.question, args.question_file_path, args, args.debug)
+                getattr(args, "reference_files", []),
+                getattr(args, "rewrite_files", []),
+                getattr(args, "question", None),
+                getattr(args, "question_file_path", None),
+                args, getattr(args, "debug", False)
+            )
             for file_path, content in result.items():
-                # Get the directory name from the file path
-                
                 directory = os.path.dirname(file_path)
-                
-                # If the directory does not exist, create it
                 if directory and not os.path.exists(directory):
                     os.makedirs(directory)
-                
-                # Write the content to the file
                 with open(file_path, 'w') as file:
                     file.write(content)
-
             print("Generated Content:", result)
 
-        if args.execute_files:
+        if getattr(args, "execute_files", None):
             exec_outputs = ChatBot.execute_files(args.execute_files)
             for file_path, (stdout, stderr) in exec_outputs.items():
                 print(f"Output for {file_path}:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}")
