@@ -92,7 +92,7 @@ class TestAutoChatBot(unittest.TestCase):
             rewrite_files=self.rewrite_files,
             execute_files=self.execute_files,
             question=None,
-            question_file_path=self.question_file,
+            question_file=self.question_file,
             debug=self.debug,
             output_dir=self.output_dir,
             show_available_context=False,

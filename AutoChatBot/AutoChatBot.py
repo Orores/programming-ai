@@ -26,7 +26,7 @@ class ChatBot:
     -------
     main():
         The main method to run the chatbot.
-    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, args = None, debug: bool = False) -> dict:
+    execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file: str = None, args = None, debug: bool = False) -> dict:
         Executes the multi-file agent to generate and update multiple files.
     execute_files(file_paths: list) -> dict:
         Executes a list of Python files and captures their stdout and stderr outputs.
@@ -39,7 +39,7 @@ class ChatBot:
     BOLD = '\33[1m'       # bold
 
     @staticmethod
-    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file_path: str = None, args = None, debug: bool = False) -> dict:
+    def execute_multifile_agent(reference_files: list, rewrite_files: list, question: str = None, question_file: str = None, args = None, debug: bool = False) -> dict:
         """
         Executes the multi-file agent to generate and update multiple files based on reference files and user-provided questions.
 
@@ -47,14 +47,14 @@ class ChatBot:
         reference_files (list): List of paths to the reference files. Can be an empty list.
         rewrite_files (list): List of paths to the rewrite files.
         question (str, optional): The question to be included in the task string. Default is `None`.
-        question_file_path (str, optional): The path to the file containing the question. Default is `None`.
+        question_file (str, optional): The path to the file containing the question. Default is `None`.
         args (Namespace): Parsed CLI arguments for API call.
         debug (bool): Debug flag.
 
         Returns:
         dict: Dictionary with file paths as keys and generated content as values.
         """
-        return MultiFileAgent.execute(reference_files or [], rewrite_files, question, question_file_path, args, debug)
+        return MultiFileAgent.execute(reference_files or [], rewrite_files, question, question_file, args, debug)
 
     @staticmethod
     def execute_files(file_paths: list) -> dict:
@@ -146,7 +146,7 @@ class ChatBot:
                 getattr(args, "reference_files", []),
                 getattr(args, "rewrite_files", []),
                 getattr(args, "question", None),
-                getattr(args, "question_file_path", None),
+                getattr(args, "question_file", None),
                 args, getattr(args, "debug", False)
             )
             for file_path, content in result.items():
